@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>fi.nls.paikkatietoikkuna</groupId>
+    <artifactId>kartta</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>kartta.paikkatietoikkuna.fi</name>
+
+    <properties>
+        <oskari.version>1.42.0-SNAPSHOT</oskari.version>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>1.7</java.version>
+
+        <commons-dbcp2.version>2.0.1</commons-dbcp2.version>
+        <postgresql.version>9.3-1102-jdbc41</postgresql.version>
+        <junit.version>4.11</junit.version>
+        <slf4j.version>1.7.12</slf4j.version>
+		<jackson.version>1.9.11</jackson.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>oskari_org</id>
+            <name>Oskari.org release repository</name>
+            <url>http://oskari.org/nexus/content/repositories/releases/</url>
+        </repository>
+        <repository>
+            <id>oskari_org_snapshot</id>
+            <name>Oskari.org snapshot repository</name>
+            <url>http://oskari.org/nexus/content/repositories/snapshots/</url>
+        </repository>
+    </repositories>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <modules>
+        <module>app-resources</module>
+        <module>server-extension</module>
+        <module>webapp-map</module>
+        <module>webapp-transport</module>
+    </modules>
+
+</project>

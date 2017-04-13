@@ -1,0 +1,19 @@
+{
+	"srs_name": "EPSG:3057",
+	"type":"wmtslayer",
+    "url":"http://karttamoottori.maanmittauslaitos.fi/maasto/wmts",
+    "name":"ortokuva",
+    "organization": "Maanmittauslaitos",
+    "inspiretheme": "Ortokuvat",
+    "locale": {
+        "fi": {
+            "name": "Ortokuvat"
+        }
+    },
+    "role_permissions": {
+        "Guest" : ["VIEW_LAYER", "VIEW_PUBLISHED"],
+        "User" : ["VIEW_LAYER", "VIEW_PUBLISHED", "PUBLISH"]
+    },
+	"version": "1.0.0",
+    "tileMatrixSetId":"ETRS-TM35FIN"
+}

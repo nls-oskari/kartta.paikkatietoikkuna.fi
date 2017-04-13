@@ -1,0 +1,19 @@
+{
+	"srs_name": "EPSG:3057",
+	"type":"wmtslayer",
+    "url":"http://karttamoottori.maanmittauslaitos.fi/maasto/wmts",
+    "name":"maastokartta",
+    "organization": "Maanmittauslaitos",
+    "inspiretheme": "Taustakartat",
+    "locale": {
+        "fi": {
+            "name": "Maastokartta"
+        }
+    },
+    "role_permissions": {
+        "Guest" : ["VIEW_LAYER", "VIEW_PUBLISHED"],
+        "User" : ["VIEW_LAYER", "VIEW_PUBLISHED", "PUBLISH"]
+    },
+	"version": "1.0.0",
+    "tileMatrixSetId":"ETRS-TM35FIN"
+}

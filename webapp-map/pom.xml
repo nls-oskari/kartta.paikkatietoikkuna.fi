@@ -1,0 +1,138 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>fi.nls.paikkatietoikkuna</groupId>
+        <artifactId>kartta</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>webapp-map</artifactId>
+    <packaging>war</packaging>
+    <name>Webapp for map</name>
+
+    <properties>
+        <appName>oskari-map</appName>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>fi.nls.oskari.extras</groupId>
+            <artifactId>nlsfi-projections</artifactId>
+            <version>1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>fi.nls.oskari.service</groupId>
+            <artifactId>oskari-control-statistics</artifactId>
+            <version>${oskari.version}</version>
+        </dependency>
+        <!-- Statistics plugins -->
+        <dependency>
+            <groupId>fi.nls.oskari.service</groupId>
+            <artifactId>oskari-statistics-eurostat</artifactId>
+            <version>${oskari.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>fi.nls.oskari.service</groupId>
+            <artifactId>service-statistics-pxweb</artifactId>
+            <version>${oskari.version}</version>
+        </dependency>
+        <!-- /Statistics plugins -->
+        <!-- artifactId "oskari-control-base" is implied by adding extended actions -->
+        <dependency>
+            <groupId>fi.nls.oskari.service</groupId>
+            <artifactId>oskari-control-myplaces</artifactId>
+            <version>${oskari.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>fi.nls.oskari.service</groupId>
+            <artifactId>oskari-control-admin</artifactId>
+            <version>${oskari.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>fi.nls.oskari.service</groupId>
+            <artifactId>oskari-control-routing</artifactId>
+            <version>${oskari.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>fi.nls.oskari.service</groupId>
+            <artifactId>oskari-search-nls</artifactId>
+            <version>${oskari.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>fi.nls.oskari.service</groupId>
+            <artifactId>service-spatineo-monitor</artifactId>
+            <version>${oskari.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>fi.nls.paikkatietoikkuna</groupId>
+            <artifactId>app-resources</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>fi.nls.paikkatietoikkuna</groupId>
+            <artifactId>server-extension</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Replace icu4j version included by axiom-api with newer version
+        which does not brake .jar investigation performed by jetty-maven plugin  -->
+        <dependency>
+            <groupId>com.ibm.icu</groupId>
+            <artifactId>icu4j</artifactId>
+            <version>51.1</version>
+        </dependency>
+
+        <!-- oskari -->
+        <dependency>
+            <groupId>fi.nls.oskari.service</groupId>
+            <artifactId>oskari-control-example</artifactId>
+            <version>${oskari.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>fi.nls.oskari</groupId>
+            <artifactId>servlet-map</artifactId>
+            <version>${oskari.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.ibm.icu</groupId>
+                    <artifactId>icu4j</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>fi.nls.oskari</groupId>
+            <artifactId>service-logging</artifactId>
+            <version>${oskari.version}</version>
+        </dependency>
+        <!-- /oskari -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-dbcp2</artifactId>
+            <version>${commons-dbcp2.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${postgresql.version}</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <finalName>${appName}</finalName>
+    </build>
+</project>
