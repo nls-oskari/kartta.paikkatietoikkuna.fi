@@ -316,5 +316,9 @@
     "id": "timeseries"
   }, {
     "id": "feedbackService"
+  }, {
+    "id": "maprotator"
+  }, {
+    "id": "system-message"
   }]
 }

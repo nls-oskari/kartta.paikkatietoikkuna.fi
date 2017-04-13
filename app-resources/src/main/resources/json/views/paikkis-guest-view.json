@@ -424,5 +424,7 @@
     "id": "timeseries"
   }, {
     "id": "feedbackService"
+  }, {
+    "id": "system-message"
   }]
 }
