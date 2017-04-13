@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Oskari - ${viewName}</title>
+    <title>${viewName}</title>
     <script type="text/javascript" src="//code.jquery.com/jquery-1.7.2.min.js">
     </script>
 
