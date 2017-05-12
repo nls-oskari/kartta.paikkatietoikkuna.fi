@@ -6,6 +6,7 @@
 <html>
 <head>
     <title>${viewName}</title>
+    <link rel="shortcut icon" href="/static/img/pti_icon.png" type="image/png" />
     <script type="text/javascript" src="//code.jquery.com/jquery-1.7.2.min.js">
     </script>
 
@@ -51,8 +52,25 @@
                 margin-left: 170px;
             }
 
+            #loginbar {
+                padding: 10px 10px 0 16px;
+                color: #CCC;
+                vertical-align: bottom;
+                margin-bottom: 8px;
+                margin-top: 10px;
+                font-size: 12px;
+                line-height: 12.6px;
+            }
+            
+            #loginbar a {
+                color: #FFDE00;
+                font-size: 12px;
+                line-height: 150%;
+            }
+
             #login {
                 margin-left: 5px;
+                color: #CCC;
             }
 
             #login input[type="text"], #login input[type="password"] {
@@ -86,7 +104,7 @@
             }
 
             #login a {
-                color: #FFF;
+                color: #ffde00;
                 padding: 5px;
             }
             #oskari-system-messages {
@@ -103,29 +121,29 @@
 <body>
 
 <nav id="maptools">
+    <div id="logobar">
+        <img src="/static/img/logo.png">
+    </div>
     <div id="loginbar">
-    </div>
-    <div id="menubar">
-    </div>
-    <div id="divider">
-    </div>
-    <div id="toolbar">
-    </div>
-    <div id="login">
-        <c:choose>
-            <c:when test="${!empty loginState}">
-                <p class="error"><spring:message code="invalid_password_or_username" text="Invalid password or username!" /></p>
-            </c:when>
-        </c:choose>
         <c:choose>
             <%-- If logout url is present - so logout link --%>
             <c:when test="${!empty _logout_uri}">
+                ${user.getFullName()} </br>
                 <a href="${pageContext.request.contextPath}${_logout_uri}"><spring:message code="logout" text="Logout" /></a>
             </c:when>
             <%-- Otherwise show appropriate logins --%>
             <c:otherwise>
+                <%-- new login TODO: link to right page  --%>
+                <a href="http://www.paikkatietoikkuna.fi/web/fi"><spring:message code="login" text="Login"/></a>
+                -
+                <a href="http://www.paikkatietoikkuna.fi/web/fi"><spring:message code="user.registration" text="Register"/></a>
+            </c:otherwise>
+        </c:choose>
+    </div>
+    <div id="login">
+                <%-- old login, DELETE when sign in realy works! --%>
                 <c:if test="${!empty _login_uri_saml}">
-                    <a href="${pageContext.request.contextPath}${_login_uri_saml}"><spring:message code="login.sso" text="SSO login" /></a><hr />
+                    <a href="${pageContext.request.contextPath}${_login_uri_saml}"><spring:message code="login.sso" text="SSO login"/></a><hr />
                 </c:if>
                 <c:if test="${!empty _login_uri && !empty _login_field_user}">
                     <form action='${pageContext.request.contextPath}${_login_uri}' method="post" accept-charset="UTF-8">
@@ -138,8 +156,12 @@
                 <c:if test="${!empty _registration_uri}">
                     <a href="${pageContext.request.contextPath}${_registration_uri}"><spring:message code="user.registration" text="Register" /></a>
                 </c:if>
-            </c:otherwise>
-        </c:choose>
+    </div>
+    <div id="menubar">
+    </div>
+    <div id="divider">
+    </div>
+    <div id="toolbar">
     </div>
     <div id="oskari-system-messages"></div>
 </nav>
