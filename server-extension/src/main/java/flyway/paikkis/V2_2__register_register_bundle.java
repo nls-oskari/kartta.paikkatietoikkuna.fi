@@ -1,4 +1,4 @@
-package flyway.oskari;
+package flyway.paikkis;
 
 import fi.nls.oskari.db.BundleHelper;
 import fi.nls.oskari.domain.map.view.Bundle;
