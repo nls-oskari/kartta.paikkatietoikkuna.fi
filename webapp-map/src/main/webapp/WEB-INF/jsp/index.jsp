@@ -52,61 +52,6 @@
                 margin-left: 170px;
             }
 
-            #loginbar {
-                padding: 10px 10px 0 16px;
-                color: #CCC;
-                vertical-align: bottom;
-                margin-bottom: 8px;
-                margin-top: 10px;
-                font-size: 12px;
-                line-height: 12.6px;
-            }
-            
-            #loginbar a {
-                color: #FFDE00;
-                font-size: 12px;
-                line-height: 150%;
-            }
-
-            #login {
-                margin-left: 5px;
-                color: #CCC;
-            }
-
-            #login input[type="text"], #login input[type="password"] {
-                width: 90%;
-                margin-bottom: 5px;
-                background-image: url("/Oskari/resources/images/forms/input_shadow.png");
-                background-repeat: no-repeat;
-                padding-left: 5px;
-                padding-right: 5px;
-                border: 1px solid #B7B7B7;
-                border-radius: 4px 4px 4px 4px;
-                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) inset;
-                color: #878787;
-                font: 13px/100% Arial,sans-serif;
-            }
-            #login input[type="submit"] {
-                width: 90%;
-                margin-bottom: 5px;
-                padding-left: 5px;
-                padding-right: 5px;
-                border: 1px solid #B7B7B7;
-                border-radius: 4px 4px 4px 4px;
-                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) inset;
-                color: #878787;
-                font: 13px/100% Arial,sans-serif;
-            }
-            #login p.error {
-                font-weight: bold;
-                color : red;
-                margin-bottom: 10px;
-            }
-
-            #login a {
-                color: #ffde00;
-                padding: 5px;
-            }
             #oskari-system-messages {
                 bottom: 1em;
                 position: fixed;
@@ -125,37 +70,6 @@
         <img src="/static/img/logo.png">
     </div>
     <div id="loginbar">
-        <c:choose>
-            <%-- If logout url is present - so logout link --%>
-            <c:when test="${!empty _logout_uri}">
-                ${user.getFullName()} </br>
-                <a href="${pageContext.request.contextPath}${_logout_uri}"><spring:message code="logout" text="Logout" /></a>
-            </c:when>
-            <%-- Otherwise show appropriate logins --%>
-            <c:otherwise>
-                <%-- new login TODO: link to right page  --%>
-                <a href="http://www.paikkatietoikkuna.fi/web/fi"><spring:message code="login" text="Login"/></a>
-                -
-                <a href="http://www.paikkatietoikkuna.fi/web/fi"><spring:message code="user.registration" text="Register"/></a>
-            </c:otherwise>
-        </c:choose>
-    </div>
-    <div id="login">
-                <%-- old login, DELETE when sign in realy works! --%>
-                <c:if test="${!empty _login_uri_saml}">
-                    <a href="${pageContext.request.contextPath}${_login_uri_saml}"><spring:message code="login.sso" text="SSO login"/></a><hr />
-                </c:if>
-                <c:if test="${!empty _login_uri && !empty _login_field_user}">
-                    <form action='${pageContext.request.contextPath}${_login_uri}' method="post" accept-charset="UTF-8">
-                        <input size="16" id="username" name="${_login_field_user}" type="text" placeholder="<spring:message code="username" text="Username" />" autofocus
-                               required>
-                        <input size="16" id="password" name="${_login_field_pass}" type="password" placeholder="<spring:message code="password" text="Password" />" required>
-                        <input type="submit" id="submit" value="<spring:message code="login" text="Log in" />">
-                    </form>
-                </c:if>
-                <c:if test="${!empty _registration_uri}">
-                    <a href="${pageContext.request.contextPath}${_registration_uri}"><spring:message code="user.registration" text="Register" /></a>
-                </c:if>
     </div>
     <div id="menubar">
     </div>
