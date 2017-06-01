@@ -34,3 +34,25 @@ Use these in oskari-ext.properties:
     # These need to match names in SqlMapConfig_*.xml under webapp-map
     db.analysis.jndi.name=jdbc/AnalysisPool
     db.userlayer.jndi.name=jdbc/UserLayerPool
+
+Use an additional context file as {jetty}/contexts/pti-front.xml when used with Jetty-Oskari bundle:
+ 
+    <?xml version="1.0"  encoding="ISO-8859-1"?>
+    <!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://jetty.eclipse.org/configure.dtd">
+    <Configure class="org.eclipse.jetty.server.handler.ContextHandler">
+      <Call class="org.eclipse.jetty.util.log.Log" name="debug"><Arg>Paikkis front</Arg></Call>
+      <Set name="contextPath">/static</Set>
+      <Set name="resourceBase">C:/Omat/alusta/paikkatietoikkuna.fi-frontend</Set>
+      <Set name="handler">
+        <New class="org.eclipse.jetty.server.handler.ResourceHandler">
+          <Set name="welcomeFiles">
+            <Array type="String">
+              <Item>README.md</Item>
+            </Array>
+          </Set>
+        </New>
+      </Set>
+    </Configure>
+    
+Change resourceBase to the directory with clone of https://github.com/nls-oskari/paikkatietoikkuna.fi-frontend
+ 
