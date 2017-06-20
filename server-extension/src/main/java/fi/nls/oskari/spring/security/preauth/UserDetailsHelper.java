@@ -62,7 +62,7 @@ public class UserDetailsHelper {
         return user;
     }
 
-    protected static String getHeader(HttpServletRequest request, String key) {
+    public static String getHeader(HttpServletRequest request, String key) {
         String input = request.getHeader(key);
         if(input == null) {
             return null;
