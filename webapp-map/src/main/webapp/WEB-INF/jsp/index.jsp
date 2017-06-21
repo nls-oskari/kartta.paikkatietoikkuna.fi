@@ -50,8 +50,8 @@
             }
 
             #pti-name {
+                width: 135px;
                 margin-top: 15px;
-                margin-right: 15px;
                 margin-left: 15px;
                 margin-bottom: 7px;
             }
@@ -120,15 +120,15 @@
         </div>
         <div id="language">
             <c:if test="${language == 'fi'}">
-                <a href="./?lang=sv">På svenska</a> - 
+                <a href="./?lang=sv">På svenska</a> -
                 <a href="./?lang=en">In English</a>
             </c:if>
             <c:if test="${language == 'sv'}">
-                <a href="./?lang=fi">Suomeksi</a> - 
+                <a href="./?lang=fi">Suomeksi</a> -
                 <a href="./?lang=en">In English</a>
             </c:if>
             <c:if test="${language == 'en'}">
-                <a href="./?lang=fi">Suomeksi</a> - 
+                <a href="./?lang=fi">Suomeksi</a> -
                 <a href="./?lang=sv">På svenska</a>
             </c:if>
         </div>
