@@ -6,6 +6,7 @@
 <html>
 <head>
     <title>${viewName}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="/static/img/pti_icon.png" type="image/png" />
     <script type="text/javascript" src="//code.jquery.com/jquery-1.7.2.min.js">
     </script>
@@ -29,9 +30,10 @@
             href="/Oskari${path}/css/overwritten.css"/>
     <style type="text/css">
         @media screen {
-            body {
+            body, html {
                 margin: 0;
                 padding: 0;
+                background-color: #000;
             }
 
             #sidebar {
@@ -74,15 +76,17 @@
                 display: block;
                 margin-left: 40px;
                 text-align: center;
-                padding-left: 150px;
-                padding-right: 150px;
                 background: url(/static/img/background_image.jpg);
                 background-size: cover;
                 height: 100%;
+                position: relative;
+                padding-top: 100px;
             }
 
             .link-to-map {
-                padding-top: 40px;
+                position: absolute;
+                left: 15px;
+                top: 27px;
                 text-align: left;
             }
 
@@ -92,10 +96,13 @@
             }
 
             .login-information {
-                padding-top: 200px;
                 font-size: 18px;
-                padding-bottom: 50px;
                 color: #CCC;
+                max-width: 600px;
+                margin: 0 auto 30px auto;
+                padding: 15px 15px;
+                background-color: rgba(0, 0, 0, 0.5);
+                line-height: 1.3em;
             }
 
             .login-information a {
@@ -114,7 +121,8 @@
 
             input {
                 margin: 10px;
-                width: 300px;
+                width: 80%;
+                max-width: 300px;
             }
         }
     </style>
@@ -139,7 +147,7 @@
             <form action="/my.policy" method="post">
                 <input type="email" name="username" placeholder="username" autofocus="autofocus"/><br/>
                 <input type="password" name="password" placeholder="password"/><br/>
-                <input type="submit" />
+                <input type="submit" class="primary" />
             </form>
     </div>
 </div>
