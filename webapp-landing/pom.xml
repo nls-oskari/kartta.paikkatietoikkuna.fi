@@ -17,6 +17,7 @@
         <javax.servlet.version>3.1.0</javax.servlet.version>
         <javax.servlet.jsp.version>2.0</javax.servlet.jsp.version>
         <javax.servlet.jstl.version>1.2</javax.servlet.jstl.version>
+        <jackson.version>2.5.4</jackson.version>
     </properties>
 
     <dependencies>
@@ -33,8 +34,10 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.5.4</version>
+            <version>${jackson.version}</version>
         </dependency>
     </dependencies>
+
+    <build><finalName>paikkis-landing</finalName></build>
 
 </project>

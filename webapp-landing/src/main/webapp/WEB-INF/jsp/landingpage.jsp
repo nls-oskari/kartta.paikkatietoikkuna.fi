@@ -21,36 +21,38 @@
     </div>
     <div class="row">
         <div class="col-md-12 main-text">
-            <p>Paikkatietoikkuna on uudistunut. Voit siirtyä karttapalveluun keltaisen laatikon kautta tai suoraan osoitteella <a href="https://kartta.paikkatietoikkuna.fi">https://kartta.paikkatietoikkuna.fi</a>. INSPIRE-tukisivut ja muut sisällöt löydät jatkossa Maanmittauslaitoksen verkkosivuilta <a href="http://maanmittauslaitos.fi/kartat-ja-paikkatieto/paikkatietojen-yhteiskayttö/ajankohtaista">Paikkatietojen yhteiskäyttö</a> -osiosta. Pääset niille myös alla olevista linkeistä.
-            </p>
+            <p><spring:message code="landing.basic.info"/></p>
 
-            <p>Rekisteröityneiden käyttäjien tunnukset on siirretty uuteen järjestelmään, mutta salasanat on nollattu. Voit tilata uuden salasanan <a href="https://omatili.maanmittauslaitos.fi/user/password">tästä</a>. Ongelmatilanteissa ota yhteyttä asiakaspalveluumme: paikkatietoikkuna@maanmittauslaitos.fi.</p>
+            <p><spring:message code="landing.passwd.reset.info"/></p>
         </div>
     </div>
     <div class="row link-panels">
         <div class="col-md-6">
             <div class="panel map-panel">
                 <div class="panel-body">
-                    <p>Karttapalvelussa voit esimerkiksi katsella eri organisaatioiden paikkatietoja, luoda teemakarttoja tai julkaista kartan omilla verkkosivuillasi.</p>
-                    <p><a class="btn btn-default maplink-btn" href="#" role="button">Siirry karttaikkunaan &rsaquo;</a></p>
+                    <p><spring:message code="landing.map.desc"/></p>
+                    <p><a class="btn btn-default maplink-btn" href="https://kartta.paikkatietoikkuna.fi/?lang=${pageContext.response.locale.language}" role="button"><spring:message code="landing.map.link"/>  &rsaquo;</a></p>
                 </div>
             </div>
         </div>
         <div class="col-md-6">
             <div class="panel sdi-panel">
                 <div class="panel-body">
-                    <p><a class="btn btn-default paikkislink-btn" href="#" role="button">Paikkatietojen yhteiskäyttö &rsaquo;</a></p>
-                    <a class="datalink" href="#">INSPIRE &rsaquo;</a><br>
-                    <a class="datalink" href="#">Mukaan toimintaan &rsaquo;</a><br>
-                    <a class="datalink" href="#">Ohjaava toiminta &rsaquo;</a><br>
-                    <a class="datalink" href="#">Yhteystiedot &rsaquo;</a><br>
+
+                    <p><a class="btn btn-default paikkislink-btn" href="<spring:message code="landing.cms.current.link"/>" role="button"><spring:message code="landing.cms.current.label"/> &rsaquo;</a></p>
+                    <a class="datalink" href="<spring:message code="landing.cms.inspire.link"/>"><spring:message code="landing.cms.inspire.label"/> &rsaquo;</a><br>
+                    <a class="datalink" href="<spring:message code="landing.cms.osallistu.link"/>"><spring:message code="landing.cms.osallistu.label"/> &rsaquo;</a><br>
+                    <a class="datalink" href="<spring:message code="landing.cms.ohjaava.link"/>"><spring:message code="landing.cms.ohjaava.label"/> &rsaquo;</a><br>
+                    <a class="datalink" href="<spring:message code="landing.cms.contact.link"/>"><spring:message code="landing.cms.contact.label"/> &rsaquo;</a><br>
+
                 </div>
             </div>
         </div>
     </div>
     <footer>
-        <a href="sv.html" class="language-link">På svenska</a>
-        <a href="en.html" class="language-link">In English</a>
+        <c:if test="${pageContext.response.locale.language != 'sv'}"><a href="/?lang=sv" class="language-link">På svenska</a></c:if>
+        <c:if test="${pageContext.response.locale.language != 'en'}"><a href="/?lang=en" class="language-link">In English</a></c:if>
+        <c:if test="${pageContext.response.locale.language != 'fi'}"><a href="/?lang=fi" class="language-link">Suomeksi</a></c:if>
     </footer>
 </div>
 </body>
