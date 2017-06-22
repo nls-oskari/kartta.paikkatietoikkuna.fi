@@ -1,15 +1,11 @@
 package fi.nls.oskari.spring;
 
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -29,9 +25,9 @@ import java.util.Locale;
 @Configuration
 @EnableWebMvc
 @ComponentScan(
-        excludeFilters = @ComponentScan.Filter(type= FilterType.ASSIGNABLE_TYPE, value={SpringConfig.class}),
-        basePackages="fi.nls.oskari")
-public class SpringConfig extends WebMvcConfigurerAdapter{
+        excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = {SpringConfig.class}),
+        basePackages = "fi.nls.oskari")
+public class SpringConfig extends WebMvcConfigurerAdapter {
 
     //  --------- locale handling -------------
     // TODO: use this instead fi.nls.oskari.servlet.WebLocaleResolver
@@ -42,8 +38,8 @@ public class SpringConfig extends WebMvcConfigurerAdapter{
     }
 
     @Bean
-    public LocaleChangeInterceptor localeChangeInterceptor(){
-        LocaleChangeInterceptor localeChangeInterceptor=new LocaleChangeInterceptor();
+    public LocaleChangeInterceptor localeChangeInterceptor() {
+        LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();
         localeChangeInterceptor.setParamName("lang");
         return localeChangeInterceptor;
     }
