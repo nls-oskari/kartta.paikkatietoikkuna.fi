@@ -55,4 +55,116 @@ Use an additional context file as {jetty}/contexts/pti-front.xml when used with 
     </Configure>
     
 Change resourceBase to the directory with clone of https://github.com/nls-oskari/paikkatietoikkuna.fi-frontend
+
+Use an additional JSON file as {jetty}/resources/articles-by-tag-setup-file.json when you want at userguide works:
+
+	{
+	    "articles": [
+	        {
+	            "tags": "fi_ohje_karttaikkuna",
+	            "url": "https://www.maanmittauslaitos.fi/asioi-verkossa/palveluiden-kayttoohjeet/paikkatietoikkuna",
+	            "element": "section.block--mml-content"
+	        },
+	        {
+	            "tags": "fi_ohje_tyokalut",
+	            "url": "https://www.maanmittauslaitos.fi/asioi-verkossa/palveluiden-kayttoohjeet/paikkatietoikkuna/tyokalut ",
+	            "element": "section.block--mml-content"
+	        },
+	        {
+	            "tags": "fi_ohje_haku",
+	            "url": "https://www.maanmittauslaitos.fi/asioi-verkossa/palveluiden-kayttoohjeet/paikkatietoikkuna/haku",
+	            "element": "section.block--mml-content"
+	        },
+	        {
+	            "tags": "fi_ohje_karttatasot",
+	            "url": "https://www.maanmittauslaitos.fi/asioi-verkossa/palveluiden-kayttoohjeet/paikkatietoikkuna/karttatasot ",
+	            "element": "section.block--mml-content"
+	        },
+	        {
+	            "tags": "fi_ohje_karttajulkaisu",
+	            "url": "https://www.maanmittauslaitos.fi/asioi-verkossa/palveluiden-kayttoohjeet/paikkatietoikkuna/karttajulkaisu ",
+	            "element": "section.block--mml-content"
+	        },
+	        {
+	            "tags": "fi_ohje_teemakartat",
+	            "url": "https://www.maanmittauslaitos.fi/asioi-verkossa/palveluiden-kayttoohjeet/paikkatietoikkuna/teemakartat",
+	            "element": "section.block--mml-content"
+	        },
+	        {
+	            "tags": "fi_ohje_analyysi",
+	            "url": "https://www.maanmittauslaitos.fi/asioi-verkossa/palveluiden-kayttoohjeet/paikkatietoikkuna/analyysi ",
+	            "element": "section.block--mml-content"
+	        },
+	        {
+	            "tags": "en_guide_welcome",
+	            "url": "https://www.maanmittauslaitos.fi/en/e-services/instructions-use-our-services/paikkatietoikkuna",
+	            "element": "section.block--mml-content"
+	        },
+	        {
+	            "tags": "en_guide_tools",
+	            "url": "https://www.maanmittauslaitos.fi/en/e-services/instructions-use-our-services/paikkatietoikkuna/tools",
+	            "element": "section.block--mml-content"
+	        },
+	        {
+	            "tags": "en_guide_search",
+	            "url": "https://www.maanmittauslaitos.fi/en/e-services/instructions-use-our-services/paikkatietoikkuna/search",
+	            "element": "section.block--mml-content"
+	        },
+	        {
+	            "tags": "en_guide_maplayers",
+	            "url": "https://www.maanmittauslaitos.fi/en/e-services/instructions-use-our-services/paikkatietoikkuna/map-layers",
+	            "element": "section.block--mml-content"
+	        },
+	        {
+	            "tags": "en_guide_publishing",
+	            "url": "https://www.maanmittauslaitos.fi/en/e-services/instructions-use-our-services/paikkatietoikkuna/create-map",
+	            "element": "section.block--mml-content"
+	        },
+	        {
+	            "tags": "en_guide_thematic",
+	            "url": "https://www.maanmittauslaitos.fi/en/e-services/instructions-use-our-services/paikkatietoikkuna/thematic-maps",
+	            "element": "section.block--mml-content"
+	        },
+	        {
+	            "tags": "en_guide_analysis",
+	            "url": "https://www.maanmittauslaitos.fi/en/e-services/instructions-use-our-services/paikkatietoikkuna/analyse",
+	            "element": "section.block--mml-content"
+	        },
+	        {
+	            "tags": "sv_kartfönstret,snappguide",
+	            "url": "https://www.maanmittauslaitos.fi/sv/e-tjanster/bruksanvisningar-av-e-tjanster/paikkatietoikkuna",
+	            "element": "section.block--mml-content"
+	        },
+	        {
+	            "tags": "sv_guide_tools",
+	            "url": "https://www.maanmittauslaitos.fi/sv/e-tjanster/bruksanvisningar-av-e-tjanster/paikkatietoikkuna/verktyg",
+	            "element": "section.block--mml-content"
+	        },
+	        {
+	            "tags": "sv_guide_search",
+	            "url": "https://www.maanmittauslaitos.fi/sv/e-tjanster/bruksanvisningar-av-e-tjanster/paikkatietoikkuna/sokning",
+	            "element": "section.block--mml-content"
+	        },
+	        {
+	            "tags": "sv_guide_maplayers",
+	            "url": "https://www.maanmittauslaitos.fi/sv/e-tjanster/bruksanvisningar-av-e-tjanster/paikkatietoikkuna/kartlager",
+	            "element": "section.block--mml-content"
+	        },
+	        {
+	            "tags": "sv_guide_publishing",
+	            "url": "https://www.maanmittauslaitos.fi/sv/e-tjanster/bruksanvisningar-av-e-tjanster/paikkatietoikkuna/definiera-karta",
+	            "element": "section.block--mml-content"
+	        },
+	        {
+	            "tags": "sv_guide_thematic",
+	            "url": "https://www.maanmittauslaitos.fi/sv/e-tjanster/bruksanvisningar-av-e-tjanster/paikkatietoikkuna/temakartor",
+	            "element": "section.block--mml-content"
+	        },
+	        {
+	            "tags": "sv_guide_analysis",
+	            "url": "https://www.maanmittauslaitos.fi/sv/e-tjanster/bruksanvisningar-av-e-tjanster/paikkatietoikkuna/analys",
+	            "element": "section.block--mml-content"
+	        }
+	    ]
+	}
  
