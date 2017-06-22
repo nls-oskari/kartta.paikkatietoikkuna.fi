@@ -1,4 +1,4 @@
-package fi.nls.oskari;
+package fi.nls.oskari.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,10 +9,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class LegacyDocument {
     @JsonProperty("UUID")
-    String uuid;
+    public String uuid;
     @JsonProperty("title")
-    String filename;
-    String mimeType;
+    public String filename;
+    public String mimeType;
     @JsonProperty("filename")
-    String path;
+    public String path;
 }

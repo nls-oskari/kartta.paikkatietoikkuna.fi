@@ -1,6 +1,6 @@
 package fi.nls.oskari;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import fi.nls.oskari.domain.LegacyDocument;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
@@ -9,30 +9,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpClientErrorException;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import static fi.nls.oskari.Helper.*;
 
 /**
  * Support for old document links, now available under Jetty/resources/legacy-docs
- * Maybe move legacy links handling to another webapp?
  */
 @Controller
 public class DocumentsHandler {
 
     private Map<String, LegacyDocument> docs = new HashMap<>();
-    private ObjectMapper objectMapper = new ObjectMapper();
-
-    private String basePath = "/legacy";
-
-    @RequestMapping("/documents/**")
-    public String documentsPath(HttpServletRequest request) throws Exception {
-        request.getRequestURI();
-        return "login";
-    }
 
     /*
     /documents/108478/f22964f8-cc49-421e-bf2e-084d54be6a04
@@ -63,9 +54,6 @@ public class DocumentsHandler {
     }
 
     protected LegacyDocument findDocument(String uuid) throws Exception {
-        if (docs.isEmpty()) {
-            readList();
-        }
         LegacyDocument doc = docs.get(uuid);
         if (doc == null) {
             throw new HttpClientErrorException(HttpStatus.NOT_FOUND);
@@ -73,6 +61,7 @@ public class DocumentsHandler {
         return doc;
     }
 
+    @PostConstruct
     private void readList() throws IOException {
         Map<String, String> mimeTypes = new HashMap<>();
         mimeTypes.put(".pdf", "application/pdf");
@@ -90,14 +79,15 @@ public class DocumentsHandler {
         mimeTypes.put(".png", "image/png");
         mimeTypes.put(".jpg", "image/jpg");
 
-        LegacyDocument[] list = objectMapper.readValue(getClass().getResourceAsStream(basePath + "/liferay_docs.json"), LegacyDocument[].class);
+        LegacyDocument[] list = getMapper().readValue(getClass().getResourceAsStream(getBasePath() + "/liferay_docs.json"), LegacyDocument[].class);
         for(LegacyDocument doc : list) {
             // setup path for classpath resource
-            doc.path = basePath + "/docs/" + doc.path;
+            doc.path = getBasePath() + "/docs/" + doc.path;
             doc.mimeType = getMimeType(doc.filename, mimeTypes);
             docs.put(doc.uuid, doc);
         }
     }
+
     private String getMimeType(String filename, Map<String, String> types) {
         for( Map.Entry<String, String> e : types.entrySet()) {
             if(filename.toLowerCase().endsWith(e.getKey())) {
