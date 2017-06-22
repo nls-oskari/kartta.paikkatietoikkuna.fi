@@ -62,6 +62,7 @@
         <module>app-resources</module>
         <module>server-extension</module>
         <module>webapp-map</module>
+        <module>webapp-landing</module>
         <module>webapp-transport</module>
     </modules>
 
