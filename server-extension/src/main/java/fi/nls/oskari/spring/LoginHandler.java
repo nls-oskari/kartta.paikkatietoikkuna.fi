@@ -24,9 +24,10 @@ public class LoginHandler {
 
     @RequestMapping
     public String index(Model model, @OskariParam ActionParameters params) throws Exception {
-        if("true".equalsIgnoreCase(params.getHttpParam("fail"))) {
+        if("true".equalsIgnoreCase(params.getHttpParam("error"))) {
             model.addAttribute("error", true);
         }
+        model.addAttribute("language", params.getLocale().getLanguage());
         return "login";
     }
 }
