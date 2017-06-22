@@ -45,7 +45,6 @@ public class LegacyMapLinksHandler {
         // links are sorted from longest to shortest so the first one to match is the best one
         String candidate = null;
         for(LegacyLink link : links) {
-            System.out.println(link.path);
             if(!link.path.startsWith(path)) {
                 continue;
             }

@@ -16,6 +16,7 @@ public class LegacyLink implements Comparable<LegacyLink> {
 
     @Override
     public int compareTo(LegacyLink o) {
-        return path.length() - o.path.length();
+        // sort from longest to shortest path
+        return o.path.length() - path.length();
     }
 }
