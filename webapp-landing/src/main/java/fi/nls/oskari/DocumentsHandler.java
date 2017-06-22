@@ -1,10 +1,6 @@
-package fi.nls.oskari.spring;
+package fi.nls.oskari;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fi.nls.oskari.log.LogFactory;
-import fi.nls.oskari.log.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
@@ -22,11 +18,11 @@ import java.util.Map;
 
 /**
  * Support for old document links, now available under Jetty/resources/legacy-docs
+ * Maybe move legacy links handling to another webapp?
  */
 @Controller
 public class DocumentsHandler {
 
-    private final static Logger LOG = LogFactory.getLogger(DocumentsHandler.class);
     private Map<String, LegacyDocument> docs = new HashMap<>();
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -108,7 +104,7 @@ public class DocumentsHandler {
                 return e.getValue();
             }
         }
-        LOG.warn("Mimetype missing for", filename);
+        System.out.println("Mimetype missing for: " + filename);
         return null;
     }
 }
