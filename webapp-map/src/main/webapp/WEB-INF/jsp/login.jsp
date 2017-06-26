@@ -120,7 +120,7 @@
         </div>
 
         <div class="link-to-map">
-            <a href="/">Takaisin karttaikkunaan</a>
+            <a href="/">takaisin karttapalveluun</a>
         </div>
 
         <div class="login-information">
@@ -153,7 +153,7 @@
         </div>
 
         <div class="link-to-map">
-            <a href="/">Tillbaka till karttaikkunaan</a>
+            <a href="/">tillbaka till karttjänsten</a>
         </div>
 
         <div class="login-information">
@@ -188,7 +188,7 @@
         </div>
 
         <div class="link-to-map">
-            <a href="/">Back to Karttaikkuna</a>
+            <a href="/">back to the map service</a>
         </div>
 
         <div class="login-information">
