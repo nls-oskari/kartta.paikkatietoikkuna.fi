@@ -16,10 +16,14 @@
 </head>
 <body>
 <div class="container main">
+    <div class="row margin hidden-xs">
+    </div>
     <div class="row logo">
       <div class="col-md-6 col-md-offset-3">
         <img src="/static/resources/images/Paikkatietoikkuna_logo_rgb.svg" viewBox="0 0 100 100" class="logo_image">
       </div>
+    </div>
+    <div class="row margin hidden-xs">
     </div>
     <div class="row">
         <div class="col-md-12 main-text">
@@ -27,6 +31,8 @@
 
             <p><spring:message code="landing.passwd.reset.info"/></p>
         </div>
+    </div>
+    <div class="row margin hidden-xs">
     </div>
     <div class="row link-panels">
         <div class="col-md-5 col-md-offset-1">
