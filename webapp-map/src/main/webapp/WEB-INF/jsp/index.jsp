@@ -34,6 +34,10 @@
                 padding: 0;
             }
 
+            #content {
+                position: relative;
+            }
+
             #sidebar {
                 background-color: #FFDE00;
                 width: 40px;
@@ -41,6 +45,7 @@
                 display: block;
                 z-index: 3;
                 height: 100%;
+                margin-left: -40px;
             }
 
             #pti-icon {
@@ -58,7 +63,6 @@
 
             #mapContainer {
                 display: block;
-                margin-left: 40px;
             }
 
             #mapdiv {
@@ -102,52 +106,54 @@
     </style>
     <!-- ############# /css ################# -->
 </head>
-<body>
+<body class="mml-map">
 
-<div id="sidebar">
-    <img id="pti-icon" src="/static/img/ikkuna.svg">
-</div>
-<div id="mapContainer">
-    <nav id="maptools">
-        <div id="logobar">
-            <img id="pti-name" src="/static/img/paikkatietoikkuna_138px.svg">
-        </div>
-        <div id="menubar">
-        </div>
-        <div id="divider">
-        </div>
-        <div id="loginbar">
-        </div>
-        <div id="language">
-            <c:if test="${language == 'fi'}">
-                <a href="./?lang=sv">På svenska</a> -
-                <a href="./?lang=en">In English</a>
-            </c:if>
-            <c:if test="${language == 'sv'}">
-                <a href="./?lang=fi">Suomeksi</a> -
-                <a href="./?lang=en">In English</a>
-            </c:if>
-            <c:if test="${language == 'en'}">
-                <a href="./?lang=fi">Suomeksi</a> -
-                <a href="./?lang=sv">På svenska</a>
-            </c:if>
-        </div>
-        <div id="toolbar">
-        </div>
-        <div id="oskari-system-messages"></div>
-    </nav>
-    <div id="contentMap" class="oskariui container-fluid">
-        <div id="menutoolbar" class="container-fluid"></div>
-        <div class="row-fluid oskariui-mode-content" style="height: 100%; background-color:white;">
-            <div class="oskariui-left"></div>
-            <div class="span12 oskariui-center" style="height: 100%; margin: 0;">
-                <div id="mapdiv"></div>
-            </div>
-            <div class="oskari-closed oskariui-right">
-                <div id="mapdivB"></div>
-            </div>
-        </div>
+<div id="wrapper">
+    <div id="sidebar">
+        <img id="pti-icon" src="/static/img/ikkuna.svg">
     </div>
+    <section id="content" class="floatleft">
+        <nav id="maptools">
+            <div id="logobar">
+                <img id="pti-name" src="/static/img/paikkatietoikkuna_138px.svg">
+            </div>
+            <div id="menubar">
+            </div>
+            <div id="divider">
+            </div>
+            <div id="loginbar">
+            </div>
+            <div id="language">
+                <c:if test="${language == 'fi'}">
+                    <a href="./?lang=sv">På svenska</a> -
+                    <a href="./?lang=en">In English</a>
+                </c:if>
+                <c:if test="${language == 'sv'}">
+                    <a href="./?lang=fi">Suomeksi</a> -
+                    <a href="./?lang=en">In English</a>
+                </c:if>
+                <c:if test="${language == 'en'}">
+                    <a href="./?lang=fi">Suomeksi</a> -
+                    <a href="./?lang=sv">På svenska</a>
+                </c:if>
+            </div>
+            <div id="toolbar">
+            </div>
+            <div id="oskari-system-messages"></div>
+        </nav>
+        <div id="contentMap" class="oskariui container-fluid">
+            <div id="menutoolbar" class="container-fluid"></div>
+            <div class="row-fluid oskariui-mode-content" style="height: 100%; background-color:white;">
+                <div class="oskariui-left"></div>
+                <div class="span12 oskariui-center" style="height: 100%; margin: 0;">
+                    <div id="mapdiv"></div>
+                </div>
+                <div class="oskari-closed oskariui-right">
+                    <div id="mapdivB"></div>
+                </div>
+            </div>
+        </div>
+    </section>
 </div>
 
 
