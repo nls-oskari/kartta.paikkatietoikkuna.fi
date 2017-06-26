@@ -52,27 +52,6 @@
                 margin-left: 10px;
             }
 
-            #pti-name {
-                margin-top: 15px;
-                margin-right: 15px;
-                margin-left: 15px;
-                margin-bottom: 7px;
-            }
-
-            #maptools {
-                background-color: #333438;
-                height: 100%;
-                position: absolute;
-                top: 0;
-                width: 153px;
-                z-index: 2;
-            }
-
-            #contentMap {
-                height: 100%;
-                margin-left: 170px;
-            }
-
             #loginContainer {
                 display: block;
                 margin-left: 40px;
@@ -107,12 +86,6 @@
 
             .login-form {
                 padding-top: 50px;
-            }
-
-            p.login-title {
-                font-size: 24px;
-                color: #CCC;
-                padding-bottom: 20px;
             }
 
             input {
@@ -159,7 +132,7 @@
                 <b style="color:red;">Väärät kirjautumistiedot</b>
             </c:if>
             <form action="/my.policy" method="post">
-                <input type="email" name="username" placeholder="Käyttäjätunnus" autofocus="autofocus"/><br/>
+                <input type="email" name="username" placeholder="Sähköpostiosoite" autofocus="autofocus"/><br/>
                 <input type="password" name="password" placeholder="Salasana"/><br/>
                 <input type="submit" class="primary" value="Kirjaudu"/>
             </form>
@@ -192,7 +165,7 @@
                 <b style="color:red;">Felaktiga uppgifter</b>
             </c:if>
             <form action="/my.policy" method="post">
-                <input type="email" name="username" placeholder="Användarnamn" autofocus="autofocus"/><br/>
+                <input type="email" name="username" placeholder="E-postadress" autofocus="autofocus"/><br/>
                 <input type="password" name="password" placeholder="Lösenord"/><br/>
                 <input type="submit" class="primary" value="Logga in"/>
             </form>
@@ -227,7 +200,7 @@
                 <b style="color:red;">Wrong credentials</b>
             </c:if>
             <form action="/my.policy" method="post">
-                <input type="email" name="username" placeholder="Username" autofocus="autofocus"/><br/>
+                <input type="email" name="username" placeholder="Email" autofocus="autofocus"/><br/>
                 <input type="password" name="password" placeholder="Password"/><br/>
                 <input type="submit" class="primary" value="Sign in"/>
             </form>
