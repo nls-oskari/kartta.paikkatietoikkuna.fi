@@ -2,11 +2,13 @@ package fi.nls.oskari;
 
 import fi.nls.oskari.domain.LegacyLink;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,6 +31,25 @@ public class LegacyMapLinksHandler {
         LegacyLink[] list = getMapper().readValue(getClass().getResourceAsStream(getBasePath() + "/liferay_links.json"), LegacyLink[].class);
         links.addAll(Arrays.asList(list));
         Collections.sort(links);
+    }
+
+    @RequestMapping("/published/{mapId}")
+    public ModelAndView embeddedMaps(@PathVariable("mapId") String mapId, HttpServletRequest request) throws Exception {
+        return embeddedMaps("fi", mapId, request);
+    }
+
+    @RequestMapping("/published/{lang}/{mapId}")
+    public ModelAndView embeddedMaps(@PathVariable("lang") String lang, @PathVariable("mapId") String mapId, HttpServletRequest request) throws Exception {
+        String url = "https://kartta.paikkatietoikkuna.fi/?lang=" + lang + "&";
+        if(mapId.matches("\\d+")) {
+            // digits -> use viewId
+            url = url + "viewId=" + mapId;
+        } else {
+            // default to uuid
+            url = url + "uuid=" + mapId;
+        }
+        // not found -> go to landing page
+        return new ModelAndView("redirect:" + attachQuery(url, request.getQueryString()));
     }
 
     @RequestMapping("/web/**")
