@@ -46,7 +46,7 @@ public class DocumentsHandler {
         if(doc.mimeType != null) {
             response.setContentType(doc.mimeType);
         }
-        response.setHeader("Content-Disposition", "inline; filename=\"" + doc.filename + "\"");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + doc.filename + "\"");
         try (InputStream is = getClass().getResourceAsStream(doc.path)) {
             response.setContentLength(is.available());
             FileCopyUtils.copy(is, response.getOutputStream());
