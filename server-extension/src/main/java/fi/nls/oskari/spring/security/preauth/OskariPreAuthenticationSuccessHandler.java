@@ -42,7 +42,9 @@ public class OskariPreAuthenticationSuccessHandler extends SimpleUrlAuthenticati
         try {
             user = getUser(oud);
             if (user.getId() == -1) {
-                user = userService.createUser(user);
+                userService.createUser(user);
+                // the user returned by createUser() doesn't have roles so find the user with email
+                user = userService.getUserByEmail(user.getEmail());
             } else {
                 userService.modifyUser(user);
             }
