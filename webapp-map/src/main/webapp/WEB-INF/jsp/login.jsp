@@ -157,7 +157,7 @@
         </div>
 
         <div class="login-information">
-            <p>Paikkatietoikkuna har förnyats den 27.6.2017. Registrerade användarnamn har överförts till den nya tjänsten, men lösenorden har nollställts. Beställ nytt lösenord <a href="https://omatili.maanmittauslaitos.fi/user/password">här</a>, om du loggar in till den nya tjänsten för första gången. </p>
+            <p>Paikkatietoikkuna har förnyats den 27.6.2017. Registrerade användarnamn har överförts till den nya tjänsten, men lösenorden har nollställts. Beställ nytt lösenord <a href="https://omatili.maanmittauslaitos.fi/user/password/?lang=sv">här</a>, om du loggar in till den nya tjänsten för första gången. </p>
         </div>
 
         <div class="login-form">
@@ -173,10 +173,10 @@
 
 
         <div id="forgotPassword">
-            <a href="https://omatili.maanmittauslaitos.fi/user/password">Har du glömt lösenordet?</a>
+            <a href="https://omatili.maanmittauslaitos.fi/user/password/?lang=sv">Har du glömt lösenordet?</a>
         </div>
         <div id="register">
-            <a href="https://omatili.maanmittauslaitos.fi/">Registrera</a>
+            <a href="https://omatili.maanmittauslaitos.fi/?lang=sv">Registrera</a>
         </div>
 
     </c:if>
@@ -192,7 +192,7 @@
         </div>
 
         <div class="login-information">
-            <p>Paikkatietoikkuna has been renewed on June 27th, 2017. The existing user accounts have been moved to the new service, but all passwords have been cleared. You can set a new password <a href="https://omatili.maanmittauslaitos.fi/user/password">here</a>, if you are entering the new service for the first time. </p>
+            <p>Paikkatietoikkuna has been renewed on June 27th, 2017. The existing user accounts have been moved to the new service, but all passwords have been cleared. You can set a new password <a href="https://omatili.maanmittauslaitos.fi/user/password/?lang=en">here</a>, if you are entering the new service for the first time. </p>
         </div>
 
         <div class="login-form">
@@ -207,10 +207,10 @@
         </div>
 
         <div id="forgotPassword">
-            <a href="https://omatili.maanmittauslaitos.fi/user/password">Forgot password?</a>
+            <a href="https://omatili.maanmittauslaitos.fi/user/password/?lang=en">Forgot password?</a>
         </div>
         <div id="register">
-            <a href="https://omatili.maanmittauslaitos.fi/">Register</a>
+            <a href="https://omatili.maanmittauslaitos.fi/?lang=en">Register</a>
         </div>
 
     </c:if>
