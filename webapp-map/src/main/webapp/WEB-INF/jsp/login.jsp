@@ -124,7 +124,10 @@
         </div>
 
         <div class="login-information">
-            <p>Paikkatietoikkuna on uudistunut 27.6.2017. Rekisteröityneiden käyttäjien tunnukset on siirretty uusittuun palveluun, mutta salasanat on nollattu. Käy tilaamassa uusi salasana <a href="https://omatili.maanmittauslaitos.fi/user/password">tästä</a>, jos olet kirjautumassa uuteen palveluun ensimmäistä kertaa. </p>
+            <p>Rekisteröityneiden käyttäjien tunnukset on siirretty Maanmittauslaitoksen Omatili-palveluun, mutta salasanat on nollattu. Samat tunnukset käyvät tulevaisuudessa muihinkin verkkopalveluihin. Kun kirjaudut uusittuun palveluun ensimmäistä kertaa, toimi näin:<br><br>
+            1) Tilaa uusi salasana <a href="https://omatili.maanmittauslaitos.fi/user/password">tästä</a> - saat sähköpostiisi ohjeet salasanan vaihtamiseksi.<br>
+            2) Kun olet saanut salasanasi vaihdettua, päädyt Omatili-palvelun etusivulle. Paikkatietoikkunaan pääset kirjautumaan uudella salasanallasi menemällä osoitteeseen <a href="https://kartta.paikkatietoikkuna.fi/login">https://kartta.paikkatietoikkuna.fi/login</a>.</p>
+            <p>Ongelmatilanteissa ota yhteyttä asiakaspalveluumme: paikkatietoikkuna@maanmittauslaitos.fi.</p>
         </div>
 
         <div class="login-form">
@@ -157,7 +160,10 @@
         </div>
 
         <div class="login-information">
-            <p>Paikkatietoikkuna har förnyats den 27.6.2017. Registrerade användarnamn har överförts till den nya tjänsten, men lösenorden har nollställts. Beställ nytt lösenord <a href="https://omatili.maanmittauslaitos.fi/user/password/?lang=sv">här</a>, om du loggar in till den nya tjänsten för första gången. </p>
+            <p>Registrerade andvändarnamn har överförts till Lantmäteriverkets Omatili-tjänst, men lösenorden har nollställts. Samma inloggningsuppgifter kan användas i fortsättningen också i andra webbtjänster. När du loggar in i den nya tjänsten för första gången, gör så här:<br><br>
+            1) Beställ ett nytt lösenord <a href="https://omatili.maanmittauslaitos.fi/user/password/?lang=sv">här</a> - du får instruktioner för bytet av lösenordet per e-post.<br>
+            2) När du har lyckats byta lösenordet tas du vidare till Omatili-tjänstens framsida. Du kan logga in till Paikkatietoikkuna med ditt nya lösenord genom att gå till addressen <a href="https://kartta.paikkatietoikkuna.fi/login?lang=sv">https://kartta.paikkatietoikkuna.fi/login</a>.</p>
+            <p>Vid problem, kontakta vår kundservice paikkatietoikkuna@lantmateriverket.fi.</p>
         </div>
 
         <div class="login-form">
@@ -192,7 +198,10 @@
         </div>
 
         <div class="login-information">
-            <p>Paikkatietoikkuna has been renewed on June 27th, 2017. The existing user accounts have been moved to the new service, but all passwords have been cleared. You can set a new password <a href="https://omatili.maanmittauslaitos.fi/user/password/?lang=en">here</a>, if you are entering the new service for the first time. </p>
+            <p>All existing user accounts have been moved to Omatili service provided by the National Land Survey of Finland. In the future, you can use the same account also in other web services. If you are entering the new service for the first time, please go through the following steps:<br><br>
+            1) Order a new password <a href="https://omatili.maanmittauslaitos.fi/user/password/?lang=en">here</a> - you will receive instructions by e-mail.<br>
+            2) After receiving the new password, you will be forwared to the front page of Omatili service. You can log in to Paikkatietoikkuna by going to the following page: <a href="https://kartta.paikkatietoikkuna.fi/login?lang=en">https://kartta.paikkatietoikkuna.fi/login</a>.</p>
+            <p>If you encounter problems on this site, please contact our customer service: paikkatietoikkuna@maanmittauslaitos.fi. </p>
         </div>
 
         <div class="login-form">
