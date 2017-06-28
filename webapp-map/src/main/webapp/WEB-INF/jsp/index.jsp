@@ -193,5 +193,43 @@
 
 
 <!-- ############# /Javascript ################# -->
+<jsp:useBean id="props" class="fi.nls.oskari.util.PropertyUtil"/>
+<c:set var="ribbon" scope="page" value="${props.getOptional('page.ribbon')}" />
+<c:if test="${!empty ribbon}">
+    <style type="text/css">
+
+        #demoribbon
+        {
+            color:white;
+            background-color: red;
+            z-index: 100000;
+            top: 0px;
+            left: 0px;
+            position: fixed;
+            <%--  left side --%>
+            padding-left: 40px;
+            margin-top: 20px;
+            margin-left: -30px;
+            padding-right: 40px;
+            -webkit-transform: rotate(-45deg);
+            -moz-transform: rotate(-45deg);
+            transform: rotate(-45deg);
+            <%--  right side --%>
+            <%--
+            margin-right: -30px;
+            padding-left: 40px;
+            padding-right: 40px;
+            margin-top: 20px;
+            -webkit-transform: rotate(45deg);
+            -moz-transform: rotate(45deg);
+            transform: rotate(45deg);
+             --%>
+        }
+        #demoribbon:hover {
+            display:none;
+        }
+    </style>
+    <div id="demoribbon">${ribbon}</div>
+</c:if>
 </body>
 </html>
