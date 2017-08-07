@@ -4,16 +4,13 @@ import fi.nls.oskari.domain.LegacyLink;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static fi.nls.oskari.Helper.getBasePath;
 import static fi.nls.oskari.Helper.getMapper;
@@ -25,17 +22,22 @@ import static fi.nls.oskari.Helper.getMapper;
 public class LegacyMapLinksHandler {
 
     private List<LegacyLink> links = new ArrayList<>();
+    private Map<String, String> liferay5MapLinks = new HashMap<>();
 
     @PostConstruct
     private void readList() throws IOException {
         LegacyLink[] list = getMapper().readValue(getClass().getResourceAsStream(getBasePath() + "/liferay_links.json"), LegacyLink[].class);
         links.addAll(Arrays.asList(list));
         Collections.sort(links);
+
+        liferay5MapLinks = getMapper().readValue(getClass().getResourceAsStream(getBasePath() + "/liferay_oldId_uuid_maps.json"), HashMap.class);
     }
 
     @RequestMapping("/published/{mapId}")
-    public ModelAndView embeddedMaps(@PathVariable("mapId") String mapId, HttpServletRequest request) throws Exception {
-        return embeddedMaps("fi", mapId, request);
+    public ModelAndView simpleEmbeddedMaps(@PathVariable("mapId") String mapId,
+                                     @RequestParam(value = "lang", required = false, defaultValue = "fi") String lang,
+                                     HttpServletRequest request) throws Exception {
+        return embeddedMaps(lang, mapId, request);
     }
 
     @RequestMapping("/published/{lang}/{mapId}")
@@ -50,6 +52,14 @@ public class LegacyMapLinksHandler {
         }
         // not found -> go to landing page
         return new ModelAndView("redirect:" + attachQuery(url, request.getQueryString()));
+    }
+
+    // /widget/web/fi/julkaisijankartta/-/MapPublished_WAR_mapportlet?id=442
+    @RequestMapping("/widget/web/fi/julkaisijankartta/-/MapPublished_WAR_mapportlet")
+    public ModelAndView liferay5embeddedMaps(@RequestParam("id") String mapId,
+                                      @RequestParam(value = "lang", required = false, defaultValue = "fi") String lang,
+                                      HttpServletRequest request) throws Exception {
+        return embeddedMaps(lang, liferay5MapLinks.get(mapId), request);
     }
 
     @RequestMapping("/web/**")
