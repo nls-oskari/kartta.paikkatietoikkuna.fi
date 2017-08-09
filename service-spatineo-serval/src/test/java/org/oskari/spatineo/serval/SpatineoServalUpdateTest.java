@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-public class SpatineoServalDaoTest {
+public class SpatineoServalUpdateTest {
 
     @Test
     public void partitionNullListReturnsEmptyList() {
@@ -15,7 +15,7 @@ public class SpatineoServalDaoTest {
         assertNotNull(list);
         assertTrue(list.isEmpty());
     }
-    
+
     @Test
     public void partitioningWithNegativePartitionSizeReturnsEmptyList() {
         List<String> list = Arrays.asList("foo");
@@ -23,7 +23,7 @@ public class SpatineoServalDaoTest {
         assertNotNull(parts);
         assertTrue(parts.isEmpty());
     }
-    
+
     @Test
     public void partitioningWithPartitionSizeZeroReturnsEmptyList() {
         List<String> list = Arrays.asList("foo");
@@ -31,7 +31,7 @@ public class SpatineoServalDaoTest {
         assertNotNull(parts);
         assertTrue(parts.isEmpty());
     }
-    
+
     @Test
     public void partitioningWithExactlyListSizeReturnsListWithOneList() {
         List<String> list = Arrays.asList("foo", "bar");
@@ -39,7 +39,7 @@ public class SpatineoServalDaoTest {
         assertNotNull(parts);
         assertEquals(1, parts.size());
     }
-    
+
     @Test
     public void partitioningWithExactlyThreeTimesTheListSizeReturnsListWithThreeLists() {
         List<String> list = Arrays.asList("foo", "bar", "baz", "qux", "yyy", "eee");
@@ -47,7 +47,7 @@ public class SpatineoServalDaoTest {
         assertNotNull(parts);
         assertEquals(3, parts.size());
     }
-    
+
     @Test
     public void partitioningWithLargerPartitionSizeThanTotalEntriesReturnsOneList() {
         List<String> list = Arrays.asList("foo", "bar");
@@ -56,7 +56,7 @@ public class SpatineoServalDaoTest {
         assertEquals(1, parts.size());
         assertEquals(list.size(), parts.get(0).size());
     }
-    
+
     @Test
     public void partitioningRegularCase() {
         List<String> list = Arrays.asList("foo", "bar", "baz", "qux");
@@ -66,5 +66,5 @@ public class SpatineoServalDaoTest {
         assertEquals(3, parts.get(0).size());
         assertEquals(1, parts.get(1).size());
     }
-    
+
 }

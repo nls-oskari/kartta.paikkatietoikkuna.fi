@@ -42,12 +42,16 @@ public class SpatineoServalDao {
             int sc = conn.getResponseCode();
             LOG.debug("Received status code: ", sc);
             try (InputStream in = IOHelper.getInputStream(conn)) {
-                return om.readValue(in, ServalResponse.class);
+                return parse(in);
             }
         } catch (IOException e) {
             LOG.warn(e);
             return null;
         }
+    }
+
+    protected ServalResponse parse(final InputStream in) throws IOException {
+        return om.readValue(in, ServalResponse.class);
     }
 
     private static Map<String, String> buildRequest(final List<ServalService> services) {
