@@ -21,7 +21,7 @@ public class SpatineoServalDaoTest {
     }
     
     @Test
-    public void test() {
+    public void simpleTestCase() {
         List<ServalService> services = Arrays.asList(
                 new ServalService(ServalServiceType.WMS,
                         "http://kartat.lounaispaikka.fi/ms6/maakuntakaavat/varsinais-suomi/maakuntakaava_ms6",
