@@ -17,7 +17,6 @@ Spatineo Serval API documentation:
 
 * https://docs.google.com/a/spatineo.com/file/d/0B7yQv2YAAzWcQmR3cWlhN1BGWUU/edit?usp=drive_web
 
-
     oskari@devbox:~$ https -v -f POST monitor.spatineo.com/api/public/availability-1.0 'service[0][type]=WMS' 'service[0][url]=http://kartat.lounaispaikka.fi/ms6/maakuntakaavat/varsinais-suomi/maakuntakaava_ms6' 'service[0][offering]=mk_tunnelit'
 
     POST /api/public/availability-1.0 HTTP/1.1

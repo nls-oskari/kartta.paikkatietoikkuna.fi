@@ -23,8 +23,8 @@ public class SpatineoServalDaoTest {
     @Test
     public void test() {
         List<ServalService> services = Arrays.asList(
-                new ServalService(ServalServiceType.WMS, 
-                        "http://kartat.lounaispaikka.fi/ms6/maakuntakaavat/varsinais-suomi/maakuntakaava_ms6", 
+                new ServalService(ServalServiceType.WMS,
+                        "http://kartat.lounaispaikka.fi/ms6/maakuntakaavat/varsinais-suomi/maakuntakaava_ms6",
                         "mk_tunnelit")
         );
         ServalResponse response = serval.query(services);
