@@ -3,10 +3,8 @@ package org.oskari.spatineo.serval;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.oskari.spatineo.monitor.UpdateBackendStatusJob;
-import org.oskari.spatineo.monitor.backendstatus.BackendStatus;
-import org.oskari.spatineo.monitor.backendstatus.BackendStatusDao;
+import org.oskari.service.backendstatus.BackendStatusService;
+import org.oskari.service.backendstatus.BackendStatusServiceMyBatisImpl;
 import org.oskari.spatineo.monitor.maplayer.MapLayer;
 import org.oskari.spatineo.monitor.maplayer.MapLayerDao;
 import org.oskari.spatineo.serval.api.ServalResponse;
@@ -15,6 +13,7 @@ import org.oskari.spatineo.serval.api.ServalService;
 import org.oskari.spatineo.serval.api.ServalService.ServalServiceType;
 import org.oskari.spatineo.serval.api.SpatineoServalDao;
 
+import fi.nls.oskari.domain.map.BackendStatus;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.util.PropertyUtil;
@@ -33,9 +32,8 @@ public class SpatineoServalUpdateJob {
                 "Spatineo Serval API requires an end point address. Calls to API disabled.");
         final SpatineoServalDao spatineoServalDao = new SpatineoServalDao(endPoint);
         
-        final SqlSessionFactory factory = UpdateBackendStatusJob.initMyBatis();
-        final MapLayerDao mapLayerDao = new MapLayerDao(factory);
-        final BackendStatusDao serviceStatusDao = new BackendStatusDao(factory);
+        final MapLayerDao mapLayerDao = new MapLayerDao();
+        final BackendStatusService statusService = new BackendStatusServiceMyBatisImpl();
 
         final List<BackendStatus> statuses = new ArrayList<>();
 
@@ -46,7 +44,7 @@ public class SpatineoServalUpdateJob {
             handlePartition(spatineoServalDao, chunk, statuses, ServalServiceType.WFS);
         }
         
-        serviceStatusDao.insertStatuses(statuses);
+        statusService.insertAll(statuses);
 
         LOG.info("Done with the Spatineo Serval update service call");
     }
