@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.oskari.service.backendstatus.BackendStatusService;
 import org.oskari.service.backendstatus.BackendStatusServiceMyBatisImpl;
-import org.oskari.spatineo.monitor.maplayer.MapLayer;
-import org.oskari.spatineo.monitor.maplayer.MapLayerDao;
+import org.oskari.service.backendstatus.maplayer.MapLayer;
+import org.oskari.service.backendstatus.maplayer.MapLayerDao;
 import org.oskari.spatineo.serval.api.ServalResponse;
 import org.oskari.spatineo.serval.api.ServalResult;
 import org.oskari.spatineo.serval.api.ServalService;

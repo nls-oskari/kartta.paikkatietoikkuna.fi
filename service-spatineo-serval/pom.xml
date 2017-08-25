@@ -13,7 +13,12 @@
     <dependencies>
         <dependency>
             <groupId>fi.nls.oskari.service</groupId>
-            <artifactId>service-spatineo-monitor</artifactId>
+            <artifactId>service-scheduler</artifactId>
+            <version>${oskari.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>fi.nls.oskari.service</groupId>
+            <artifactId>oskari-map</artifactId>
             <version>${oskari.version}</version>
         </dependency>
         <dependency>
