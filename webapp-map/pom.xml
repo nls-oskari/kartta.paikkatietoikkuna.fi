@@ -18,6 +18,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>fi.nls.paikkatietoikkuna</groupId>
+            <artifactId>service-spatineo-serval</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>fi.nls.oskari.extras</groupId>
             <artifactId>nlsfi-projections</artifactId>
             <version>1.1</version>
