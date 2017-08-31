@@ -23,67 +23,75 @@ public class SpatineoServalUpdateJob {
     private static final Logger LOG = LogFactory.getLogger(SpatineoServalUpdateJob.class);
 
     private static final String PROP_SERVAL_URL = "spatineo.serval.url";
-    private static final int CHUNK_SIZE = 10;
+    private static final String PROP_SERVAL_CHUNK_SIZE = "spatineo.serval.chunk.size";
+    private static final String PROP_SERVAL_TRY_COUNT = "spatineo.serval.try.count";
 
-    public static void scheduledServiceCall() throws Exception {
+    private static final int DEFAULT_CHUNK_SIZE = 10;
+    private static final int DEFAULT_NUM_TRIES = 3;
+
+    public static void scheduledServiceCall() {
         LOG.info("Starting the Spatineo Serval update service call...");
 
         final String endPoint = PropertyUtil.getNecessary(PROP_SERVAL_URL, 
                 "Spatineo Serval API requires an end point address. Calls to API disabled.");
         final SpatineoServalDao spatineoServalDao = new SpatineoServalDao(endPoint);
-        
+
+        final int chunkSize = PropertyUtil.getOptional(PROP_SERVAL_CHUNK_SIZE, DEFAULT_CHUNK_SIZE);
+        final int numTries = PropertyUtil.getOptional(PROP_SERVAL_TRY_COUNT, DEFAULT_NUM_TRIES);
+
         final MapLayerDao mapLayerDao = new MapLayerDao();
         final BackendStatusService statusService = new BackendStatusServiceMyBatisImpl();
 
         final List<BackendStatus> statuses = new ArrayList<>();
 
-        for (List<MapLayer> chunk : partition(mapLayerDao.findWMSMapLayers(), CHUNK_SIZE)) {
-            handlePartition(spatineoServalDao, chunk, statuses, ServalServiceType.WMS);
+        for (List<MapLayer> chunk : ListPartition.partition(mapLayerDao.findWMSMapLayers(), chunkSize)) {
+            handle(spatineoServalDao, chunk, statuses, numTries, ServalServiceType.WMS);
         }
-        for (List<MapLayer> chunk : partition(mapLayerDao.findWFSMapLayers(), CHUNK_SIZE)) {
-            handlePartition(spatineoServalDao, chunk, statuses, ServalServiceType.WFS);
+        for (List<MapLayer> chunk : ListPartition.partition(mapLayerDao.findWFSMapLayers(), chunkSize)) {
+            handle(spatineoServalDao, chunk, statuses, numTries, ServalServiceType.WFS);
         }
-        
+
         statusService.insertAll(statuses);
 
         LOG.info("Done with the Spatineo Serval update service call");
     }
 
-    public static <T> List<List<T>> partition(final List<T> list, final int partitionSize) {
-        final List<List<T>> parent = new ArrayList<>();
-        if (list == null || partitionSize <= 0) {
-            return parent;
-        }
-        
-        List<T> tmp = null;
-        int size = partitionSize;
-    
-        for (T t : list) {
-            if (size == partitionSize) {
-                tmp = new ArrayList<>(partitionSize);
-                parent.add(tmp);
-                size = 0;
+    private static boolean handle(SpatineoServalDao spatineoServalDao,
+            List<MapLayer> layers, List<BackendStatus> statuses, int numTries, ServalServiceType type) {
+        for (int i = 0; i < numTries; i++) {
+            if (i > 0) {
+                LOG.info("Re-trying to handle the same chunk", (i + 1), "/", numTries);
             }
-            tmp.add(t);
-            size++;
+            if (handle(spatineoServalDao, layers, statuses, type)) {
+                return true;
+            }
         }
-        return parent;
+        return false;
     }
 
-    private static void handlePartition(SpatineoServalDao spatineoServalDao,
+    private static boolean handle(SpatineoServalDao spatineoServalDao,
             List<MapLayer> layers, List<BackendStatus> statuses, ServalServiceType type) {
         final List<ServalService> services = toServices(layers, type);
         final ServalResponse response = spatineoServalDao.query(services);
         if (response == null) {
-            LOG.debug("Failed to get response from Spatineo Serval");
-            return;
+            LOG.info("Failed to get response from Spatineo Serval");
+            return false;
         }
+
+        LOG.debug("Received Response with status:", response.getStatus(),
+                " statusMessage:", response.getStatusMessage());
         if (!"OK".equals(response.getStatus())) {
-            LOG.info("Received Response with status: ", response.getStatus(), 
-                    " statusMessage: ", response.getStatusMessage());
-            return;
+            return false;
         }
+
         final List<ServalResult> results = response.getResult();
+        if (results.size() != layers.size()) {
+            LOG.warn("Received different number of statuses than queried for!",
+                    "Number of layers:", layers.size(),
+                    "Number of statuses:", results.size());
+            return false;
+        }
+
         for (int i = 0; i < layers.size(); i++) {
             MapLayer layer = layers.get(i);
             ServalResult result = results.get(i);
@@ -92,6 +100,7 @@ public class SpatineoServalUpdateJob {
                     result.getStatusMessage(), 
                     result.getInfoUrl()));
         }
+        return true;
     }
 
     private static List<ServalService> toServices(List<MapLayer> layers, 
