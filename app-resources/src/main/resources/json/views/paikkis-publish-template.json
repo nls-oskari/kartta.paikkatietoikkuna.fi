@@ -5,9 +5,9 @@
   "public" : false,
   "creator" : 10110,
   "oskari" : {
-    "application" : "servlet_published_ol3",
+    "application" : "published-map_ol3",
     "page" : "published",
-    "development_prefix": "/applications/sample"
+    "development_prefix": "/applications/paikkatietoikkuna.fi"
   },
   "bundles" : [
     {

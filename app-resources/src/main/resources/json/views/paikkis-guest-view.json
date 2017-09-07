@@ -5,9 +5,9 @@
   "public": true,
   "onlyUuid": false,
   "oskari": {
-    "application": "servlet",
+    "application": "full-map_guest",
     "page": "index",
-    "development_prefix": "/applications/sample"
+    "development_prefix": "/applications/paikkatietoikkuna.fi"
   },
   "selectedLayers": [
     "taustakartta.json"
