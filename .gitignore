@@ -10,3 +10,4 @@ target/
 .project
 transport.log
 *pom.xml.versionsBackup
+.metadata/
