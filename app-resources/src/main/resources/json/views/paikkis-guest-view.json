@@ -5,7 +5,7 @@
   "public": true,
   "onlyUuid": false,
   "oskari": {
-    "application": "full-map_guest",
+    "application": "full-map",
     "page": "index",
     "development_prefix": "/applications/paikkatietoikkuna.fi"
   },
