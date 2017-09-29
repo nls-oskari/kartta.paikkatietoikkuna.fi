@@ -91,7 +91,7 @@
         <!-- oskari -->
         <dependency>
             <groupId>fi.nls.oskari.service</groupId>
-            <artifactId>oskari-control-example</artifactId>
+            <artifactId>oskari-search-opendata</artifactId>
             <version>${oskari.version}</version>
         </dependency>
 
