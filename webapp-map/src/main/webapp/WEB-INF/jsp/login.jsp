@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>${viewName}</title>
+    <title>Paikkatietoikkuna</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="/static/img/pti_icon.png" type="image/png" />
     <script type="text/javascript" src="//code.jquery.com/jquery-1.7.2.min.js">
@@ -20,21 +20,12 @@
             rel="stylesheet"
             type="text/css"
             href="/Oskari/resources/css/portal.css"/>
-    <link
-            rel="stylesheet"
-            type="text/css"
-            href="/Oskari${path}/icons.css"/>
-    <link
-            rel="stylesheet"
-            type="text/css"
-            href="/Oskari${path}/css/overwritten.css"/>
     <style type="text/css">
         @media screen {
             body, html {
                 margin: 0;
                 padding: 0;
                 background-color: #000;
-                overflow: hidden;
             }
 
             #sidebar {
@@ -58,6 +49,7 @@
                 text-align: center;
                 background: url(/static/img/background_image.jpg);
                 background-size: cover;
+                background-attachment: fixed;
                 height: 100%;
                 position: relative;
                 padding-top: 100px;
