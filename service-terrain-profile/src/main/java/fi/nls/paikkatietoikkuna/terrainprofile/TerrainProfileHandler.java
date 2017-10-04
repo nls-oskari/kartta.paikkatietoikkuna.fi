@@ -1,8 +1,9 @@
 package fi.nls.paikkatietoikkuna.terrainprofile;
 
+import org.hamcrest.core.Is;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.nls.oskari.annotation.OskariActionRoute;
-import fi.nls.oskari.control.ActionException;
 import fi.nls.oskari.control.ActionHandler;
 import fi.nls.oskari.control.ActionParameters;
 import fi.nls.oskari.control.ActionParamsException;
@@ -21,10 +22,10 @@ public class TerrainProfileHandler extends ActionHandler {
 
     private static final Logger LOG = LogFactory.getLogger(TerrainProfileHandler.class);
 
-    private static final String PARAM_ROUTE = "route";
+    protected static final String PARAM_ROUTE = "route";
 
-    private static final String PROPERTY_RESOLUTION = "resolution";
-    private static final String PROPERTY_DISTANCE_FROM_START = "distanceFromStart";
+    protected static final String PROPERTY_RESOLUTION = "resolution";
+    protected static final String PROPERTY_DISTANCE_FROM_START = "distanceFromStart";
 
     private final ObjectMapper om;
 
@@ -37,7 +38,7 @@ public class TerrainProfileHandler extends ActionHandler {
     }
 
     @Override
-    public void handleAction(ActionParameters params) throws ActionException {
+    public void handleAction(ActionParameters params) throws ActionParamsException {
         String routeStr = params.getRequiredParam(PARAM_ROUTE);
         Feature route = parseFeature(routeStr);
         LineString geom = (LineString) route.getGeometry();
@@ -73,28 +74,32 @@ public class TerrainProfileHandler extends ActionHandler {
 
     protected Feature parseFeature(String routeStr) throws ActionParamsException {
         try {
-             Feature route = om.readValue(routeStr, Feature.class);
-             if (!(route.getGeometry() instanceof LineString)) {
-                 throw new ActionParamsException("Invalid input - expected LineString geometry");
-             }
-             return route;
-        } catch (IOException e) {
+            Feature route = om.readValue(routeStr, Feature.class);
+            if (!(route.getGeometry() instanceof LineString)) {
+                throw new ActionParamsException("Invalid input - expected LineString geometry");
+            }
+            return route;
+        } catch (IllegalArgumentException | IOException e) {
             throw new ActionParamsException("Invalid input - expected GeoJSON feature", e);
         }
     }
 
     protected double getResolution(Feature route) throws ActionParamsException {
-        String resolution = route.getProperty(PROPERTY_RESOLUTION);
-        if (resolution == null || resolution.isEmpty()) {
+        Object resolution = route.getProperty(PROPERTY_RESOLUTION);
+        if (resolution == null) {
             throw new ActionParamsException(String.format(
                     "Required property '%s' missing!", PROPERTY_RESOLUTION));
         }
-        try {
-            return Double.parseDouble(resolution);
-        } catch (NumberFormatException e) {
-            throw new ActionParamsException(String.format(
-                    "Invalid property value '%s'", PROPERTY_RESOLUTION));
+        if (resolution instanceof Number) {
+            return ((Number) resolution).doubleValue();
         }
+        if (resolution instanceof String) {
+            try {
+                return Double.parseDouble((String) resolution);
+            } catch (NumberFormatException ignore) {}
+        }
+        throw new ActionParamsException(String.format(
+                "Invalid property value '%s'", PROPERTY_RESOLUTION));
     }
 
 }

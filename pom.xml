@@ -21,6 +21,7 @@
         <slf4j.version>1.7.12</slf4j.version>
 		<jackson.version>1.9.11</jackson.version>
         <jsoup.version>1.7.2</jsoup.version>
+        <geojson-jackson.version>1.8</geojson-jackson.version>
     </properties>
 
     <repositories>
