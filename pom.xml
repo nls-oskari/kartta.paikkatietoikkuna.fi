@@ -65,6 +65,7 @@
         <module>webapp-landing</module>
         <module>webapp-transport</module>
         <module>service-spatineo-serval</module>
+        <module>service-terrain-profile</module>
     </modules>
 
 </project>
