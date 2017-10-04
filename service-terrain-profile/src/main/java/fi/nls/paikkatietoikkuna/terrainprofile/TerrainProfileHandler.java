@@ -1,7 +1,5 @@
 package fi.nls.paikkatietoikkuna.terrainprofile;
 
-import org.hamcrest.core.Is;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.nls.oskari.annotation.OskariActionRoute;
 import fi.nls.oskari.control.ActionHandler;

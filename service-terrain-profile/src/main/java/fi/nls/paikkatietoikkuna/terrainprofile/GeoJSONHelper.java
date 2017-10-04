@@ -19,7 +19,11 @@ public class GeoJSONHelper {
     }
 
     public static MultiPoint toMultiPoint3D(double[] terrainProfile) {
-        int numPoints = terrainProfile.length / 3;
+        int len = terrainProfile.length;
+        int numPoints = len / 3;
+        if (numPoints * 3 != len) {
+            throw new IllegalArgumentException("length of terrainProfile must be divisible by 3");
+        }
         LngLatAlt[] points = new LngLatAlt[numPoints];
         for (int i = 0, j = 0; i < numPoints; i++) {
             double e = terrainProfile[j++];
