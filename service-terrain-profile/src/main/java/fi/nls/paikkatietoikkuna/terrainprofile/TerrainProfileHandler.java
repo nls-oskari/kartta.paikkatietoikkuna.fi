@@ -1,5 +1,8 @@
 package fi.nls.paikkatietoikkuna.terrainprofile;
 
+import fi.nls.oskari.control.ActionException;
+
+import fi.nls.oskari.service.ServiceException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.nls.oskari.annotation.OskariActionRoute;
 import fi.nls.oskari.control.ActionHandler;
@@ -8,12 +11,15 @@ import fi.nls.oskari.control.ActionParamsException;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.util.IOHelper;
+import fi.nls.oskari.util.PropertyUtil;
 import fi.nls.oskari.util.ResponseHelper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import javax.xml.parsers.ParserConfigurationException;
 import org.geojson.Feature;
 import org.geojson.LineString;
+import org.xml.sax.SAXException;
 
 @OskariActionRoute("TerrainProfile")
 public class TerrainProfileHandler extends ActionHandler {
@@ -22,21 +28,28 @@ public class TerrainProfileHandler extends ActionHandler {
 
     protected static final String PARAM_ROUTE = "route";
 
-    protected static final String PROPERTY_RESOLUTION = "resolution";
-    protected static final String PROPERTY_DISTANCE_FROM_START = "distanceFromStart";
+    protected static final String PROPERTY_ENDPOINT = "terrain.profile.wcs.endPoint";
+    protected static final String PROPERTY_DEM_COVERAGE_ID= "terrain.profile.wcs.demCoverageId";
+
+    protected static final String JSON_PROPERTY_RESOLUTION = "resolution";
+    protected static final String JSON_PROPERTY_DISTANCE_FROM_START = "distanceFromStart";
 
     private final ObjectMapper om;
+    private final TerrainProfileService tps;
 
-    public TerrainProfileHandler() {
-        this(new ObjectMapper());
+    public TerrainProfileHandler() throws IOException, ParserConfigurationException, SAXException {
+        this(new ObjectMapper(), new TerrainProfileService(
+                PropertyUtil.get(PROPERTY_ENDPOINT),
+                PropertyUtil.get(PROPERTY_DEM_COVERAGE_ID)));
     }
 
-    public TerrainProfileHandler(ObjectMapper om) {
+    public TerrainProfileHandler(ObjectMapper om, TerrainProfileService tps) {
         this.om = om;
+        this.tps = tps;
     }
 
     @Override
-    public void handleAction(ActionParameters params) throws ActionParamsException {
+    public void handleAction(ActionParameters params) throws ActionException {
         String routeStr = params.getRequiredParam(PARAM_ROUTE);
         Feature route = parseFeature(routeStr);
         LineString geom = (LineString) route.getGeometry();
@@ -48,26 +61,29 @@ public class TerrainProfileHandler extends ActionHandler {
                     "line:", Arrays.toString(points), "resolution", resolution);
         }
 
-        double[] terrainProfile = TerrainProfile.getTerrainProfile(points, resolution);
-        double[] distanceFromStart = TerrainProfile.calculateDistanceFromStart(terrainProfile);
-
-        Feature multiPoint = new Feature();
-        multiPoint.setGeometry(GeoJSONHelper.toMultiPoint3D(terrainProfile));
-        multiPoint.setProperty(PROPERTY_RESOLUTION, resolution);
-        multiPoint.setProperty(PROPERTY_DISTANCE_FROM_START, distanceFromStart);
-
-        writeResponse(params, multiPoint);
+        try {
+            double[] terrainProfile = tps.getTerrainProfile(points, resolution);
+            double[] distanceFromStart = GeomUtil.calculateDistanceFromStart(terrainProfile);
+    
+            Feature multiPoint = new Feature();
+            multiPoint.setGeometry(GeoJSONHelper.toMultiPoint3D(terrainProfile));
+            multiPoint.setProperty(JSON_PROPERTY_RESOLUTION, resolution);
+            multiPoint.setProperty(JSON_PROPERTY_DISTANCE_FROM_START, distanceFromStart);
+    
+            writeResponse(params, multiPoint);
+        } catch (ServiceException e) {
+            throw new ActionException(e.getMessage());
+        }
     }
 
-    private void writeResponse(ActionParameters params, Feature multiPoint) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    private void writeResponse(ActionParameters params, Feature multiPoint) throws ActionException {
         try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
             om.writeValue(baos, multiPoint);
+            ResponseHelper.writeResponse(params, 200, IOHelper.CONTENT_TYPE_JSON, baos);
         } catch (IOException e) {
-            ResponseHelper.writeError(params, "Failed to encode GeoJSON");
-            return;
+            throw new ActionException("Failed to encode GeoJSON", e);
         }
-        ResponseHelper.writeResponse(params, 200, IOHelper.CONTENT_TYPE_JSON, baos);
     }
 
     protected Feature parseFeature(String routeStr) throws ActionParamsException {
@@ -83,10 +99,10 @@ public class TerrainProfileHandler extends ActionHandler {
     }
 
     protected double getResolution(Feature route) throws ActionParamsException {
-        Object resolution = route.getProperty(PROPERTY_RESOLUTION);
+        Object resolution = route.getProperty(JSON_PROPERTY_RESOLUTION);
         if (resolution == null) {
             throw new ActionParamsException(String.format(
-                    "Required property '%s' missing!", PROPERTY_RESOLUTION));
+                    "Required property '%s' missing!", JSON_PROPERTY_RESOLUTION));
         }
         if (resolution instanceof Number) {
             return ((Number) resolution).doubleValue();
@@ -97,7 +113,9 @@ public class TerrainProfileHandler extends ActionHandler {
             } catch (NumberFormatException ignore) {}
         }
         throw new ActionParamsException(String.format(
-                "Invalid property value '%s'", PROPERTY_RESOLUTION));
+                "Invalid property value '%s'", JSON_PROPERTY_RESOLUTION));
     }
+
+
 
 }

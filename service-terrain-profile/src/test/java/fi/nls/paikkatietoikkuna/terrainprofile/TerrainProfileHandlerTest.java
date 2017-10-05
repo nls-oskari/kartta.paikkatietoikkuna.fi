@@ -131,7 +131,7 @@ public class TerrainProfileHandlerTest {
         line.add(new LngLatAlt(100, 100));
         line.add(new LngLatAlt(200, 100));
         feature.setGeometry(line);
-        feature.setProperty(TerrainProfileHandler.PROPERTY_RESOLUTION, 1.0);
+        feature.setProperty(TerrainProfileHandler.JSON_PROPERTY_RESOLUTION, 1.0);
         String routeStr = om.writeValueAsString(feature);
 
         HttpServletRequest request = mock(HttpServletRequest.class);
