@@ -29,6 +29,11 @@ public class CoordTransService {
     }
 
     public static void parseResponse(final byte[] resp, final double[] coords, final int dimension) {
+        if (resp[0] == 'V') {
+            // "Virhe: " - send only the part after prefix
+            throw new IllegalArgumentException(new String(resp, 7, resp.length - 7, StandardCharsets.UTF_8));
+        }
+
         if (dimension == 3) {
             parseResponse3D(resp, coords);
         } else {
@@ -38,11 +43,6 @@ public class CoordTransService {
 
     protected static void parseResponse3D(final byte[] resp, final double[] coords)
             throws IllegalArgumentException {
-        if (resp[0] == 'V') {
-            // "Virhe:"
-            throw new IllegalArgumentException(new String(resp, StandardCharsets.UTF_8));
-        }
-
         final int len = resp.length;
 
         int j = 0;
@@ -85,11 +85,6 @@ public class CoordTransService {
     protected static void parseResponse2D(final byte[] resp, final double[] coords)
             throws IllegalArgumentException {
         final int len = resp.length;
-
-        if (resp[0] == 'V') {
-            // "Virhe: " - send only the part after prefix
-            throw new IllegalArgumentException(new String(resp, 7, len - 7, StandardCharsets.UTF_8));
-        }
 
         int j = 0;
         int k;
