@@ -29,11 +29,9 @@ Use these in oskari-ext.properties:
     #db.myplaces.url=jdbc:postgresql://localhost:5432/oskaridb_myplaces
     #db.analysis.url=jdbc:postgresql://localhost:5432/oskaridb_analysis
     #db.userlayer.url=jdbc:postgresql://localhost:5432/oskaridb_userlayer
-    
     #db.myplaces.jndi.name=jdbc/MyPlacesPool
-    # These need to match names in SqlMapConfig_*.xml under webapp-map
-    db.analysis.jndi.name=jdbc/AnalysisPool
-    db.userlayer.jndi.name=jdbc/UserLayerPool
+    #db.analysis.jndi.name=jdbc/AnalysisPool
+    #db.userlayer.jndi.name=jdbc/UserLayerPool
 
 Use an additional context file as {jetty}/contexts/pti-front.xml when used with Jetty-Oskari bundle:
  

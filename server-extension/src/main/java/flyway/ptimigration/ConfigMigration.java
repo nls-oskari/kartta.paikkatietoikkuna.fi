@@ -29,10 +29,19 @@ public abstract class ConfigMigration implements JdbcMigration {
         }
     }
 
+    /**
+     * An optional additional where clause to narrow down the bundle rows to be modified
+     * "AND view_id IN (select id from portti_view where type NOT IN  ('PUBLISH', 'PUBLISHED'))
+     * @return
+     */
+    public String getAdditionalSQLFilterForBundles() {
+        return "";
+    }
+
     private ArrayList<Bundle> getBundles(Connection connection, String bundle) throws Exception {
         ArrayList<Bundle> ids = new ArrayList<>();
         final String sql = "SELECT view_id, bundle_id, config FROM portti_view_bundle_seq " +
-                "WHERE bundle_id = (select id from portti_bundle where name = '" + bundle + "')";
+                "WHERE bundle_id = (select id from portti_bundle where name = '" + bundle + "') " + getAdditionalSQLFilterForBundles();
         try (final PreparedStatement statement =
                      connection.prepareStatement(sql);
              ResultSet rs = statement.executeQuery()) {
