@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fi.nls.oskari.control.ActionException;
 import fi.nls.oskari.control.ActionParameters;
 import fi.nls.oskari.control.ActionParamsException;
 import fi.nls.test.control.MockServletOutputStream;
@@ -14,26 +15,28 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.parsers.ParserConfigurationException;
 import org.geojson.Feature;
 import org.geojson.LineString;
 import org.geojson.LngLatAlt;
 import org.geojson.MultiPoint;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 public class TerrainProfileHandlerTest {
 
-    private ObjectMapper om;
-    private TerrainProfileHandler handler;
+    private static ObjectMapper om;
+    private static TerrainProfileHandler handler;
 
-    @Before
-    public void init() {
+    @BeforeClass
+    public static void init() throws IOException, ParserConfigurationException, SAXException {
         om = new ObjectMapper();
-        handler = new TerrainProfileHandler(om);
+        handler = new TerrainProfileHandler(om, null);
     }
 
     @Test
-    public void whenRouteParameterIsMissingThrowsActionParamsException() throws JsonProcessingException {
+    public void whenRouteParameterIsMissingThrowsActionParamsException() throws JsonProcessingException, ActionException {
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getParameter(TerrainProfileHandler.PARAM_ROUTE)).thenReturn(null);
         ActionParameters params = new ActionParameters();
@@ -47,7 +50,7 @@ public class TerrainProfileHandlerTest {
     }
 
     @Test
-    public void whenRouteParameterIsEmptyThrowsActionParamsException() throws JsonProcessingException {
+    public void whenRouteParameterIsEmptyThrowsActionParamsException() throws JsonProcessingException, ActionException {
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getParameter(TerrainProfileHandler.PARAM_ROUTE)).thenReturn("");
         ActionParameters params = new ActionParameters();
@@ -61,7 +64,7 @@ public class TerrainProfileHandlerTest {
     }
 
     @Test
-    public void whenRouteParameterIsNotGeoJSONFeatureThrowsActionParamsException() throws JsonProcessingException {
+    public void whenRouteParameterIsNotGeoJSONFeatureThrowsActionParamsException() throws JsonProcessingException, ActionException {
         LineString line = new LineString();
         line.add(new LngLatAlt(100, 100));
         line.add(new LngLatAlt(200, 100));
@@ -81,7 +84,7 @@ public class TerrainProfileHandlerTest {
     }
 
     @Test
-    public void whenGeometryOfFeatureIsNotLineStringThrowsActionParamsException() throws JsonProcessingException {
+    public void whenGeometryOfFeatureIsNotLineStringThrowsActionParamsException() throws JsonProcessingException, ActionException {
         Feature feature = new Feature();
         MultiPoint mp = new MultiPoint();
         mp.add(new LngLatAlt(100, 100));
@@ -103,7 +106,7 @@ public class TerrainProfileHandlerTest {
     }
 
     @Test
-    public void whenResolutionIsMissingThrowsActionParamsException() throws JsonProcessingException {
+    public void whenResolutionIsMissingThrowsActionParamsException() throws JsonProcessingException, ActionException {
         Feature feature = new Feature();
         LineString line = new LineString();
         line.add(new LngLatAlt(100, 100));
@@ -125,7 +128,7 @@ public class TerrainProfileHandlerTest {
     }
 
     @Test
-    public void whenInputIsCorrectWePass() throws ActionParamsException, IOException {
+    public void whenInputIsCorrectWePass() throws IOException, ActionException {
         Feature feature = new Feature();
         LineString line = new LineString();
         line.add(new LngLatAlt(100, 100));

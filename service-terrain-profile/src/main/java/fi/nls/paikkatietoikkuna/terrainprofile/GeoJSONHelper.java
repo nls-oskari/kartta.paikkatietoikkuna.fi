@@ -18,7 +18,7 @@ public class GeoJSONHelper {
         return arr;
     }
 
-    public static MultiPoint toMultiPoint3D(double[] terrainProfile) {
+    public static MultiPoint toMultiPoint3D(float[] terrainProfile) {
         int len = terrainProfile.length;
         int numPoints = len / 3;
         if (numPoints * 3 != len) {
@@ -26,9 +26,9 @@ public class GeoJSONHelper {
         }
         LngLatAlt[] points = new LngLatAlt[numPoints];
         for (int i = 0, j = 0; i < numPoints; i++) {
-            double e = terrainProfile[j++];
-            double n = terrainProfile[j++];
-            double a = terrainProfile[j++];
+            float e = terrainProfile[j++];
+            float n = terrainProfile[j++];
+            float a = terrainProfile[j++];
             points[i] = new LngLatAlt(e, n, a);
         }
         return new MultiPoint(points);

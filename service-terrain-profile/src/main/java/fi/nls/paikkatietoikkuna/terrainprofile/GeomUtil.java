@@ -11,7 +11,7 @@ public class GeomUtil {
     *      array of doubles [d1,d2,...,dN]
     *      where: d = distance from start (in 2D)
     */
-   public static double[] calculateDistanceFromStart(double[] terrainProfile) {
+   public static float[] calculateDistanceFromStart(float[] terrainProfile) {
        return null;
    }
    

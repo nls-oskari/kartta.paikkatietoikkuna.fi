@@ -62,8 +62,8 @@ public class TerrainProfileHandler extends ActionHandler {
         }
 
         try {
-            double[] terrainProfile = tps.getTerrainProfile(points, resolution);
-            double[] distanceFromStart = GeomUtil.calculateDistanceFromStart(terrainProfile);
+            float[] terrainProfile = tps.getTerrainProfile(points, resolution);
+            float[] distanceFromStart = GeomUtil.calculateDistanceFromStart(terrainProfile);
     
             Feature multiPoint = new Feature();
             multiPoint.setGeometry(GeoJSONHelper.toMultiPoint3D(terrainProfile));
@@ -115,7 +115,5 @@ public class TerrainProfileHandler extends ActionHandler {
         throw new ActionParamsException(String.format(
                 "Invalid property value '%s'", JSON_PROPERTY_RESOLUTION));
     }
-
-
 
 }

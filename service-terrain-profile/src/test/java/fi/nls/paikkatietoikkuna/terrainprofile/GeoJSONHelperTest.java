@@ -61,7 +61,7 @@ public class GeoJSONHelperTest {
 
     @Test
     public void testToMultiPoint3DWithZeroPoints() {
-        double[] terrainProfile = {};
+        float[] terrainProfile = {};
         MultiPoint mp = GeoJSONHelper.toMultiPoint3D(terrainProfile);
         List<LngLatAlt> coords = mp.getCoordinates();
         assertEquals(0, coords.size());
@@ -69,14 +69,14 @@ public class GeoJSONHelperTest {
 
     @Test(expected=IllegalArgumentException.class)
     public void testToMultiPoint3DWithNumberOfOordinatesNotDivisibleBy3() {
-        double[] terrainProfile = { 1.0, 2.0 };
+        float[] terrainProfile = { 1.0f, 2.0f };
         GeoJSONHelper.toMultiPoint3D(terrainProfile);
         fail();
     }
 
     @Test
     public void testToMultiPoint3DWithOnePoint() {
-        double[] terrainProfile = { 100.0, 200.0, 300.0 };
+        float[] terrainProfile = { 100.0f, 200.0f, 300.0f };
         MultiPoint mp = GeoJSONHelper.toMultiPoint3D(terrainProfile);
         List<LngLatAlt> coords = mp.getCoordinates();
         assertEquals(1, coords.size());
@@ -89,9 +89,9 @@ public class GeoJSONHelperTest {
 
     @Test
     public void testToMultiPoint3DWithTwoPoints() {
-        double[] terrainProfile = {
-                100.0, 200.0, 300.0,
-                200.0, 300.0, 302.0
+        float[] terrainProfile = {
+                100.0f, 200.0f, 300.0f,
+                200.0f, 300.0f, 302.0f
         };
         MultiPoint mp = GeoJSONHelper.toMultiPoint3D(terrainProfile);
         List<LngLatAlt> coords = mp.getCoordinates();
