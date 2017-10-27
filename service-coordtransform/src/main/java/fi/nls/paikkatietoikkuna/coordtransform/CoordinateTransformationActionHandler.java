@@ -59,14 +59,9 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
 
         if (sourceHeightCrs != null && !sourceHeightCrs.isEmpty()) {
             sourceCrs = sourceCrs + ',' + sourceHeightCrs;
-        } else {
-            sourceCrs = getCrs(sourceCrs);
         }
-
         if (targetHeightCrs != null && !targetHeightCrs.isEmpty()) {
             targetCrs = targetCrs + ',' + targetHeightCrs;
-        } else {
-            targetCrs = getCrs(targetCrs);
         }
 
         int dimension = sourceCrs.indexOf(',') > 0 ? 3 : 2;
@@ -108,20 +103,6 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
             writeJsonResponse(out, dimension, coords);
         } catch (IOException e) {
             throw new ActionException("Failed to write JSON to client");
-        }
-    }
-
-    private String getCrs(String crs) {
-        // Handle compound coordinate systems
-        switch (crs) {
-        case "EPSG:3901":
-            return "EPSG:2393,EPSG:5717";
-        case "EPSG:3902":
-            return "EPSG:3067,EPSG:5717";
-        case "EPSG:3903":
-            return "EPSG:3067,EPSG:3900";
-        default:
-            return crs;
         }
     }
 
@@ -167,7 +148,7 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
                 coordinates[i++] = parser.getDoubleValue();
 
                 // The if here should be pretty cheap since dimension is final
-                // meaning it's not worth creating separate functions for 2d and 3D
+                // meaning it's not worth creating separate functions for 2D and 3D
                 if (dimension == 3) {
                     token = parser.nextToken();
                     if (token != JsonToken.VALUE_NUMBER_FLOAT
