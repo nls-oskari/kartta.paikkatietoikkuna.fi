@@ -7,8 +7,10 @@ import java.nio.charset.StandardCharsets;
  */
 public class CoordTransService {
 
-    private static final byte SEP_OORDINATE = ',';
+    private static final byte SEP_COORDINATE_PART = ',';
     private static final byte SEP_COORDINATE = ';';
+    private static final char SEP_COORDINATE_PART_C = ',';
+    private static final char SEP_COORDINATE_C = ';';
 
     public static String createQuery(String sourceCrs, String targetCrs,
             final int dimension, final double[] coords) {
@@ -18,11 +20,11 @@ public class CoordTransService {
         sb.append("&coords=");
         for (int i = 0; i < coords.length;) {
             if (i > 0) {
-                sb.append(';');
+                sb.append(SEP_COORDINATE_C);
             }
             sb.append(coords[i++]).append(',').append(coords[i++]);
             if (dimension == 3) {
-                sb.append(',').append(coords[i++]);
+                sb.append(SEP_COORDINATE_PART_C).append(coords[i++]);
             }
         }
         return sb.toString();
@@ -48,13 +50,13 @@ public class CoordTransService {
         int j = 0;
         int k;
         for (int i = 0; i < coords.length - 3;) {
-            k = indexOf(resp, SEP_OORDINATE, j, len);
+            k = indexOf(resp, SEP_COORDINATE_PART, j, len);
             if (k < 0) {
                 throw new IllegalArgumentException("Invalid response from service");
             }
             coords[i++] = parseAsciiDouble(resp, j, k);
             j = k + 1;
-            k = indexOf(resp, SEP_OORDINATE, j, len);
+            k = indexOf(resp, SEP_COORDINATE_PART, j, len);
             if (k < 0) {
                 throw new IllegalArgumentException("Invalid response from service");
             }
@@ -68,13 +70,13 @@ public class CoordTransService {
             j = k + 1;
         }
         // Last coordinate
-        k = indexOf(resp, SEP_OORDINATE, j, len);
+        k = indexOf(resp, SEP_COORDINATE_PART, j, len);
         if (k < 0) {
             throw new IllegalArgumentException("Invalid response from service");
         }
         coords[coords.length - 3] = parseAsciiDouble(resp, j, k);
         j = k + 1;
-        k = indexOf(resp, SEP_OORDINATE, j, len);
+        k = indexOf(resp, SEP_COORDINATE_PART, j, len);
         if (k < 0) {
             throw new IllegalArgumentException("Invalid response from service");
         }
@@ -89,7 +91,7 @@ public class CoordTransService {
         int j = 0;
         int k;
         for (int i = 0; i < coords.length - 2;) {
-            k = indexOf(resp, SEP_OORDINATE, j, len);
+            k = indexOf(resp, SEP_COORDINATE_PART, j, len);
             if (k < 0) {
                 throw new IllegalArgumentException("Invalid response from service");
             }
@@ -103,7 +105,7 @@ public class CoordTransService {
             j = k + 1;
         }
         // Last coordinate
-        k = indexOf(resp, SEP_OORDINATE, j, len);
+        k = indexOf(resp, SEP_COORDINATE_PART, j, len);
         if (k < 0) {
             throw new IllegalArgumentException("Invalid response from service");
         }
