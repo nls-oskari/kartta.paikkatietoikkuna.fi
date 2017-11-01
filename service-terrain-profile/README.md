@@ -20,13 +20,13 @@ Available parameters per request feature.properties.$key:
 
 property | description
 -------- | -----------
-numPoints | Number of points you want back (default 100). If your LineString has more coordinates than this value, we will use that number. Maximum number of points is 1000 (even if your LineString has more coordinates than that).
-resolution | *Ignored at the moment*. Used for describing the level-of-detail you're interested in.
+`numPoints` | Number of points you want back (default 100). If your LineString has more coordinates than this value, we will use that number. Maximum number of points is 1000 (even if your LineString has more coordinates than that).
+`resolution` | *Ignored at the moment*. Used for describing the level-of-detail you're interested in.
 
 Response properties in feature.properties.$key:
 
 property | description
 -------- | -----------
-numPoints | Number of points.
-distanceFromStart | Array of numbers, each describing the distance from the begin of the LineString. Numbers are ordered and evenly spaced, unless requested numPoints was less than number of coordinates in the requested LineString (see previous table)
-resolution | *Ignored at the moment*.
+`numPoints` | Number of points.
+`distanceFromStart` | Array of numbers, each describing the distance from the begin of the LineString. Numbers are ordered and evenly spaced, unless requested numPoints was less than number of coordinates in the requested LineString (see previous table)
+`resolution` | *Ignored at the moment*.
