@@ -31,8 +31,8 @@ public class TerrainProfileService {
 
     private final String endPoint;
     private final String demCoverageId;
-    protected final Capabilities caps;
-    protected final RectifiedGridCoverage desc;
+    private final Capabilities caps;
+    private final RectifiedGridCoverage desc;
 
     public TerrainProfileService(String endPoint, String demCoverageId)
             throws ServiceException {
@@ -75,13 +75,15 @@ public class TerrainProfileService {
      * @return
      *      array of array of floats
      */
-    public List<DataPoint> getTerrainProfile(double[] coordinates) throws ServiceException {
+    public List<DataPoint> getTerrainProfile(double[] coordinates, int numPoints) throws ServiceException {
         double[] envelope = GeomUtil.getEnvelope(coordinates);
         // Round to nearest step
         envelope[0] = STEP * Math.round(envelope[0] / STEP);
         envelope[1] = STEP * Math.round(envelope[1] / STEP);
         envelope[2] = STEP * Math.round(envelope[2] / STEP);
         envelope[3] = STEP * Math.round(envelope[3] / STEP);
+        // TODO: Instead of using a single request we should split large envelopes
+        // to multiple requests with a reasonable maximum size (for example 256x256px)
 
         // Add one step extra to end, since the condition is interpreted as [start,end[
         // Only change this for the request, not for the envelope,
@@ -114,7 +116,7 @@ public class TerrainProfileService {
 
             final float[][] tileCache = new float[tileCount][];
 
-            List<DataPoint> points = createDataPoints(coordinates,
+            List<DataPoint> points = createDataPoints(coordinates, numPoints,
                     envelope[0], envelope[3],
                     tw, th, tilesAcross);
             points.sort(new Comparator<DataPoint>() {
@@ -150,7 +152,18 @@ public class TerrainProfileService {
         }
     }
 
-    private List<DataPoint> createDataPoints(double[] coordinates,
+    private List<DataPoint> createDataPoints(double[] coordinates, int numDataPoints,
+            double eastMin, double northMax,
+            int tileWidth, int tileHeight, int tilesAcross) {
+        int numberOfPoints = coordinates.length / 2;
+        if (numberOfPoints < numDataPoints) {
+            return createDataPointsInterpolate(coordinates, numDataPoints,
+                    eastMin, northMax, tileWidth, tileHeight, tilesAcross);
+        }
+        return createDataPointsFromCoordinates(coordinates, eastMin, northMax, tileWidth, tileHeight, tilesAcross);
+    }
+
+    private List<DataPoint> createDataPointsFromCoordinates(double[] coordinates,
             double eastMin, double northMax,
             int tileWidth, int tileHeight, int tilesAcross) {
         List<DataPoint> points = new ArrayList<>();
@@ -185,6 +198,78 @@ public class TerrainProfileService {
             e1 = e2;
             n1 = n2;
         }
+
+        return points;
+    }
+
+    private List<DataPoint> createDataPointsInterpolate(double[] coordinates, int numDataPoints,
+            double eastMin, double northMax, int tileWidth, int tileHeight, int tilesAcross) {
+        double totalLength = GeomUtil.getLength(coordinates);
+        int numSegments = numDataPoints - 1;
+        double segmentLength = totalLength / numSegments;
+        List<DataPoint> points = new ArrayList<>(numDataPoints);
+
+        double x1 = coordinates[0];
+        double y1 = coordinates[1];
+        double distanceFromStart = 0.0;
+
+        int px_x = (int) Math.round((x1 - eastMin) / STEP);
+        int px_y = (int) Math.round((northMax - y1) / STEP);
+        int tileCol = px_x / tileWidth;
+        int tileRow = px_y / tileHeight;
+        int tileIdx = tileRow * tilesAcross + tileCol;
+        int tileOffsetX = px_x % tileWidth;
+        int tileOffsetY = px_y % tileHeight;
+        int offsetInTile = tileOffsetY * tileWidth + tileOffsetX;
+        points.add(getDataPoint(x1, y1, distanceFromStart, tileIdx, offsetInTile));
+
+        double remainingSegmentLength = segmentLength;
+        int i = 2;
+        while (points.size() < (numDataPoints - 1)) {
+            double x2 = coordinates[i];
+            double y2 = coordinates[i + 1];
+            double dx = x2 - x1;
+            double dy = y2 - y1;
+            double len = Math.sqrt(dx * dx + dy * dy);
+            if (len < remainingSegmentLength) {
+                remainingSegmentLength -= len;
+                i += 2;
+                continue;
+            }
+
+            double dx_unit = dx / len;
+            double dy_unit = dy / len;
+            double dx_scaled = remainingSegmentLength * dx_unit;
+            double dy_scaled = remainingSegmentLength * dy_unit;
+            double x3 = x1 + dx_scaled;
+            double y3 = y1 + dy_scaled;
+
+            distanceFromStart += segmentLength;
+            px_x = (int) Math.round((x3 - eastMin) / STEP);
+            px_y = (int) Math.round((northMax - y3) / STEP);
+            tileCol = px_x / tileWidth;
+            tileRow = px_y / tileHeight;
+            tileIdx = tileRow * tilesAcross + tileCol;
+            tileOffsetX = px_x % tileWidth;
+            tileOffsetY = px_y % tileHeight;
+            offsetInTile = tileOffsetY * tileWidth + tileOffsetX;
+            points.add(getDataPoint(x3, y3, distanceFromStart, tileIdx, offsetInTile));
+
+            x1 = x3;
+            y1 = y3;
+            remainingSegmentLength = segmentLength;
+        }
+        double x = coordinates[coordinates.length - 2];
+        double y = coordinates[coordinates.length - 1];
+        px_x = (int) Math.round((x - eastMin) / STEP);
+        px_y = (int) Math.round((northMax - y) / STEP);
+        tileCol = px_x / tileWidth;
+        tileRow = px_y / tileHeight;
+        tileIdx = tileRow * tilesAcross + tileCol;
+        tileOffsetX = px_x % tileWidth;
+        tileOffsetY = px_y % tileHeight;
+        offsetInTile = tileOffsetY * tileWidth + tileOffsetX;
+        points.add(getDataPoint(x, y, totalLength, tileIdx, offsetInTile));
 
         return points;
     }

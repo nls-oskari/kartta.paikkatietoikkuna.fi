@@ -35,4 +35,23 @@ public class GeomUtil {
         return Math.sqrt(dx * dx + dy * dy);
     }
 
+    /**
+     * @param lineString [x1,y1,x2,y2,...,xN,yN]
+     * @return the length fo the LineString meaning the sum of Euclidean distance
+     *         between adjacent coordinates
+     */
+    public static double getLength(double[] lineString) {
+        double x1 = lineString[0];
+        double y1 = lineString[1];
+        double sum = 0.0;
+        for (int i = 2; i < lineString.length;) {
+            double x2 = lineString[i++];
+            double y2 = lineString[i++];
+            sum += getDistance(x1, y1, x2, y2);
+            x1 = x2;
+            y1 = y2;
+        }
+        return sum;
+    }
+
 }

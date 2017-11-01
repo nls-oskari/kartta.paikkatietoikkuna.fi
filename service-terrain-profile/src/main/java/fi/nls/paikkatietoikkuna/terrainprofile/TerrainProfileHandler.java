@@ -30,7 +30,11 @@ public class TerrainProfileHandler extends ActionHandler {
     protected static final String PROPERTY_DEM_COVERAGE_ID= "terrain.profile.wcs.demCoverageId";
 
     protected static final String JSON_PROPERTY_RESOLUTION = "resolution";
+    protected static final String JSON_PROPERTY_NUM_POINTS = "numPoints";
     protected static final String JSON_PROPERTY_DISTANCE_FROM_START = "distanceFromStart";
+
+    private static final int NUM_POINTS_DEFAULT = 100;
+    private static final int NUM_POINTS_MAX = 1000;
 
     private final ObjectMapper om;
     private final TerrainProfileService tps;
@@ -53,6 +57,7 @@ public class TerrainProfileHandler extends ActionHandler {
         LineString geom = (LineString) route.getGeometry();
         double[] points = GeoJSONHelper.getCoordinates2D(geom);
         double resolution = getResolution(route);
+        int numPoints = Math.min(getNumPoints(route), NUM_POINTS_MAX);
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("Number of coords:", (points.length / 2),
@@ -60,7 +65,7 @@ public class TerrainProfileHandler extends ActionHandler {
         }
 
         try {
-            List<DataPoint> dp = tps.getTerrainProfile(points);
+            List<DataPoint> dp = tps.getTerrainProfile(points, numPoints);
             Feature multiPoint = new Feature();
             multiPoint.setGeometry(GeoJSONHelper.toMultiPoint3D(dp));
             multiPoint.setProperty(JSON_PROPERTY_RESOLUTION, resolution);
@@ -69,7 +74,7 @@ public class TerrainProfileHandler extends ActionHandler {
 
             writeResponse(params, multiPoint);
         } catch (ServiceException e) {
-            throw new ActionException(e.getMessage());
+            throw new ActionException(e.getMessage(), e);
         }
     }
 
@@ -111,6 +116,24 @@ public class TerrainProfileHandler extends ActionHandler {
         }
         throw new ActionParamsException(String.format(
                 "Invalid property value '%s'", JSON_PROPERTY_RESOLUTION));
+    }
+
+    protected int getNumPoints(Feature route) throws ActionParamsException {
+        Object numPoints = route.getProperty(JSON_PROPERTY_NUM_POINTS);
+        if (numPoints == null) {
+            return NUM_POINTS_DEFAULT;
+        }
+        if (numPoints instanceof Number) {
+            return ((Number) numPoints).intValue();
+        }
+        if (numPoints instanceof String) {
+            try {
+                return Integer.parseInt((String) numPoints);
+            } catch (NumberFormatException ignore) {}
+        }
+        throw new ActionParamsException(String.format(
+                "Invalid property value '%s'", JSON_PROPERTY_NUM_POINTS));
+
     }
 
 }

@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.nls.oskari.control.ActionException;
 import fi.nls.oskari.control.ActionParameters;
 import fi.nls.oskari.control.ActionParamsException;
+import fi.nls.oskari.service.ServiceException;
 import fi.nls.test.control.MockServletOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -21,6 +22,7 @@ import org.geojson.LineString;
 import org.geojson.LngLatAlt;
 import org.geojson.MultiPoint;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -128,11 +130,12 @@ public class TerrainProfileHandlerTest {
     }
 
     @Test
-    public void whenInputIsCorrectWePass() throws IOException, ActionException {
+    @Ignore("Depends on a outside API")
+    public void whenInputIsCorrectWePass() throws IOException, ActionException, ServiceException {
         Feature feature = new Feature();
         LineString line = new LineString();
-        line.add(new LngLatAlt(100, 100));
-        line.add(new LngLatAlt(200, 100));
+        line.add(new LngLatAlt(500000, 6822000));
+        line.add(new LngLatAlt(501000, 6823000));
         feature.setGeometry(line);
         feature.setProperty(TerrainProfileHandler.JSON_PROPERTY_RESOLUTION, 1.0);
         String routeStr = om.writeValueAsString(feature);
@@ -148,7 +151,12 @@ public class TerrainProfileHandlerTest {
         params.setRequest(request);
         params.setResponse(response);
 
-        handler.handleAction(params);
+        String endPoint = "http://avoindata.maanmittauslaitos.fi/geoserver/wcs";
+        String coverageId = "korkeusmalli_10m__korkeusmalli_10m";
+        TerrainProfileService tps = new TerrainProfileService(endPoint, coverageId);
+        new TerrainProfileHandler(om, tps).handleAction(params);
+
+        System.out.println(baos.toString());
     }
 
 }
