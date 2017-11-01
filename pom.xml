@@ -22,6 +22,7 @@
 		<jackson.version>1.9.11</jackson.version>
         <jackson2.version>2.9.2</jackson2.version>
         <jsoup.version>1.7.2</jsoup.version>
+        <geojson-jackson.version>1.8</geojson-jackson.version>
         <servlet.version>2.5</servlet.version>
     </properties>
 
@@ -67,6 +68,7 @@
         <module>webapp-landing</module>
         <module>webapp-transport</module>
         <module>service-spatineo-serval</module>
+        <module>service-terrain-profile</module>
         <module>service-coordtransform</module>
     </modules>
 
