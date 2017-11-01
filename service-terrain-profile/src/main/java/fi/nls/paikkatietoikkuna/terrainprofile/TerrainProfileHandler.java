@@ -27,7 +27,7 @@ public class TerrainProfileHandler extends ActionHandler {
     protected static final String PARAM_ROUTE = "route";
 
     protected static final String PROPERTY_ENDPOINT = "terrain.profile.wcs.endPoint";
-    protected static final String PROPERTY_DEM_COVERAGE_ID= "terrain.profile.wcs.demCoverageId";
+    protected static final String PROPERTY_DEM_COVERAGE_ID = "terrain.profile.wcs.demCoverageId";
 
     protected static final String JSON_PROPERTY_RESOLUTION = "resolution";
     protected static final String JSON_PROPERTY_NUM_POINTS = "numPoints";
@@ -56,19 +56,20 @@ public class TerrainProfileHandler extends ActionHandler {
         Feature route = parseFeature(routeStr);
         LineString geom = (LineString) route.getGeometry();
         double[] points = GeoJSONHelper.getCoordinates2D(geom);
-        double resolution = getResolution(route);
         int numPoints = Math.min(getNumPoints(route), NUM_POINTS_MAX);
+        // double resolution = getResolution(route);
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("Number of coords:", (points.length / 2),
-                    "line:", Arrays.toString(points), "resolution", resolution);
+                    "line:", Arrays.toString(points), "numPoints", numPoints);
         }
 
         try {
             List<DataPoint> dp = tps.getTerrainProfile(points, numPoints);
             Feature multiPoint = new Feature();
             multiPoint.setGeometry(GeoJSONHelper.toMultiPoint3D(dp));
-            multiPoint.setProperty(JSON_PROPERTY_RESOLUTION, resolution);
+            multiPoint.setProperty(JSON_PROPERTY_NUM_POINTS, numPoints);
+            // multiPoint.setProperty(JSON_PROPERTY_RESOLUTION, resolution);
             multiPoint.setProperty(JSON_PROPERTY_DISTANCE_FROM_START,
                     dp.stream().mapToDouble(DataPoint::getDistFromStart).toArray());
 

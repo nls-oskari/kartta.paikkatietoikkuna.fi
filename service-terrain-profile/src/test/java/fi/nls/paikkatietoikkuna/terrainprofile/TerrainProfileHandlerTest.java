@@ -155,8 +155,6 @@ public class TerrainProfileHandlerTest {
         String coverageId = "korkeusmalli_10m__korkeusmalli_10m";
         TerrainProfileService tps = new TerrainProfileService(endPoint, coverageId);
         new TerrainProfileHandler(om, tps).handleAction(params);
-
-        System.out.println(baos.toString());
     }
 
 }
