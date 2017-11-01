@@ -18,18 +18,12 @@ public class GeoJSONHelper {
         return arr;
     }
 
-    public static MultiPoint toMultiPoint3D(float[] terrainProfile) {
-        int len = terrainProfile.length;
-        int numPoints = len / 3;
-        if (numPoints * 3 != len) {
-            throw new IllegalArgumentException("length of terrainProfile must be divisible by 3");
-        }
-        LngLatAlt[] points = new LngLatAlt[numPoints];
-        for (int i = 0, j = 0; i < numPoints; i++) {
-            float e = terrainProfile[j++];
-            float n = terrainProfile[j++];
-            float a = terrainProfile[j++];
-            points[i] = new LngLatAlt(e, n, a);
+    public static MultiPoint toMultiPoint3D(List<DataPoint> dataPoints) {
+        int n = dataPoints.size();
+        LngLatAlt[] points  = new LngLatAlt[n];
+        for (int i = 0; i < n; i++) {
+            DataPoint dp = dataPoints.get(i);
+            points[i] = new LngLatAlt(dp.getE(), dp.getN(), dp.getAltitude());
         }
         return new MultiPoint(points);
     }

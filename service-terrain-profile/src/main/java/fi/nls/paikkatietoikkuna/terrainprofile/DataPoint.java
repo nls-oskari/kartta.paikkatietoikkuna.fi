@@ -6,8 +6,8 @@ public class DataPoint {
     private double n;
     private double altitude;
     private double distFromStart;
-    private int x;
-    private int y;
+    private int tileIdx;
+    private int offsetInTile;
 
     public double getE() {
         return e;
@@ -41,20 +41,20 @@ public class DataPoint {
         this.distFromStart = distFromStart;
     }
 
-    public int getX() {
-        return x;
+    public int getTileIdx() {
+        return tileIdx;
     }
 
-    public void setX(int x) {
-        this.x = x;
+    public void setTileIdx(int tileIdx) {
+        this.tileIdx = tileIdx;
     }
 
-    public int getY() {
-        return y;
+    public int getOffsetInTile() {
+        return offsetInTile;
     }
 
-    public void setY(int y) {
-        this.y = y;
+    public void setOffsetInTile(int offsetInTile) {
+        this.offsetInTile = offsetInTile;
     }
 
 }

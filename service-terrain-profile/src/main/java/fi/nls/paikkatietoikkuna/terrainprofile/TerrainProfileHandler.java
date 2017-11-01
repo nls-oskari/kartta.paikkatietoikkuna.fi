@@ -1,25 +1,23 @@
 package fi.nls.paikkatietoikkuna.terrainprofile;
 
-import fi.nls.oskari.control.ActionException;
-
-import fi.nls.oskari.service.ServiceException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.nls.oskari.annotation.OskariActionRoute;
+import fi.nls.oskari.control.ActionException;
 import fi.nls.oskari.control.ActionHandler;
 import fi.nls.oskari.control.ActionParameters;
 import fi.nls.oskari.control.ActionParamsException;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
+import fi.nls.oskari.service.ServiceException;
 import fi.nls.oskari.util.IOHelper;
 import fi.nls.oskari.util.PropertyUtil;
 import fi.nls.oskari.util.ResponseHelper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
-import javax.xml.parsers.ParserConfigurationException;
+import java.util.List;
 import org.geojson.Feature;
 import org.geojson.LineString;
-import org.xml.sax.SAXException;
 
 @OskariActionRoute("TerrainProfile")
 public class TerrainProfileHandler extends ActionHandler {
@@ -37,7 +35,7 @@ public class TerrainProfileHandler extends ActionHandler {
     private final ObjectMapper om;
     private final TerrainProfileService tps;
 
-    public TerrainProfileHandler() throws IOException, ParserConfigurationException, SAXException {
+    public TerrainProfileHandler() throws ServiceException {
         this(new ObjectMapper(), new TerrainProfileService(
                 PropertyUtil.get(PROPERTY_ENDPOINT),
                 PropertyUtil.get(PROPERTY_DEM_COVERAGE_ID)));
@@ -62,14 +60,13 @@ public class TerrainProfileHandler extends ActionHandler {
         }
 
         try {
-            float[] terrainProfile = tps.getTerrainProfile(points, resolution);
-            float[] distanceFromStart = GeomUtil.calculateDistanceFromStart(terrainProfile);
-    
+            List<DataPoint> dp = tps.getTerrainProfile(points);
             Feature multiPoint = new Feature();
-            multiPoint.setGeometry(GeoJSONHelper.toMultiPoint3D(terrainProfile));
+            multiPoint.setGeometry(GeoJSONHelper.toMultiPoint3D(dp));
             multiPoint.setProperty(JSON_PROPERTY_RESOLUTION, resolution);
-            multiPoint.setProperty(JSON_PROPERTY_DISTANCE_FROM_START, distanceFromStart);
-    
+            multiPoint.setProperty(JSON_PROPERTY_DISTANCE_FROM_START,
+                    dp.stream().mapToDouble(DataPoint::getDistFromStart).toArray());
+
             writeResponse(params, multiPoint);
         } catch (ServiceException e) {
             throw new ActionException(e.getMessage());
