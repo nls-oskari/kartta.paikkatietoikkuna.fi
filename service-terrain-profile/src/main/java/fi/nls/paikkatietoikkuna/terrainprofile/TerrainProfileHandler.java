@@ -68,7 +68,7 @@ public class TerrainProfileHandler extends ActionHandler {
             List<DataPoint> dp = tps.getTerrainProfile(points, numPoints);
             Feature multiPoint = new Feature();
             multiPoint.setGeometry(GeoJSONHelper.toMultiPoint3D(dp));
-            multiPoint.setProperty(JSON_PROPERTY_NUM_POINTS, numPoints);
+            multiPoint.setProperty(JSON_PROPERTY_NUM_POINTS, dp.size());
             // multiPoint.setProperty(JSON_PROPERTY_RESOLUTION, resolution);
             multiPoint.setProperty(JSON_PROPERTY_DISTANCE_FROM_START,
                     dp.stream().mapToDouble(DataPoint::getDistFromStart).toArray());
