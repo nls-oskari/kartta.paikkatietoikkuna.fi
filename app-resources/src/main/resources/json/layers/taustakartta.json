@@ -1,5 +1,5 @@
 {
-	"srs_name": "EPSG:3057",
+	"srs_name": "EPSG:3067",
 	"type":"wmtslayer",
     "url":"http://karttamoottori.maanmittauslaitos.fi/maasto/wmts",
     "name":"taustakartta",
