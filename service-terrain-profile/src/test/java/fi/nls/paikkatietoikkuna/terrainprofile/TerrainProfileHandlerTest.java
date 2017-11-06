@@ -108,6 +108,7 @@ public class TerrainProfileHandlerTest {
     }
 
     @Test
+    @Ignore("'resolution' property is not required as of now")
     public void whenResolutionIsMissingThrowsActionParamsException() throws JsonProcessingException, ActionException {
         Feature feature = new Feature();
         LineString line = new LineString();
@@ -130,7 +131,7 @@ public class TerrainProfileHandlerTest {
     }
 
     @Test
-    @Ignore("Depends on a outside API")
+    @Ignore("Depends on an outside API")
     public void whenInputIsCorrectWePass() throws IOException, ActionException, ServiceException {
         Feature feature = new Feature();
         LineString line = new LineString();
