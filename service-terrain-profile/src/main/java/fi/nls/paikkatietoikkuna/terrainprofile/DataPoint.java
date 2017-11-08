@@ -4,10 +4,11 @@ public class DataPoint {
 
     private double e;
     private double n;
-    private double altitude;
     private double distFromStart;
-    private int tileIdx;
-    private int offsetInTile;
+    private int gridTileX;
+    private int gridTileY;
+    private int gridTileOffset;
+    private double altitude;
 
     public double getE() {
         return e;
@@ -25,14 +26,6 @@ public class DataPoint {
         this.n = n;
     }
 
-    public double getAltitude() {
-        return altitude;
-    }
-
-    public void setAltitude(double altitude) {
-        this.altitude = altitude;
-    }
-
     public double getDistFromStart() {
         return distFromStart;
     }
@@ -41,20 +34,36 @@ public class DataPoint {
         this.distFromStart = distFromStart;
     }
 
-    public int getTileIdx() {
-        return tileIdx;
+    public int getGridTileX() {
+        return gridTileX;
     }
 
-    public void setTileIdx(int tileIdx) {
-        this.tileIdx = tileIdx;
+    public void setGridTileX(int gridTileX) {
+        this.gridTileX = gridTileX;
     }
 
-    public int getOffsetInTile() {
-        return offsetInTile;
+    public int getGridTileY() {
+        return gridTileY;
     }
 
-    public void setOffsetInTile(int offsetInTile) {
-        this.offsetInTile = offsetInTile;
+    public void setGridTileY(int gridTileY) {
+        this.gridTileY = gridTileY;
+    }
+
+    public int getGridTileOffset() {
+        return gridTileOffset;
+    }
+
+    public void setGridTileOffset(int gridTileOffset) {
+        this.gridTileOffset = gridTileOffset;
+    }
+
+    public double getAltitude() {
+        return altitude;
+    }
+
+    public void setAltitude(double altitude) {
+        this.altitude = altitude;
     }
 
 }

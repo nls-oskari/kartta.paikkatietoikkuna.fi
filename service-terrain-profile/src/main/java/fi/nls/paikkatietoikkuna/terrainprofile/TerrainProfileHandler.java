@@ -33,7 +33,6 @@ public class TerrainProfileHandler extends ActionHandler {
     protected static final String JSON_PROPERTY_NUM_POINTS = "numPoints";
     protected static final String JSON_PROPERTY_DISTANCE_FROM_START = "distanceFromStart";
 
-    private static final int NUM_POINTS_DEFAULT = 100;
     private static final int NUM_POINTS_MAX = 1000;
 
     private final ObjectMapper om;
@@ -93,7 +92,18 @@ public class TerrainProfileHandler extends ActionHandler {
         try {
             Feature route = om.readValue(routeStr, Feature.class);
             if (!(route.getGeometry() instanceof LineString)) {
-                throw new ActionParamsException("Invalid input - expected LineString geometry");
+                throw new ActionParamsException("Invalid input"
+                        + " - expected LineString geometry");
+            }
+            LineString ls = (LineString) route.getGeometry();
+            int numPoints = ls.getCoordinates().size();
+            if (numPoints < 2) {
+                throw new ActionParamsException("Invalid input"
+                        + " - expected LineString with atleast two coordinates");
+            }
+            if (numPoints > NUM_POINTS_MAX) {
+                throw new ActionParamsException("Invalid input"
+                        + " - too many coordinates, maximum is " + NUM_POINTS_MAX);
             }
             return route;
         } catch (IllegalArgumentException | IOException e) {
@@ -122,7 +132,7 @@ public class TerrainProfileHandler extends ActionHandler {
     protected int getNumPoints(Feature route) throws ActionParamsException {
         Object numPoints = route.getProperty(JSON_PROPERTY_NUM_POINTS);
         if (numPoints == null) {
-            return NUM_POINTS_DEFAULT;
+            return 0;
         }
         if (numPoints instanceof Number) {
             return ((Number) numPoints).intValue();
@@ -134,7 +144,6 @@ public class TerrainProfileHandler extends ActionHandler {
         }
         throw new ActionParamsException(String.format(
                 "Invalid property value '%s'", JSON_PROPERTY_NUM_POINTS));
-
     }
 
 }
