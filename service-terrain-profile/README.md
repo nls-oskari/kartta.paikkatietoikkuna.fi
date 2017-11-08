@@ -13,7 +13,7 @@ Requires following properties:
 
 property | description
 -------- | -----------
-`terrain.profile.wcs.endPoint` | URL of the WCS service, query string is NOT ALLOED (e.g. don't specify ?, otherwise it won't work)
+`terrain.profile.wcs.endPoint` | URL of the WCS service, query string is NOT ALLOWED (e.g. do NOT specify '?', otherwise it won't work)
 `terrain.profile.wcs.demCoverageId`| id of the DEM coverage in the WCS service
 
 Available parameters per request feature.properties.$key:
