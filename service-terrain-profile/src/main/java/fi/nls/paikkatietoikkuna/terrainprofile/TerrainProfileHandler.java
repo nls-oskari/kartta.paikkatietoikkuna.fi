@@ -33,7 +33,6 @@ public class TerrainProfileHandler extends ActionHandler {
     protected static final String JSON_PROPERTY_NUM_POINTS = "numPoints";
     protected static final String JSON_PROPERTY_DISTANCE_FROM_START = "distanceFromStart";
 
-    private static final int NUM_POINTS_DEFAULT = 100;
     private static final int NUM_POINTS_MAX = 1000;
 
     private final ObjectMapper om;
@@ -56,6 +55,9 @@ public class TerrainProfileHandler extends ActionHandler {
         Feature route = parseFeature(routeStr);
         LineString geom = (LineString) route.getGeometry();
         double[] points = GeoJSONHelper.getCoordinates2D(geom);
+        if (points.length / 2 > NUM_POINTS_MAX) {
+            throw new ActionParamsException("Too many coordinates, maximum is " + NUM_POINTS_MAX);
+        }
         int numPoints = Math.min(getNumPoints(route), NUM_POINTS_MAX);
         // double resolution = getResolution(route);
 
@@ -122,7 +124,7 @@ public class TerrainProfileHandler extends ActionHandler {
     protected int getNumPoints(Feature route) throws ActionParamsException {
         Object numPoints = route.getProperty(JSON_PROPERTY_NUM_POINTS);
         if (numPoints == null) {
-            return NUM_POINTS_DEFAULT;
+            return 0;
         }
         if (numPoints instanceof Number) {
             return ((Number) numPoints).intValue();
@@ -134,7 +136,6 @@ public class TerrainProfileHandler extends ActionHandler {
         }
         throw new ActionParamsException(String.format(
                 "Invalid property value '%s'", JSON_PROPERTY_NUM_POINTS));
-
     }
 
 }

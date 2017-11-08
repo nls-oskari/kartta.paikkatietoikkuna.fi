@@ -155,12 +155,13 @@ public class TerrainProfileService {
     private List<DataPoint> createDataPoints(double[] coordinates, int numDataPoints,
             double eastMin, double northMax,
             int tileWidth, int tileHeight, int tilesAcross) {
-        int numberOfPoints = coordinates.length / 2;
-        if (numberOfPoints < numDataPoints) {
+        int numCoordinates = coordinates.length / 2;
+        if (numCoordinates < numDataPoints) {
             return createDataPointsInterpolate(coordinates, numDataPoints,
                     eastMin, northMax, tileWidth, tileHeight, tilesAcross);
         }
-        return createDataPointsFromCoordinates(coordinates, eastMin, northMax, tileWidth, tileHeight, tilesAcross);
+        return createDataPointsFromCoordinates(coordinates,
+                eastMin, northMax, tileWidth, tileHeight, tilesAcross);
     }
 
     private List<DataPoint> createDataPointsFromCoordinates(double[] coordinates,
@@ -213,6 +214,7 @@ public class TerrainProfileService {
         double y1 = coordinates[1];
         double distanceFromStart = 0.0;
 
+        // First point
         int px_x = (int) Math.round((x1 - eastMin) / STEP);
         int px_y = (int) Math.round((northMax - y1) / STEP);
         int tileCol = px_x / tileWidth;
@@ -223,6 +225,7 @@ public class TerrainProfileService {
         int offsetInTile = tileOffsetY * tileWidth + tileOffsetX;
         points.add(getDataPoint(x1, y1, distanceFromStart, tileIdx, offsetInTile));
 
+        // Points 1...n-1
         double remainingSegmentLength = segmentLength;
         int i = 2;
         while (points.size() < (numDataPoints - 1)) {
@@ -259,6 +262,8 @@ public class TerrainProfileService {
             y1 = y3;
             remainingSegmentLength = segmentLength;
         }
+
+        // Last point
         double x = coordinates[coordinates.length - 2];
         double y = coordinates[coordinates.length - 1];
         px_x = (int) Math.round((x - eastMin) / STEP);
