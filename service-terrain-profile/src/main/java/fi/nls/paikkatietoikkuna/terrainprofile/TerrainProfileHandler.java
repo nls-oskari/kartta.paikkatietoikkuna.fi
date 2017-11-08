@@ -55,9 +55,6 @@ public class TerrainProfileHandler extends ActionHandler {
         Feature route = parseFeature(routeStr);
         LineString geom = (LineString) route.getGeometry();
         double[] points = GeoJSONHelper.getCoordinates2D(geom);
-        if (points.length / 2 > NUM_POINTS_MAX) {
-            throw new ActionParamsException("Too many coordinates, maximum is " + NUM_POINTS_MAX);
-        }
         int numPoints = Math.min(getNumPoints(route), NUM_POINTS_MAX);
         // double resolution = getResolution(route);
 
@@ -95,7 +92,18 @@ public class TerrainProfileHandler extends ActionHandler {
         try {
             Feature route = om.readValue(routeStr, Feature.class);
             if (!(route.getGeometry() instanceof LineString)) {
-                throw new ActionParamsException("Invalid input - expected LineString geometry");
+                throw new ActionParamsException("Invalid input"
+                        + " - expected LineString geometry");
+            }
+            LineString ls = (LineString) route.getGeometry();
+            int numPoints = ls.getCoordinates().size();
+            if (numPoints < 2) {
+                throw new ActionParamsException("Invalid input"
+                        + " - expected LineString with atleast two coordinates");
+            }
+            if (numPoints > NUM_POINTS_MAX) {
+                throw new ActionParamsException("Invalid input"
+                        + " - too many coordinates, maximum is " + NUM_POINTS_MAX);
             }
             return route;
         } catch (IllegalArgumentException | IOException e) {

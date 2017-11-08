@@ -1,6 +1,7 @@
 package fi.nls.paikkatietoikkuna.terrainprofile;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -104,6 +105,51 @@ public class TerrainProfileHandlerTest {
             fail();
         } catch (ActionParamsException e) {
             assertEquals("Invalid input - expected LineString geometry", e.getMessage());
+        }
+    }
+
+    @Test
+    public void whenLineHasOnePointThrowsActionParamsException() throws JsonProcessingException, ActionException {
+        Feature feature = new Feature();
+        LineString ls = new LineString();
+        ls.add(new LngLatAlt(0, 0));
+        feature.setGeometry(ls);
+        String routeStr = om.writeValueAsString(feature);
+
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getParameter(TerrainProfileHandler.PARAM_ROUTE)).thenReturn(routeStr);
+        ActionParameters params = new ActionParameters();
+        params.setRequest(request);
+
+        try {
+            handler.handleAction(params);
+            fail();
+        } catch (ActionParamsException e) {
+            assertEquals("Invalid input - expected LineString with atleast two coordinates", e.getMessage());
+        }
+    }
+
+    @Test
+    public void whenLineHasTooManyPointsThrowsActionParamsException() throws JsonProcessingException, ActionException {
+        Feature feature = new Feature();
+        LineString ls = new LineString();
+        for (int i = 0; i < 10000; i++) {
+            ls.add(new LngLatAlt(i, i));
+        }
+        feature.setGeometry(ls);
+        String routeStr = om.writeValueAsString(feature);
+
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getParameter(TerrainProfileHandler.PARAM_ROUTE)).thenReturn(routeStr);
+        ActionParameters params = new ActionParameters();
+        params.setRequest(request);
+
+        try {
+            handler.handleAction(params);
+            fail();
+        } catch (ActionParamsException e) {
+            assertTrue(e.getMessage().startsWith("Invalid input"
+                    + " - too many coordinates, maximum is"));
         }
     }
 
