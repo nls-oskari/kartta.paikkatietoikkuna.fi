@@ -9,6 +9,7 @@ import fi.nls.oskari.control.ActionParamsException;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.service.ServiceException;
+import fi.nls.oskari.service.ServiceRuntimeException;
 import fi.nls.oskari.util.IOHelper;
 import fi.nls.oskari.util.PropertyUtil;
 import fi.nls.oskari.util.ResponseHelper;
@@ -36,17 +37,32 @@ public class TerrainProfileHandler extends ActionHandler {
     private static final int NUM_POINTS_MAX = 1000;
 
     private final ObjectMapper om;
-    private final TerrainProfileService tps;
+    private TerrainProfileService tps;
 
-    public TerrainProfileHandler() throws ServiceException {
-        this(new ObjectMapper(), new TerrainProfileService(
-                PropertyUtil.get(PROPERTY_ENDPOINT),
-                PropertyUtil.get(PROPERTY_DEM_COVERAGE_ID)));
+    public TerrainProfileHandler() {
+        // ServiceLoader/annotation based setup requires a no-param constructor
+        this(new ObjectMapper(), null);
     }
 
     public TerrainProfileHandler(ObjectMapper om, TerrainProfileService tps) {
         this.om = om;
         this.tps = tps;
+    }
+
+    @Override
+    public void init() {
+        super.init();
+        // service needs to be created here since exceptions in constructors break the annotation based setup
+        if(tps == null) {
+            try {
+                tps = new TerrainProfileService(
+                        PropertyUtil.get(PROPERTY_ENDPOINT),
+                        PropertyUtil.get(PROPERTY_DEM_COVERAGE_ID));
+            } catch (ServiceException ex) {
+                LOG.warn("Unable to init TerrainProfile action route");
+                throw new ServiceRuntimeException(ex.getMessage());
+            }
+        }
     }
 
     @Override
