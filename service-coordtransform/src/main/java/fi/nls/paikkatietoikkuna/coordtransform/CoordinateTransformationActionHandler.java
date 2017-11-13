@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.util.Arrays;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -52,18 +51,8 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
 
     @Override
     public void handleAction(ActionParameters params) throws ActionException {
-        String sourceCrs = params.getRequiredParam(PARAM_SOURCE_CRS);
-        String targetCrs = params.getRequiredParam(PARAM_TARGET_CRS);
-        String sourceHeightCrs = params.getHttpParam(PARAM_SOURCE_H_CRS);
-        String targetHeightCrs = params.getHttpParam(PARAM_TARGET_H_CRS);
-
-        if (sourceHeightCrs != null && !sourceHeightCrs.isEmpty()) {
-            sourceCrs = sourceCrs + ',' + sourceHeightCrs;
-        }
-        if (targetHeightCrs != null && !targetHeightCrs.isEmpty()) {
-            targetCrs = targetCrs + ',' + targetHeightCrs;
-        }
-
+        String sourceCrs = getSourceCrs(params);
+        String targetCrs = getTargetCrs(params);
         int dimension = sourceCrs.indexOf(',') > 0 ? 3 : 2;
 
         double[] coords;
@@ -73,8 +62,7 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
             throw new ActionException("Failed to parse input JSON!");
         }
 
-        String query = CoordTransService.createQuery(
-                sourceCrs, targetCrs, dimension, coords);
+        String query = CoordTransService.createQuery(sourceCrs, targetCrs, dimension, coords);
 
         HttpURLConnection conn;
         try {
@@ -106,73 +94,55 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
         }
     }
 
+    private String getSourceCrs(ActionParameters params) throws ActionParamsException {
+        String sourceCrs = params.getRequiredParam(PARAM_SOURCE_CRS);
+        String sourceHeightCrs = params.getHttpParam(PARAM_SOURCE_H_CRS);
+        if (sourceHeightCrs != null && !sourceHeightCrs.isEmpty()) {
+            return sourceCrs + ',' + sourceHeightCrs;
+        }
+        return sourceCrs;
+    }
+
+    private String getTargetCrs(ActionParameters params) throws ActionParamsException {
+        String targetCrs = params.getRequiredParam(PARAM_TARGET_CRS);
+        String targetHeightCrs = params.getHttpParam(PARAM_TARGET_H_CRS);
+        if (targetHeightCrs != null && !targetHeightCrs.isEmpty()) {
+            return targetCrs + ',' + targetHeightCrs;
+        }
+        return targetCrs;
+    }
+
     protected double[] parseInputCoordinates(InputStream in, final int dimension)
             throws IOException, ActionParamsException {
         try (JsonParser parser = jf.createParser(in)) {
             if (parser.nextToken() != JsonToken.START_ARRAY) {
-                throw new ActionParamsException(
-                        "Expected an array of arrays of " + dimension + " doubles");
+                throw new ActionParamsException("Expected input starting with an array");
             }
 
-            double[] coordinates = new double[8 * dimension];
-            int i = 0;
+            DoubleArray coordinates = new DoubleArray(8);
             JsonToken token;
 
-            while (true) {
-                token = parser.nextToken();
-                if (token == JsonToken.END_ARRAY) {
-                    break;
-                }
+            while ((token = parser.nextToken()) != JsonToken.END_ARRAY) {
                 if (token != JsonToken.START_ARRAY) {
-                    throw new ActionParamsException(
-                            "Expected an array of arrays of " + dimension + " doubles");
+                    throw new ActionParamsException("Expected array opening");
                 }
-
-                token = parser.nextToken();
-                if (token != JsonToken.VALUE_NUMBER_FLOAT
-                        && token != JsonToken.VALUE_NUMBER_INT) {
-                    throw new ActionParamsException(
-                            "Expected an array of arrays of " + dimension + " doubles");
+                for (int i = 0; i < dimension; i++) {
+                    assertNumber(parser.nextToken(), "Expected " + dimension + " numbers");
+                    coordinates.add(parser.getDoubleValue());
                 }
-                if (i == coordinates.length) {
-                    coordinates = grow(coordinates);
-                }
-                coordinates[i++] = parser.getDoubleValue();
-
-                token = parser.nextToken();
-                if (token != JsonToken.VALUE_NUMBER_FLOAT
-                        && token != JsonToken.VALUE_NUMBER_INT) {
-                    throw new ActionParamsException(
-                            "Expected an array of arrays of " + dimension + " doubles");
-                }
-                coordinates[i++] = parser.getDoubleValue();
-
-                // The if here should be pretty cheap since dimension is final
-                // meaning it's not worth creating separate functions for 2D and 3D
-                if (dimension == 3) {
-                    token = parser.nextToken();
-                    if (token != JsonToken.VALUE_NUMBER_FLOAT
-                            && token != JsonToken.VALUE_NUMBER_INT) {
-                        throw new ActionParamsException(
-                                "Expected an array of arrays of " + dimension + " doubles");
-                    }
-                    coordinates[i++] = parser.getDoubleValue();
-                }
-
                 if (parser.nextToken() != JsonToken.END_ARRAY) {
-                    throw new ActionParamsException(
-                            "Expected an array of arrays of " + dimension + " doubles");
+                    throw new ActionParamsException("Expected array closing");
                 }
             }
 
-            return Arrays.copyOf(coordinates, i);
+            return coordinates.toArray();
         }
     }
 
-    private double[] grow(double[] a) {
-        double[] b = new double[a.length * 2];
-        System.arraycopy(a, 0, b, 0, a.length);
-        return b;
+    private void assertNumber(JsonToken token, String err) throws ActionParamsException {
+        if (token != JsonToken.VALUE_NUMBER_FLOAT && token != JsonToken.VALUE_NUMBER_INT) {
+            throw new ActionParamsException(err);
+        }
     }
 
     protected void writeJsonResponse(OutputStream out, final int dimension, double[] coords)
@@ -180,12 +150,11 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
         try (JsonGenerator json = jf.createGenerator(out)) {
             json.writeStartObject();
             json.writeNumberField("dimension", dimension);
+            json.writeFieldName("coordinates");
             json.writeStartArray();
             for (int i = 0; i < coords.length;) {
                 json.writeStartArray();
-                json.writeNumber(coords[i++]);
-                json.writeNumber(coords[i++]);
-                if (dimension == 3) {
+                for (int j = 0; j < dimension; j++) {
                     json.writeNumber(coords[i++]);
                 }
                 json.writeEndArray();
