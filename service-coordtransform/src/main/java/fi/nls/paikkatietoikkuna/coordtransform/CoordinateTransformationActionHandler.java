@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.vividsolutions.jts.geom.Coordinate;
 import fi.nls.oskari.annotation.OskariActionRoute;
 import fi.nls.oskari.control.ActionException;
 import fi.nls.oskari.control.ActionHandler;
@@ -15,6 +16,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -55,14 +58,14 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
         String targetCrs = getTargetCrs(params);
         int dimension = sourceCrs.indexOf(',') > 0 ? 3 : 2;
 
-        double[] coords;
+        List<Coordinate> coords;
         try (InputStream in = params.getRequest().getInputStream()) {
             coords = parseInputCoordinates(in, dimension);
         } catch (IOException e) {
             throw new ActionException("Failed to parse input JSON!");
         }
 
-        String query = CoordTransService.createQuery(sourceCrs, targetCrs, dimension, coords);
+        String query = CoordTransService.createQuery(sourceCrs, targetCrs, coords, dimension);
 
         HttpURLConnection conn;
         try {
@@ -88,7 +91,7 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
         HttpServletResponse response = params.getResponse();
         response.setContentType(IOHelper.CONTENT_TYPE_JSON);
         try (OutputStream out = response.getOutputStream()) {
-            writeJsonResponse(out, dimension, coords);
+            writeJsonResponse(out, coords, dimension);
         } catch (IOException e) {
             throw new ActionException("Failed to write JSON to client");
         }
@@ -112,30 +115,40 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
         return targetCrs;
     }
 
-    protected double[] parseInputCoordinates(InputStream in, final int dimension)
+
+    protected List<Coordinate> parseInputCoordinates(final InputStream in, final int dimension)
             throws IOException, ActionParamsException {
         try (JsonParser parser = jf.createParser(in)) {
             if (parser.nextToken() != JsonToken.START_ARRAY) {
                 throw new ActionParamsException("Expected input starting with an array");
             }
 
-            DoubleArray coordinates = new DoubleArray(8);
+            List<Coordinate> coordinates = new ArrayList<>(8);
             JsonToken token;
 
             while ((token = parser.nextToken()) != JsonToken.END_ARRAY) {
                 if (token != JsonToken.START_ARRAY) {
                     throw new ActionParamsException("Expected array opening");
                 }
-                for (int i = 0; i < dimension; i++) {
-                    assertNumber(parser.nextToken(), "Expected " + dimension + " numbers");
-                    coordinates.add(parser.getDoubleValue());
+
+                assertNumber(parser.nextToken(), "Expected a number");
+                double x = parser.getDoubleValue();
+                assertNumber(parser.nextToken(), "Expected a number");
+                double y = parser.getDoubleValue();
+                if (dimension == 2) {
+                    coordinates.add(new Coordinate(x, y));
+                } else {
+                    assertNumber(parser.nextToken(), "Expected a number");
+                    double z = parser.getDoubleValue();
+                    coordinates.add(new Coordinate(x, y, z));
                 }
+
                 if (parser.nextToken() != JsonToken.END_ARRAY) {
                     throw new ActionParamsException("Expected array closing");
                 }
             }
 
-            return coordinates.toArray();
+            return coordinates;
         }
     }
 
@@ -145,17 +158,19 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
         }
     }
 
-    protected void writeJsonResponse(OutputStream out, final int dimension, double[] coords)
+    protected void writeJsonResponse(OutputStream out, List<Coordinate> coords, final int dimension)
             throws ActionException {
         try (JsonGenerator json = jf.createGenerator(out)) {
             json.writeStartObject();
             json.writeNumberField("dimension", dimension);
             json.writeFieldName("coordinates");
             json.writeStartArray();
-            for (int i = 0; i < coords.length;) {
+            for (Coordinate coord : coords) {
                 json.writeStartArray();
-                for (int j = 0; j < dimension; j++) {
-                    json.writeNumber(coords[i++]);
+                json.writeNumber(coord.x);
+                json.writeNumber(coord.y);
+                if (dimension == 3) {
+                    json.writeNumber(coord.z);
                 }
                 json.writeEndArray();
             }
