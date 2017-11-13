@@ -47,7 +47,7 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
 
     @Override
     public void init() {
-        if (endPoint != null) {
+        if (endPoint == null) {
             endPoint = PropertyUtil.getNecessary(PROP_END_POINT);
         }
     }
