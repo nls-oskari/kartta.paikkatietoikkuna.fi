@@ -151,34 +151,40 @@ public class TerrainProfileService {
         double y0 = coordinates[j++];
         double x1 = coordinates[j++];
         double y1 = coordinates[j++];
+
         double dx = x1 - x0;
         double dy = y1 - y0;
-        double len = Math.sqrt(dx * dx + dy * dy);
+        double distanceToNextPoint = Math.sqrt(dx * dx + dy * dy);
+        double dxNormalized = dx / distanceToNextPoint;
+        double dyNormalized = dy / distanceToNextPoint;
 
-        // First point
+        // Add first point
         interpolated[i++] = x0;
         interpolated[i++] = y0;
 
         while (i < interpolated.length - 2) {
-            if (len < remainingSegmentLength) {
-                remainingSegmentLength -= len;
+            if (distanceToNextPoint < remainingSegmentLength) {
+                remainingSegmentLength -= distanceToNextPoint;
+                x0 = x1;
+                y0 = y1;
                 x1 = coordinates[j++];
                 y1 = coordinates[j++];
                 dx = x1 - x0;
                 dy = y1 - y0;
-                len = Math.sqrt(dx * dx + dy * dy);
-                continue;
+                distanceToNextPoint = Math.sqrt(dx * dx + dy * dy);
+                dxNormalized = dx / distanceToNextPoint;
+                dyNormalized = dy / distanceToNextPoint;
+            } else {
+                x0 += remainingSegmentLength * dxNormalized;
+                y0 += remainingSegmentLength * dyNormalized;
+                interpolated[i++] = x0;
+                interpolated[i++] = y0;
+                distanceToNextPoint -= remainingSegmentLength;
+                remainingSegmentLength = segmentLength;
             }
-            double dx_scaled = remainingSegmentLength * dx / len;
-            double dy_scaled = remainingSegmentLength * dy / len;
-            x0 += dx_scaled;
-            y0 += dy_scaled;
-            interpolated[i++] = x0;
-            interpolated[i++] = y0;
-            remainingSegmentLength = segmentLength;
         }
 
-        // Last point
+        // Add last point
         interpolated[interpolated.length - 2] = coordinates[coordinates.length - 2];
         interpolated[interpolated.length - 1] = coordinates[coordinates.length - 1];
 
