@@ -38,26 +38,4 @@ public class TerrainProfileServiceTest {
         }
     }
 
-    @Ignore("Depends on an outside API")
-    @Test
-    public void interpolationWorks() throws IOException, ActionException, ParserConfigurationException, SAXException, ServiceException {
-        String endPoint = "http://avoindata.maanmittauslaitos.fi/geoserver/wcs";
-        String coverageId = "korkeusmalli_10m__korkeusmalli_10m";
-        TerrainProfileService tps = new TerrainProfileService(endPoint, coverageId);
-        double[] coordinates = new double[] {
-                379134.03635691135, 6671587.856738007,
-                378190.03635691135, 6672067.856738007,
-                378014.03635691135, 6673267.856738007
-        };
-
-        List<DataPoint> points = tps.getTerrainProfile(coordinates, 100);
-        for (DataPoint p : points) {
-            double e = p.getE();
-            double n = p.getN();
-            DataPoint single = tps.getTerrainProfile(new double[] { e, n }, 0).get(0);
-            assertEquals(e, single.getE(), 0.0);
-            assertEquals(n, single.getN(), 0.0);
-            assertEquals(p.getAltitude(), single.getAltitude(), 0.0);
-        }
-    }
 }
