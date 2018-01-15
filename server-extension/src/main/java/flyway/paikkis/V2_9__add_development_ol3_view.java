@@ -19,10 +19,6 @@ public class V2_9__add_development_ol3_view implements JdbcMigration {
     private ViewService service = null;
 
     public void migrate(Connection connection) throws Exception {
-        if(PropertyUtil.getOptional("flyway.paikkis.2_9.skip", true)) {
-            // skip by default
-            return;
-        }
         service = new ViewServiceIbatisImpl();
 
         final String file = PropertyUtil.get("flyway.paikkis.2_9.file", "paikkis-ol3-dev.json");
