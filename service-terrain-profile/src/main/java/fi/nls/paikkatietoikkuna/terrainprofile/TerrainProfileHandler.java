@@ -1,6 +1,8 @@
 package fi.nls.paikkatietoikkuna.terrainprofile;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import fi.nls.oskari.annotation.OskariActionRoute;
 import fi.nls.oskari.control.ActionException;
 import fi.nls.oskari.control.ActionHandler;
@@ -29,8 +31,9 @@ public class TerrainProfileHandler extends ActionHandler {
 
     protected static final String PROPERTY_ENDPOINT = "terrain.profile.wcs.endPoint";
     protected static final String PROPERTY_DEM_COVERAGE_ID = "terrain.profile.wcs.demCoverageId";
+    protected static final String PROPERTY_NODATA_VALUE = "terrain.profile.wcs.noData";
 
-    protected static final String JSON_PROPERTY_RESOLUTION = "resolution";
+    // protected static final String JSON_PROPERTY_RESOLUTION = "resolution";
     protected static final String JSON_PROPERTY_NUM_POINTS = "numPoints";
     protected static final String JSON_PROPERTY_DISTANCE_FROM_START = "distanceFromStart";
 
@@ -38,9 +41,9 @@ public class TerrainProfileHandler extends ActionHandler {
 
     private final ObjectMapper om;
     private TerrainProfileService tps;
+    private float noDataValue;
 
     public TerrainProfileHandler() {
-        // ServiceLoader/annotation based setup requires a no-param constructor
         this(new ObjectMapper(), null);
     }
 
@@ -51,9 +54,7 @@ public class TerrainProfileHandler extends ActionHandler {
 
     @Override
     public void init() {
-        super.init();
-        // service needs to be created here since exceptions in constructors break the annotation based setup
-        if(tps == null) {
+        if (tps == null) {
             try {
                 tps = new TerrainProfileService(
                         PropertyUtil.get(PROPERTY_ENDPOINT),
@@ -63,6 +64,19 @@ public class TerrainProfileHandler extends ActionHandler {
                 throw new ServiceRuntimeException(ex.getMessage());
             }
         }
+        noDataValue = getNoDataValue();
+    }
+
+    private float getNoDataValue() {
+        String noDataStr = PropertyUtil.getOptional(PROPERTY_NODATA_VALUE);
+        if (noDataStr != null && !noDataStr.isEmpty()) {
+            try {
+                return Float.parseFloat(noDataStr);
+            } catch (NumberFormatException e) {
+                LOG.warn("Could not parse NODATA value from " + noDataStr);
+            }
+        }
+        return Float.NaN;
     }
 
     @Override
@@ -80,27 +94,9 @@ public class TerrainProfileHandler extends ActionHandler {
         }
 
         try {
-            List<DataPoint> dp = tps.getTerrainProfile(points, numPoints);
-            Feature multiPoint = new Feature();
-            multiPoint.setGeometry(GeoJSONHelper.toMultiPoint3D(dp));
-            multiPoint.setProperty(JSON_PROPERTY_NUM_POINTS, dp.size());
-            // multiPoint.setProperty(JSON_PROPERTY_RESOLUTION, resolution);
-            multiPoint.setProperty(JSON_PROPERTY_DISTANCE_FROM_START,
-                    dp.stream().mapToDouble(DataPoint::getDistFromStart).toArray());
-
-            writeResponse(params, multiPoint);
+            writeResponse(params, tps.getTerrainProfile(points, numPoints));
         } catch (ServiceException e) {
             throw new ActionException(e.getMessage(), e);
-        }
-    }
-
-    private void writeResponse(ActionParameters params, Feature multiPoint) throws ActionException {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            om.writeValue(baos, multiPoint);
-            ResponseHelper.writeResponse(params, 200, IOHelper.CONTENT_TYPE_JSON, baos);
-        } catch (IOException e) {
-            throw new ActionException("Failed to encode GeoJSON", e);
         }
     }
 
@@ -127,6 +123,7 @@ public class TerrainProfileHandler extends ActionHandler {
         }
     }
 
+    /* TODO: Add support for selecting larger grid depending on resolution
     protected double getResolution(Feature route) throws ActionParamsException {
         Object resolution = route.getProperty(JSON_PROPERTY_RESOLUTION);
         if (resolution == null) {
@@ -144,6 +141,7 @@ public class TerrainProfileHandler extends ActionHandler {
         throw new ActionParamsException(String.format(
                 "Invalid property value '%s'", JSON_PROPERTY_RESOLUTION));
     }
+     */
 
     protected int getNumPoints(Feature route) throws ActionParamsException {
         Object numPoints = route.getProperty(JSON_PROPERTY_NUM_POINTS);
@@ -160,6 +158,55 @@ public class TerrainProfileHandler extends ActionHandler {
         }
         throw new ActionParamsException(String.format(
                 "Invalid property value '%s'", JSON_PROPERTY_NUM_POINTS));
+    }
+
+    protected void writeResponse(ActionParameters params, List<DataPoint> dp) throws ActionException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (JsonGenerator json = om.getFactory().createGenerator(baos)) {
+            writeMultiPointFeature(dp, json, noDataValue);
+        } catch (IOException e) {
+            throw new ActionException("Failed to encode GeoJSON", e);
+        }
+        ResponseHelper.writeResponse(params, 200, IOHelper.CONTENT_TYPE_JSON, baos);
+    }
+
+    protected static void writeMultiPointFeature(List<DataPoint> dp,
+            JsonGenerator json, final float noData) throws IOException {
+        json.writeStartObject();
+        json.writeStringField("type", "Feature");
+
+        json.writeFieldName("geometry");
+        json.writeStartObject();
+        json.writeStringField("type", "MultiPoint");
+        json.writeFieldName("coordinates");
+        json.writeStartArray();
+        for (DataPoint p : dp) {
+            json.writeStartArray();
+            json.writeNumber(p.getE());
+            json.writeNumber(p.getN());
+            float alt = p.getAltitude();
+            if (alt == noData) {
+                json.writeNull();
+            } else {
+                json.writeNumber(alt);
+            }
+            json.writeEndArray();
+        }
+        json.writeEndArray();
+        json.writeEndObject();
+
+        json.writeFieldName("properties");
+        json.writeStartObject();
+        json.writeNumberField(JSON_PROPERTY_NUM_POINTS, dp.size());
+        json.writeFieldName(JSON_PROPERTY_DISTANCE_FROM_START);
+        json.writeStartArray();
+        for (DataPoint p : dp) {
+            json.writeNumber(p.getDistFromStart());
+        }
+        json.writeEndArray();
+        json.writeEndObject();
+
+        json.writeEndObject();
     }
 
 }
