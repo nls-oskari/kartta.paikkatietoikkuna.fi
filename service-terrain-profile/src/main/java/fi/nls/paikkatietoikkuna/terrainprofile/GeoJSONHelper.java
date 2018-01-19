@@ -3,7 +3,6 @@ package fi.nls.paikkatietoikkuna.terrainprofile;
 import java.util.List;
 import org.geojson.LineString;
 import org.geojson.LngLatAlt;
-import org.geojson.MultiPoint;
 
 public class GeoJSONHelper {
 
@@ -16,16 +15,6 @@ public class GeoJSONHelper {
             arr[i++] = coord.getLatitude();
         }
         return arr;
-    }
-
-    public static MultiPoint toMultiPoint3D(List<DataPoint> dataPoints) {
-        int n = dataPoints.size();
-        LngLatAlt[] points  = new LngLatAlt[n];
-        for (int i = 0; i < n; i++) {
-            DataPoint dp = dataPoints.get(i);
-            points[i] = new LngLatAlt(dp.getE(), dp.getN(), dp.getAltitude());
-        }
-        return new MultiPoint(points);
     }
 
 }

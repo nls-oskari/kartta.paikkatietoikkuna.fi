@@ -6,6 +6,8 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.nls.oskari.control.ActionException;
@@ -15,10 +17,14 @@ import fi.nls.oskari.service.ServiceException;
 import fi.nls.test.control.MockServletOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.ParserConfigurationException;
 import org.geojson.Feature;
+import org.geojson.GeoJsonObject;
 import org.geojson.LineString;
 import org.geojson.LngLatAlt;
 import org.geojson.MultiPoint;
@@ -154,7 +160,7 @@ public class TerrainProfileHandlerTest {
     }
 
     @Test
-    @Ignore("'resolution' property is not required as of now")
+    @Ignore("'resolution' property is not supported yet")
     public void whenResolutionIsMissingThrowsActionParamsException() throws JsonProcessingException, ActionException {
         Feature feature = new Feature();
         LineString line = new LineString();
@@ -184,7 +190,7 @@ public class TerrainProfileHandlerTest {
         line.add(new LngLatAlt(500000, 6822000));
         line.add(new LngLatAlt(501000, 6823000));
         feature.setGeometry(line);
-        feature.setProperty(TerrainProfileHandler.JSON_PROPERTY_RESOLUTION, 1.0);
+        // feature.setProperty(TerrainProfileHandler.JSON_PROPERTY_RESOLUTION, 1.0);
         String routeStr = om.writeValueAsString(feature);
 
         HttpServletRequest request = mock(HttpServletRequest.class);
@@ -202,6 +208,51 @@ public class TerrainProfileHandlerTest {
         String coverageId = "korkeusmalli_10m__korkeusmalli_10m";
         TerrainProfileService tps = new TerrainProfileService(endPoint, coverageId);
         new TerrainProfileHandler(om, tps).handleAction(params);
+    }
+
+    @Test
+    public void testwriteMultiPointFeature() throws IOException {
+        DataPoint p1 = new DataPoint();
+        p1.setE(0.0);
+        p1.setN(0.0);
+        p1.setAltitude(300.0f);
+        p1.setDistFromStart(0.0);
+
+        DataPoint p2 = new DataPoint();
+        p2.setE(100.0);
+        p2.setN(0.0);
+        p2.setAltitude(400.0f);
+        p2.setDistFromStart(100.0);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (JsonGenerator json = new JsonFactory().createGenerator(baos)) {
+            TerrainProfileHandler.writeMultiPointFeature(Arrays.asList(p1, p2), json, Float.NaN);
+        }
+
+        ObjectMapper om = new ObjectMapper();
+        Feature feature = om.readValue(baos.toByteArray(), Feature.class);
+
+        MultiPoint mp = (MultiPoint) feature.getGeometry();
+        List<LngLatAlt> coordinates = mp.getCoordinates();
+        assertEquals(2, coordinates.size());
+
+        LngLatAlt c1 = coordinates.get(0);
+        assertEquals(0.0, c1.getLongitude(), 0.0);
+        assertEquals(0.0, c1.getLatitude(), 0.0);
+        assertEquals(300.0, c1.getAltitude(), 0.0);
+
+        LngLatAlt c2 = coordinates.get(1);
+        assertEquals(100.0, c2.getLongitude(), 0.0);
+        assertEquals(0.0, c2.getLatitude(), 0.0);
+        assertEquals(400.0, c2.getAltitude(), 0.0);
+
+        int numPoints = (Integer) feature.getProperty(TerrainProfileHandler.JSON_PROPERTY_NUM_POINTS);
+        assertEquals(2, numPoints);
+
+        List<Double> distFromStart = feature.getProperty(TerrainProfileHandler.JSON_PROPERTY_DISTANCE_FROM_START);
+        assertEquals(2, distFromStart.size());
+        assertEquals(0.0, distFromStart.get(0).doubleValue(), 0.0);
+        assertEquals(100.0, distFromStart.get(1).doubleValue(), 0.0);
     }
 
 }

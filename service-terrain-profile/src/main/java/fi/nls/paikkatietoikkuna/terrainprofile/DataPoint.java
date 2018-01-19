@@ -8,7 +8,7 @@ public class DataPoint {
     private int gridTileX;
     private int gridTileY;
     private int gridTileOffset;
-    private double altitude;
+    private float altitude;
 
     public double getE() {
         return e;
@@ -58,11 +58,11 @@ public class DataPoint {
         this.gridTileOffset = gridTileOffset;
     }
 
-    public double getAltitude() {
+    public float getAltitude() {
         return altitude;
     }
 
-    public void setAltitude(double altitude) {
+    public void setAltitude(float altitude) {
         this.altitude = altitude;
     }
 
