@@ -60,11 +60,12 @@ public class TerrainProfileHandler extends ActionHandler {
                         PropertyUtil.get(PROPERTY_ENDPOINT),
                         PropertyUtil.get(PROPERTY_DEM_COVERAGE_ID));
             } catch (ServiceException ex) {
-                LOG.warn("Unable to init TerrainProfile action route");
-                throw new ServiceRuntimeException(ex.getMessage());
+                throw new ServiceRuntimeException(
+                        "Failed to init TerrainProfileService: " + ex.getMessage(), ex);
             }
         }
         noDataValue = getNoDataValue();
+        LOG.debug("NODATA value:", noDataValue);
     }
 
     private float getNoDataValue() {
