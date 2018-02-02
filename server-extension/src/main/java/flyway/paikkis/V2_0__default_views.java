@@ -1,5 +1,6 @@
 package flyway.paikkis;
 
+import fi.nls.oskari.db.DBHandler;
 import fi.nls.oskari.db.LayerHelper;
 import fi.nls.oskari.db.ViewHelper;
 import fi.nls.oskari.domain.map.view.View;
@@ -28,10 +29,9 @@ public class V2_0__default_views implements JdbcMigration {
         if(PropertyUtil.getOptional("flyway.paikkis.2_0.skip", false)) {
             return;
         }
-        for(String file : viewFiles) {
-            long id = ViewHelper.insertView(connection, file);
-            LOG.info("View inserted from", file, "with id:", id);
-        }
+
+        DBHandler.setupAppContent(connection, "paikkis.json");
+
         for(String file : layerFiles) {
             long id = LayerHelper.setupLayer(file);
             LOG.info("Layer inserted from", file, "with id:", id);

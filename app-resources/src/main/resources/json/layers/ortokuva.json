@@ -4,7 +4,7 @@
     "url":"http://karttamoottori.maanmittauslaitos.fi/maasto/wmts",
     "name":"ortokuva",
     "organization": "Maanmittauslaitos",
-    "inspiretheme": "Ortokuvat",
+    "inspiretheme": "Ortoilmakuvat",
     "locale": {
         "fi": {
             "name": "Ortokuvat"
