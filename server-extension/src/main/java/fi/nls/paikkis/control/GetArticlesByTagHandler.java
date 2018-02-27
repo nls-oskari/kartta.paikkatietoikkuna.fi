@@ -24,9 +24,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
-/**
- * Created by MKUOSMANEN on 16.6.2017.
- */
 @OskariActionRoute("GetArticlesByTag")
 public class GetArticlesByTagHandler extends ActionHandler {
 
@@ -50,6 +47,7 @@ public class GetArticlesByTagHandler extends ActionHandler {
     private String fileLocation = null;
     private String articlesByTagSetupFile = null;
     private int timeout = 6000;
+    private int cacheTimeout = JedisManager.EXPIRY_TIME_DAY;
 
     @Override
     public void init() {
@@ -57,6 +55,7 @@ public class GetArticlesByTagHandler extends ActionHandler {
         fileLocation = PropertyUtil.get("actionhandler.GetArticlesByTag.dir", "/fi/nls/oskari/control");
         articlesByTagSetupFile = PropertyUtil.get("actionhandler.GetArticlesByTag.setupFile", "/articles-by-tag-setup-file.json");
         timeout = PropertyUtil.getOptional("actionhandler.GetArticlesByTag.timeout", 6000);
+        cacheTimeout = PropertyUtil.getOptional("actionhandler.GetArticlesByTag.cache.timeout", JedisManager.EXPIRY_TIME_DAY);
 
         if(!fileLocation.endsWith(File.separator)) {
             fileLocation = fileLocation + File.separator;
@@ -67,45 +66,37 @@ public class GetArticlesByTagHandler extends ActionHandler {
     public void handleAction(ActionParameters params) throws ActionException {
         final String lang = params.getLocale().getLanguage();
         final String tags = params.getHttpParam(KEY_TAGS, "");
-        JSONArray articles;
+
         log.debug("Getting articles for language:", lang, "with tags:", tags);
 
         // First try to find from cache
         final String cacheKey = "getarticlebytag:" + tags + "_" + lang;
-        String articleFromCache = JedisManager.get(cacheKey, false);
-        boolean dummyContent = false;
-        if(articleFromCache != null){
-            articles = JSONHelper.createJSONArray(articleFromCache);
-        }
-        else
-        {
-            // Second try to find from json urls
-            articles = articlesFromSetupFile(lang + "_" + tags);
+        JSONArray articles = getFromCache(cacheKey);
 
-            // Latest try found on resources
-            if(articles == null) {
-                articles = new JSONArray();
+        if (articles == null || articles.length() == 0) {
+            // If nothing in cache try scraping as specified in setup file
+            articles = articlesFromSetupFile(lang + "_" + tags);
+            if (articles != null && articles.length() > 0) {
+                // Only cache successfully scraped stuff
+                JedisManager.setex(cacheKey, cacheTimeout, articles.toString());
+            } else {
+                // If scraping fails try static resources
                 JSONObject articleContent = getContent(tags);
                 if (articleContent == null) {
                     articleContent = tryContentWithLessTags(tags, tags);
                 }
-
                 if (articleContent != null && !articleContent.has(KEY_DUMMY)){
-                    articles = new JSONArray();
                     JSONObject articleJson = new JSONObject();
                     JSONHelper.putValue(articleJson, KEY_ID, "none");
                     JSONHelper.putValue(articleJson, KEY_CONTENT, articleContent);
+                    articles = new JSONArray();
                     articles.put(articleJson);
                 }
             }
         }
 
-        // Set founded articles to cache
-        if(articles != null && articles.length()>0) {
-            JedisManager.setex(cacheKey, JedisManager.EXPIRY_TIME_DAY, articles.toString());
-        }
-        // If not found create dummy content
-        else {
+        if (articles == null || articles.length() == 0) {
+            // If everything fails create dummy content
             JSONObject articleContent = getMissingContentNote(tags);
             articles = new JSONArray();
             JSONObject articleJson = new JSONObject();
@@ -117,6 +108,20 @@ public class GetArticlesByTagHandler extends ActionHandler {
         final JSONObject response = new JSONObject();
         JSONHelper.putValue(response, KEY_ARTICLES, articles);
         ResponseHelper.writeResponse(params, response);
+    }
+
+    private JSONArray getFromCache(String cacheKey) {
+        String articleFromCache = JedisManager.get(cacheKey, false);
+        if (articleFromCache != null) {
+            try {
+                return new JSONArray(articleFromCache);
+            } catch (JSONException e) {
+                // This really shouldn't happen, since we only cache
+                // valid stuff, but better safe than sorry
+                log.warn(e, "Failed to create JSONArray from cached article");
+            }
+        }
+        return null;
     }
 
     private JSONArray articlesFromSetupFile(final String commaSeparatedTags) {
