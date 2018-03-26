@@ -8,7 +8,7 @@
     <title>Paikkatietoikkuna</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="/static/img/pti_icon.png" type="image/png" />
-    <script type="text/javascript" src="//code.jquery.com/jquery-1.7.2.min.js">
+    <script type="text/javascript" src="/Oskari/libraries/jquery/jquery-1.10.2.min.js">
     </script>
 
     <!-- ############# css ################# -->
