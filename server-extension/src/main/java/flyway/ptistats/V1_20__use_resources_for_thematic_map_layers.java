@@ -8,9 +8,13 @@ import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
 import org.json.JSONObject;
 
 import fi.nls.oskari.domain.map.OskariLayer;
+import fi.nls.oskari.log.LogFactory;
+import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.util.JSONHelper;
 
 public class V1_20__use_resources_for_thematic_map_layers implements JdbcMigration {
+
+    private static final Logger LOG = LogFactory.getLogger(V1_20__use_resources_for_thematic_map_layers.class);
 
     private static final String RESOURCES_URL_PREFIX = "resources://";
     private static final String DIR = "stats-regionsets/";
@@ -57,8 +61,10 @@ public class V1_20__use_resources_for_thematic_map_layers implements JdbcMigrati
                 String attributes = layer.getAttributes().toString();
                 ps.setString(1, attributes);
                 ps.setString(3, layer.layerName);
+                LOG.debug("Executing:", ps.toString());
+                int i = ps.executeUpdate();
+                LOG.debug("Update result:", i);
             }
-            ps.executeUpdate();
         }
     }
 
