@@ -10,7 +10,7 @@ import org.json.JSONObject;
 import fi.nls.oskari.domain.map.OskariLayer;
 import fi.nls.oskari.util.JSONHelper;
 
-public class V1_10__use_resources_for_thematic_map_layers implements JdbcMigration {
+public class V1_20__use_resources_for_thematic_map_layers implements JdbcMigration {
 
     private static final String RESOURCES_URL_PREFIX = "resources://";
     private static final String DIR = "stats-regionsets/";
