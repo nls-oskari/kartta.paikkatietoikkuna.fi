@@ -1,6 +1,7 @@
 package fi.nls.oskari;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -15,8 +16,13 @@ import javax.servlet.http.HttpServletRequest;
 public class LandingHandler {
     private static final Logger logger404 = Logger.getLogger("BrokenURL");
 
+    @Autowired
+    private RssFeedService rssService;
+
     @RequestMapping
-    public String index() throws Exception {
+    public String index(HttpServletRequest request) throws Exception {
+        request.setAttribute("notifications", rssService.getNotifications());
+        request.setAttribute("news", rssService.getNews());
         return "landingpage";
     }
 

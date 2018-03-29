@@ -61,6 +61,7 @@ public class DocumentsHandler {
         return doc;
     }
 
+    @PostConstruct
     private void readList() throws IOException {
         Map<String, String> mimeTypes = new HashMap<>();
         mimeTypes.put(".pdf", "application/pdf");

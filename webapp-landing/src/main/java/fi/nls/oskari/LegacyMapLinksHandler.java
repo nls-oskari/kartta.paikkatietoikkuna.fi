@@ -24,6 +24,7 @@ public class LegacyMapLinksHandler {
     private List<LegacyLink> links = new ArrayList<>();
     private Map<String, String> liferay5MapLinks = new HashMap<>();
 
+    @PostConstruct
     private void readList() throws IOException {
         LegacyLink[] list = getMapper().readValue(getClass().getResourceAsStream(getBasePath() + "/liferay_links.json"), LegacyLink[].class);
         links.addAll(Arrays.asList(list));

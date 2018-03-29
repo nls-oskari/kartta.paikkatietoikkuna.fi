@@ -48,8 +48,8 @@
                     </div>
                     <div>
                         <ul class="rss-list">
-                            <c:forEach var="feed" items="${rssFeeds}">
-                                <li>${feed}</li>
+                            <c:forEach var="item" items="${notifications}">
+                                <li><a class="rss-link" href="${item.link}">${item.title}</a></li>
                             </c:forEach>
                         </ul>
                     </div>
@@ -78,8 +78,8 @@
                     </div>
                     <div>
                         <ul class="rss-list">
-                            <c:forEach var="feed" items="${rssFeeds}">
-                                <li>${feed}</li>
+                            <c:forEach var="item" items="${news}">
+                                <li><a class="rss-link" href="${item.link}">${item.title}</a></li>
                             </c:forEach>
                         </ul>
                     </div>
