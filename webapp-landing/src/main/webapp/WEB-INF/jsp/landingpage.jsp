@@ -1,14 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" isELIgnored="false" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
-<%@ page import="java.util.*" %>
-<%
-    Vector rssFeeds = new Vector();
-    for (int i = 1; i < 6; i++) {
-        rssFeeds.add("Uutinen "+i+" toivottavasti otsikko ei ole pidempi kuin tämä");
-    }
-    request.setAttribute("rssFeeds", rssFeeds);
-%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,7 +16,6 @@
 </head>
 <body>
 <div class="container main">
-    ${MyAttribute}
     <div class="row margin hidden-xs">
     </div>
     <div class="row logo">
