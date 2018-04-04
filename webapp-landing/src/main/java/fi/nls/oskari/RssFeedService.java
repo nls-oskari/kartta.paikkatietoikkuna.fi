@@ -85,11 +85,6 @@ public class RssFeedService {
         return null;
     }
 
-    private void updateRssItemLists() {
-        notifications = pickLatestItems(notificationsChannel);
-        news = pickLatestItems(newsChannel);
-    }
-
     /**
      * Picks last X items from the feed.
      *
@@ -111,12 +106,13 @@ public class RssFeedService {
             RssFeedChannel updatedNotifications = readRssFeed(notificationsUrl);
             if (updatedNotifications != null) {
                 notificationsChannel = updatedNotifications;
+                notifications = pickLatestItems(notificationsChannel);
             }
             RssFeedChannel updatedNews = readRssFeed(newsUrl);
             if (updatedNews != null) {
                 newsChannel = updatedNews;
+                news = pickLatestItems(newsChannel);
             }
-            updateRssItemLists();
         }
         catch (Exception ex) {
             logger.error("Reading RSS feeds caused an exception", ex);
