@@ -1,5 +1,6 @@
 package fi.nls.oskari.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.Date;
@@ -27,6 +28,7 @@ public class RssFeedItem implements Comparable<RssFeedItem> {
         this.link = link;
     }
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "EEE, dd MMM yyyy HH:mm:ss Z", locale = "en_US")
     public Date getPubDate() {
         return pubDate;
     }
