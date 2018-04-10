@@ -42,10 +42,12 @@
                         <ul class="rss-list">
                             <c:forEach var="item" items="${notifications}">
                                 <li>
-                                    <div class="rss-item-date">
-                                        <fmt:formatDate value="${item.pubDate}" pattern="d.M.yyyy"/>
-                                    </div>
-                                    <a class="rss-link" href="${item.link}">${item.title}</a>
+                                    <a class="rss-link" href="${item.link}">
+                                        <div class="rss-item-date">
+                                            <fmt:formatDate value="${item.pubDate}" pattern="d.M.yyyy"/>
+                                        </div>
+                                        ${item.title}
+                                    </a>
                                 </li>
                             </c:forEach>
                         </ul>
@@ -77,10 +79,12 @@
                         <ul class="rss-list">
                             <c:forEach var="item" items="${news}">
                                 <li>
-                                    <div class=".rss-item-date">
-                                        <fmt:formatDate value="${item.pubDate}" pattern="d.M.yyyy"/>
-                                    </div>
-                                    <a class="rss-link" href="${item.link}">${item.title}</a>
+                                    <a class="rss-link" href="${item.link}">
+                                        <div class="rss-item-date">
+                                            <fmt:formatDate value="${item.pubDate}" pattern="d.M.yyyy"/>
+                                        </div>
+                                        ${item.title}
+                                    </a>
                                 </li>
                             </c:forEach>
                         </ul>
