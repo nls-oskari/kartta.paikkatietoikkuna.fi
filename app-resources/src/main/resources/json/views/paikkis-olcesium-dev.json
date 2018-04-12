@@ -1,0 +1,89 @@
+{
+  "name": "Geoportal Ol Cesium",
+  "type": "USER",
+  "default": false,
+  "public": true,
+  "oskari": {
+    "application": "full-map_experimental",
+    "page": "index",
+    "development_prefix": "/applications/paikkatietoikkuna.fi"
+  },
+  "selectedLayers": [
+    "taustakartta-3d.json"
+  ],
+  "bundles": [
+    { "id" : "lang-overrides" },
+    {
+      "id": "mapfull",
+      "config" : {
+        "layers": [],
+        "mapOptions": {
+          "resolutions": [
+            2048,
+            1024,
+            512,
+            256,
+            128,
+            64,
+            32,
+            16,
+            8,
+            4,
+            2,
+            1,
+            0.5,
+            0.25
+          ],
+          "srsName": "EPSG:3857"
+        },
+        "plugins": [
+          {"id": "Oskari.mapframework.bundle.mapmodule.plugin.LayersPlugin"},
+          {"id": "Oskari.mapframework.mapmodule.WmsLayerPlugin"},
+          {"id": "Oskari.mapframework.mapmodule.ControlsPlugin"},
+          {"id": "Oskari.mapframework.wmts.mapmodule.plugin.WmtsLayerPlugin"},
+          {"id": "Oskari.mapframework.bundle.mapmodule.plugin.ScaleBarPlugin"},
+          {"id": "Oskari.mapframework.bundle.mapmodule.plugin.Portti2Zoombar"},
+          {"id": "Oskari.mapframework.bundle.mapmodule.plugin.PanButtons"},
+          {"id": "Oskari.mapframework.bundle.mapmodule.plugin.FullScreenPlugin"},
+          {
+            "config": {
+              "baseLayers": ["1889", "1892"]
+            },
+            "id": "Oskari.mapframework.bundle.mapmodule.plugin.BackgroundLayerSelectionPlugin"
+          },
+          {"id": "Oskari.mapframework.mapmodule.VectorLayerPlugin"}
+        ]
+      },
+      "state" : {
+        "selectedLayers":[{"id":"1889"}],
+        "east":2770000,
+        "north":9200000
+      },
+      "startup" : {
+        "bundlename": "mapfull",
+        "metadata": {
+          "Import-Bundle": {
+            "mapwmts": {
+              "bundlePath": "/Oskari/packages/mapping/ol3/"
+            },
+            "mapmodule": {
+              "bundlePath": "/Oskari/packages/paikkatietoikkuna/bundle/"
+            },
+            "mapfull": {
+              "bundlePath": "/Oskari/packages/framework/bundle/"
+            },
+            "ui-components": {
+              "bundlePath": "/Oskari/packages/framework/bundle/"
+            },
+            "oskariui": {
+              "bundlePath": "/Oskari/packages/framework/bundle/"
+            }
+          }
+        }
+      }
+    },
+    { "id" : "divmanazer" },
+    { "id" : "layerselector2" },
+    { "id" : "layerselection2" }
+  ]
+}

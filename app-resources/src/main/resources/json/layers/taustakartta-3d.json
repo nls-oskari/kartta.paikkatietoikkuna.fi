@@ -1,0 +1,19 @@
+{
+	"srs_name": "EPSG:3857",
+	"type":"wmtslayer",
+    "url":"http://karttamoottori.maanmittauslaitos.fi/maasto/wmts",
+    "name":"taustakartta",
+    "organization": "Maanmittauslaitos",
+    "inspiretheme": "Taustakartat",
+    "locale": {
+        "fi": {
+            "name": "Taustakarttasarja"
+        }
+    },
+    "role_permissions": {
+        "Guest" : ["VIEW_LAYER", "VIEW_PUBLISHED"],
+        "User" : ["VIEW_LAYER", "VIEW_PUBLISHED", "PUBLISH"]
+    },
+	"version": "1.0.0",
+    "tileMatrixSetId":"WGS84_Pseudo-Mercator"
+}
