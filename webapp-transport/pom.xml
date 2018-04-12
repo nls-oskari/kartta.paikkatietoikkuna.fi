@@ -7,7 +7,7 @@
 	<parent>
         <groupId>fi.nls.paikkatietoikkuna</groupId>
         <artifactId>kartta</artifactId>
-        <version>1.3-SNAPSHOT</version>
+        <version>1.3.0</version>
 	</parent>
 
     <artifactId>webapp-transport</artifactId>
