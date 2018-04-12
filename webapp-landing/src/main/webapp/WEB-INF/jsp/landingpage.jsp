@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" isELIgnored="false" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -29,8 +30,8 @@
         <div class="col-md-5 col-md-offset-1">
             <div class="panel map-panel">
                 <div class="panel-body">
-                    <p class="maplink-btn-holder">
-                        <a class="btn btn-default maplink-btn" href="https://kartta.paikkatietoikkuna.fi/?lang=${pageContext.response.locale.language}" role="button"><spring:message code="landing.map.link"/><span class="arrow">&rsaquo;</span></a></p>
+                    <p class="map-desc"><spring:message code="landing.map.desc"/></p>
+                    <a class="btn btn-default maplink-btn" href="https://kartta.paikkatietoikkuna.fi/?lang=${pageContext.response.locale.language}" role="button"><spring:message code="landing.map.link"/><span class="arrow">&rsaquo;</span></a>
                 </div>
                 <div class="rss-panel">
                     <div>
@@ -40,7 +41,14 @@
                     <div>
                         <ul class="rss-list">
                             <c:forEach var="item" items="${notifications}">
-                                <li><a class="rss-link" href="${item.link}">${item.title}</a></li>
+                                <li>
+                                    <a class="rss-link" href="${item.link}">
+                                        <div class="rss-item-date">
+                                            <fmt:formatDate value="${item.pubDate}" pattern="d.M.yyyy"/>
+                                        </div>
+                                        ${item.title}
+                                    </a>
+                                </li>
                             </c:forEach>
                         </ul>
                     </div>
@@ -70,7 +78,14 @@
                     <div>
                         <ul class="rss-list">
                             <c:forEach var="item" items="${news}">
-                                <li><a class="rss-link" href="${item.link}">${item.title}</a></li>
+                                <li>
+                                    <a class="rss-link" href="${item.link}">
+                                        <div class="rss-item-date">
+                                            <fmt:formatDate value="${item.pubDate}" pattern="d.M.yyyy"/>
+                                        </div>
+                                        ${item.title}
+                                    </a>
+                                </li>
                             </c:forEach>
                         </ul>
                     </div>
