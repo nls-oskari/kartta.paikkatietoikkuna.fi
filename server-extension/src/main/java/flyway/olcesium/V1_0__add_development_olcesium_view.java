@@ -35,9 +35,6 @@ public class V1_0__add_development_olcesium_view implements JdbcMigration {
                 if(newBundle == null) {
                     continue;
                 }
-                // copy the settings (state and config) from current default view
-                // newBundle.setState(bundle.getState());
-                // newBundle.setConfig(bundle.getConfig());
             }
             // save to db
             service.addView(view);
