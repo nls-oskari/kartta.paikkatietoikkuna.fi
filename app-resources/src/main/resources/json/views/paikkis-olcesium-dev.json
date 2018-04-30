@@ -41,7 +41,6 @@
           {"id": "Oskari.mapframework.mapmodule.WmsLayerPlugin"},
           {"id": "Oskari.mapframework.mapmodule.ControlsPlugin"},
           {"id": "Oskari.mapframework.wmts.mapmodule.plugin.WmtsLayerPlugin"},
-          {"id": "Oskari.mapframework.bundle.mapmodule.plugin.ScaleBarPlugin"},
           {"id": "Oskari.mapframework.bundle.mapmodule.plugin.Portti2Zoombar"},
           {"id": "Oskari.mapframework.bundle.mapmodule.plugin.PanButtons"},
           {"id": "Oskari.mapframework.bundle.mapmodule.plugin.FullScreenPlugin"},
@@ -83,6 +82,33 @@
       }
     },
     { "id" : "divmanazer" },
+    {
+      "id": "drawtools",
+      "startup": {
+        "bundlename": "drawtools",
+        "metadata": {
+          "Import-Bundle": {
+            "drawtools": {
+              "bundlePath": "/Oskari/packages/mapping/ol3/"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "toolbar",
+      "startup": {
+        "bundlename": "toolbar",
+        "metadata": {
+          "Import-Bundle": {
+            "toolbar": {
+              "bundlePath": "/Oskari/packages/mapping/ol3/"
+            }
+          }
+        }
+      }
+    },
+    { "id" : "statehandler" },
     { "id" : "layerselector2" },
     { "id" : "layerselection2" }
   ]
