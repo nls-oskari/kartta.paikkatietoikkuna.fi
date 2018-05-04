@@ -91,7 +91,7 @@ public class V2_29__external_id_removal_from_configs implements JdbcMigration {
             JSONArray fixedLayers = new JSONArray();
             for (int i = 0; i < layers.length(); i++) {
                 JSONObject layer = layers.optJSONObject(i);
-                if (layer != null && layer.optString("id").startsWith("base_")) {
+                if (layer != null && !layer.optString("id").startsWith("base_")) {
                     fixedLayers.put(layer);
                 }
             }
