@@ -45,14 +45,14 @@ public class V1_1__set_layers implements JdbcMigration {
         List<OskariLayer> layers = getNlsBaseLayers(connection);
         LOG.info("Start populating matrixies for Oskari WMTS layers - count:", layers.size());
         for (OskariLayer layer : layers) {
-            populateWMTS(connection, layer);
+            updateNlsBaseLayer(connection, layer);
         }
         if (!layers.isEmpty()) {
             updateCesiumViews(connection, layers);
         }
     }
 
-    private void populateWMTS(Connection connection, OskariLayer layer) {
+    private void updateNlsBaseLayer(Connection connection, OskariLayer layer) {
         try {
             // update
             OskariLayerCapabilities caps = capabilitiesService.getCapabilities(layer);
@@ -63,18 +63,18 @@ public class V1_1__set_layers implements JdbcMigration {
                     if (capsLayer != null) {
                         JSONObject jscaps = LayerJSONFormatterWMTS.createCapabilitiesJSON(capsLayer, (Set)null);
                         if (jscaps != null) {
-                            updateCapabilitiesAndAttributes(layer.getId(), jscaps, connection);
+                            updateCapabilities(layer.getId(), jscaps, connection);
                         }else {
-                            LOG.info("WMTSCapabilities tilematrixes / json create failed - layer: ", layer.getName());
+                            LOG.info("WMTSCapabilities / json create failed - layer: ", layer.getName());
                         }
                     } else {
-                        LOG.info("WMTSCapabilities tilematrixes / layer parse failed - layer: ", layer.getName());
+                        LOG.info("WMTSCapabilities / layer parse failed - layer: ", layer.getName());
                     }
                 } else {
-                    LOG.info("WMTSCapabilities tilematrixes / Capabilities parse failed - layer: ", layer.getName());
+                    LOG.info("WMTSCapabilities / Capabilities parse failed - layer: ", layer.getName());
                 }
             } else {
-                LOG.info("WMTSCapabilities tilematrixes / getCapabilities failed - layer: ", layer.getName());
+                LOG.info("WMTSCapabilities / getCapabilities failed - layer: ", layer.getName());
             }
         } catch (Exception e) {
             LOG.error(e, "Error getting capabilities for layer", layer);
@@ -164,13 +164,11 @@ public class V1_1__set_layers implements JdbcMigration {
     }
 
 
-    private void updateCapabilitiesAndAttributes(int layerId, JSONObject capabilities, Connection conn) throws SQLException {
+    private void updateCapabilities(int layerId, JSONObject capabilities, Connection conn) throws SQLException {
         final String sql = "UPDATE oskari_maplayer SET capabilities=?, attributes=? where id=?";
-        String lyrAttributes = "{\"forcedSRS\":[\""+PROJECTION_PSEUDO_MERCATOR+"\"],\"crossOrigin\":\"anonymous\"}";
         try(PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setString(1, capabilities.toString(2));
-            statement.setString(2, lyrAttributes);
-            statement.setInt(3, layerId);
+            statement.setInt(2, layerId);
             statement.execute();
             statement.close();
         }
