@@ -165,12 +165,11 @@ public class V1_1__set_layers implements JdbcMigration {
 
 
     private void updateCapabilities(int layerId, JSONObject capabilities, Connection conn) throws SQLException {
-        final String sql = "UPDATE oskari_maplayer SET capabilities=?, attributes=? where id=?";
+        final String sql = "UPDATE oskari_maplayer SET capabilities=? where id=?";
         try(PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setString(1, capabilities.toString(2));
             statement.setInt(2, layerId);
             statement.execute();
-            statement.close();
         }
         catch (JSONException ignored) {
             LOG.error("Error updating oskari_maplayer.capabilities and attributes", layerId);
