@@ -27,13 +27,12 @@ public class OskariRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
     @Override
     protected void successfulAuthentication(HttpServletRequest request,
             HttpServletResponse response, Authentication authResult) {
-        super.successfulAuthentication(request, response, authResult);
-        if (this.successHandler != null) {
-            try {
+        try {
+            if (this.successHandler != null) {
                 this.successHandler.onAuthenticationSuccess(request, response,  authResult);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
             }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
    
