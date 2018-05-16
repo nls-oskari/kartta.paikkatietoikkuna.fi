@@ -8,9 +8,6 @@
     "page": "index",
     "development_prefix": "/applications/paikkatietoikkuna.fi"
   },
-  "selectedLayers": [
-    "taustakartta-3d.json"
-  ],
   "bundles": [
     { "id" : "lang-overrides" },
     {
@@ -44,19 +41,23 @@
           {"id": "Oskari.mapframework.bundle.mapmodule.plugin.Portti2Zoombar"},
           {"id": "Oskari.mapframework.bundle.mapmodule.plugin.PanButtons"},
           {"id": "Oskari.mapframework.bundle.mapmodule.plugin.FullScreenPlugin"},
-          {
-            "config": {
-              "baseLayers": ["1889", "1892"]
-            },
-            "id": "Oskari.mapframework.bundle.mapmodule.plugin.BackgroundLayerSelectionPlugin"
-          },
+          {"id": "Oskari.mapframework.bundle.mapmodule.plugin.BackgroundLayerSelectionPlugin"},
           {"id": "Oskari.mapframework.mapmodule.VectorLayerPlugin"}
         ]
       },
       "state" : {
-        "selectedLayers":[{"id":"1889"}],
-        "east":2770000,
-        "north":9200000
+        "camera": {
+          "location": {
+            "x": 2776460.39,
+            "y": 8432972.40,
+            "altitude": 1000
+          },
+          "orientation": {
+            "heading": 0.0,
+            "pitch": -45,
+            "roll": 0.0
+          }
+        }
       },
       "startup" : {
         "bundlename": "mapfull",
