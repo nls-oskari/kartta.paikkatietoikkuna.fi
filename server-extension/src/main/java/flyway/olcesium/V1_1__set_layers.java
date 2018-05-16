@@ -61,7 +61,6 @@ public class V1_1__set_layers implements JdbcMigration {
                     layer.getType(),
                     layer.getVersion(),
                     data);
-            capabilitiesService.save(caps);
 
             WMTSCapabilities parsed = WMTSCapabilitiesParser.parseCapabilities(caps.getData());
             WMTSCapabilitiesLayer capsLayer = parsed.getLayer(layer.getName());
@@ -75,6 +74,7 @@ public class V1_1__set_layers implements JdbcMigration {
             }
 
             updateCapabilities(layer.getId(), jscaps, connection);
+            capabilitiesService.save(caps);
 
         } catch (Exception e) {
             LOG.error(e, "Error getting capabilities for layer", layer);
