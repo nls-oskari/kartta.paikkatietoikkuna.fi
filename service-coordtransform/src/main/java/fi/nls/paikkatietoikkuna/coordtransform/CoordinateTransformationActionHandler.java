@@ -18,13 +18,11 @@ import fi.nls.oskari.util.PropertyUtil;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
@@ -114,6 +112,7 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
         coordinateSeparators.put("space", " ");
         coordinateSeparators.put("tab", "\t");
         coordinateSeparators.put("comma", ",");
+        coordinateSeparators.put("semicolon", ";");
     }
 
     @Override
@@ -206,13 +205,9 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
         try (OutputStream out = response.getOutputStream()) {
             if (transformToFile){
                 String fileName = addFileExt(exportSettings.getFileName());
-                writeFile (coords, targetDimension, exportSettings, targetCrs);
                 response.setContentType(FILE_TYPE);
                 response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-                response.setHeader("Content-Length", String.valueOf(new File(fileName).length()));
-                FileInputStream  fis = new FileInputStream(fileName);
-                IOUtils.copy(fis,out);
-                out.flush();
+                writeFileResponse(out, coords, targetDimension, exportSettings, targetCrs);
             } else {
                 response.setContentType(IOHelper.CONTENT_TYPE_JSON);
                 writeJsonResponse(out, coords, inputCoords, targetDimension);
@@ -240,7 +235,12 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
         int zIndex = 2;
         int coordDimension = dimension;
         int headerLineCount = sourceOptions.getHeaderLineCount();
-        String coordSeparator = coordinateSeparators.get(sourceOptions.getCoordinateSeparator());
+        String coordSeparator = sourceOptions.getCoordinateSeparator();
+        if (!coordinateSeparators.containsKey(coordSeparator)){
+            throw new ActionParamsException("Invalid coordinate separator: " + coordSeparator);
+        }
+        // get actual separator
+        coordSeparator = coordinateSeparators.get(coordSeparator);
         if (sourceOptions.isAxisFlip()){
             xIndex = 1;
             yIndex = 0;
@@ -284,6 +284,9 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
                     line = line.replace(',','.');
                 }
                 coords = line.split(coordSeparator);
+                if (coords.length < coordDimension){
+                    throw new ActionParamsException("Invalid coord in line: " + line, "invalid_coord_length");
+                }
                 if (transformUnit){
                     x = CoordTransService.transformUnitToDegree (coords[xIndex], unit);
                     y = CoordTransService.transformUnitToDegree (coords[yIndex], unit);
@@ -475,11 +478,10 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
         }
     }
 
-    protected void writeFile(List<Coordinate> coords, final int dimension, CoordTransFile opts, String crs)
+    protected void writeFileResponse(OutputStream out, List<Coordinate> coords, final int dimension, CoordTransFile opts, String crs)
         throws ActionException {
         try {
-            String fileName = addFileExt(opts.getFileName());
-            BufferedWriter bw = new BufferedWriter(new FileWriter (fileName));
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
             String xCoord;
             String yCoord;
             String zCoord;
