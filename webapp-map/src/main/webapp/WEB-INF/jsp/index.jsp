@@ -110,7 +110,12 @@
 
 <div id="wrapper">
     <div id="sidebar">
-        <img id="pti-icon" src="/static/img/ikkuna.svg">
+        <c:if test="${not empty language}">
+            <c:set var="langParam" value="/?lang=${language}"/>
+        </c:if>
+        <a href="https://www.paikkatietoikkuna.fi${langParam}">
+            <img id="pti-icon" src="/static/img/ikkuna.svg">
+        </a>
     </div>
     <section id="content" class="floatleft">
         <nav id="maptools">
