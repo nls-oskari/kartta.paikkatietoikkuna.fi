@@ -50,7 +50,7 @@
                 background: url(/static/img/background_image.jpg);
                 background-size: cover;
                 background-attachment: fixed;
-                height: 100%;
+                height: calc(100% - 100px);
                 position: relative;
                 padding-top: 100px;
             }
@@ -70,14 +70,10 @@
                 font-size: 18px;
                 color: #CCC;
                 max-width: 600px;
-                margin: 0 auto 30px auto;
+                margin: 50px auto 30px auto;
                 padding: 15px 15px;
                 background-color: rgba(0, 0, 0, 0.5);
                 line-height: 1.3em;
-            }
-
-            .login-form {
-                padding-top: 50px;
             }
 
             input {
@@ -112,14 +108,7 @@
         </div>
 
         <div class="link-to-map">
-            <a href="/">takaisin karttapalveluun</a>
-        </div>
-
-        <div class="login-information">
-            <p>Rekisteröityneiden käyttäjien tunnukset on siirretty Maanmittauslaitoksen Omatili-palveluun, mutta salasanat on nollattu. Samat tunnukset käyvät tulevaisuudessa muihinkin verkkopalveluihin. Kun kirjaudut uusittuun palveluun ensimmäistä kertaa, toimi näin:<br><br>
-            1) Tilaa uusi salasana <a href="https://omatili.maanmittauslaitos.fi/user/password">tästä</a> - saat sähköpostiisi ohjeet salasanan vaihtamiseksi.<br>
-            2) Kun olet saanut salasanasi vaihdettua, päädyt Omatili-palvelun etusivulle. Palaa takaisin tälle sivulle, niin voit kirjautua Paikkatietoikkunaan uudella salasanallasi.</a></p><br>
-            <p>Ongelmatilanteissa ota yhteyttä asiakaspalveluumme: paikkatietoikkuna@maanmittauslaitos.fi.</p>
+            <a href="/">Karttapalveluun</a>
         </div>
 
         <div class="login-form">
@@ -139,6 +128,10 @@
         <div id="register">
             <a href="https://omatili.maanmittauslaitos.fi/">Rekisteröidy</a>
         </div>
+
+        <div class="login-information">
+            <p>Ongelmatilanteissa ota yhteyttä asiakaspalveluumme: paikkatietoikkuna@maanmittauslaitos.fi.</p>
+        </div>
     </c:if>
 
     <c:if test="${language == 'sv'}">
@@ -148,14 +141,7 @@
         </div>
 
         <div class="link-to-map">
-            <a href="/">tillbaka till karttjänsten</a>
-        </div>
-
-        <div class="login-information">
-            <p>Registrerade andvändarnamn har överförts till Lantmäteriverkets Omatili-tjänst, men lösenorden har nollställts. Samma inloggningsuppgifter kan användas i fortsättningen också i andra webbtjänster. När du loggar in i den nya tjänsten för första gången, gör så här:<br><br>
-            1) Beställ ett nytt lösenord <a href="https://omatili.maanmittauslaitos.fi/user/password/?lang=sv">här</a> - du får instruktioner för bytet av lösenordet per e-post.<br>
-            2) När du har lyckats byta lösenordet tas du vidare till Omatili-tjänstens framsida. Återvänd till denna sida för att logga in till Paikkatietoikkuna med ditt nya lösenord.</p><br>
-            <p>Vid problem, kontakta vår kundservice paikkatietoikkuna@lantmateriverket.fi.</p>
+            <a href="/">Till karttjänsten</a>
         </div>
 
         <div class="login-form">
@@ -177,6 +163,9 @@
             <a href="https://omatili.maanmittauslaitos.fi/?lang=sv">Registrera</a>
         </div>
 
+        <div class="login-information">
+            <p>Vid problem, kontakta vår kundservice paikkatietoikkuna@lantmateriverket.fi.</p>
+        </div>
     </c:if>
 
     <c:if test="${language == 'en'}">
@@ -186,14 +175,7 @@
         </div>
 
         <div class="link-to-map">
-            <a href="/">back to the map service</a>
-        </div>
-
-        <div class="login-information">
-            <p>All existing user accounts have been moved to Omatili service provided by the National Land Survey of Finland. In the future, you can use the same account also in other web services. If you are entering the new service for the first time, please go through the following steps:<br><br>
-            1) Order a new password <a href="https://omatili.maanmittauslaitos.fi/user/password/?lang=en">here</a> - you will receive instructions by e-mail.<br>
-            2) After receiving the new password, you will be forwarded to the front page of Omatili service. Return to this page to log in to Paikkatietoikkuna.</p><br>
-            <p>If you encounter problems on this site, please contact our customer service: paikkatietoikkuna@maanmittauslaitos.fi. </p>
+            <a href="/">To the map service</a>
         </div>
 
         <div class="login-form">
@@ -214,6 +196,9 @@
             <a href="https://omatili.maanmittauslaitos.fi/?lang=en">Register</a>
         </div>
 
+        <div class="login-information">
+            <p>If you encounter problems on this site, please contact our customer service: paikkatietoikkuna@maanmittauslaitos.fi. </p>
+        </div>
     </c:if>
 
 
