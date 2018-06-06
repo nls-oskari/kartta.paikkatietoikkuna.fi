@@ -564,12 +564,4 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
             throw new ActionException("Failed to write file", e);
         }
     }
-    //handle id, axisflip, dimension
-    protected String getOutputLine (Coordinate coord, CoordTransFile opt){
-        String line = "";
-        if (",".equals(opt.getDecimalSeparator())){
-            line = line.replace('.',',');
-        }
-        return line;
-    }
 }
