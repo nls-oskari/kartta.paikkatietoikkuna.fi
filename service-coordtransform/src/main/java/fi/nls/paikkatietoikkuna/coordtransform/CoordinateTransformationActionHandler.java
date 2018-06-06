@@ -80,7 +80,6 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
     private JsonFactory jf;
     private String endPoint;
     private static final ObjectMapper mapper = new ObjectMapper();
-    private boolean hasMoreCoordinates;
     private static final int MB = 1024 * 1024;
     private final int maxFileSize = PropertyUtil.getOptional(PROP_MAX_FILE_SIZE_MB, 50) * MB;
     private final int maxCoordsToArray = PropertyUtil.getOptional(PROP_MAX_COORDS_TO_ARRAY, 100);
@@ -117,13 +116,13 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
 
     @Override
     public void handleAction(ActionParameters params) throws ActionException {
-        hasMoreCoordinates = false;
         String sourceCrs = getSourceCrs(params);
         String targetCrs = getTargetCrs(params);
         String transformType = params.getHttpParam(PARAM_TRANSFORM_TYPE);
         int sourceDimension = params.getRequiredParamInt(PARAM_SOURCE_DIMENSION);
         int targetDimension = params.getRequiredParamInt(PARAM_TARGET_DIMENSION);
         boolean transformToFile = false;
+        boolean hasMoreCoordinates = false;
         int queryDimension = sourceDimension;
         boolean addZeroes = false;
         if (sourceDimension == 2 && targetDimension == 3){
@@ -136,7 +135,7 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
 
         List<FileItem> fileItems;
         Map<String, String> formParams;
-        CoordTransFile importSettings;
+        CoordTransFile importSettings = null;
         CoordTransFile exportSettings = null;
         FileItem file;
         //TODO: is there better way to get transformation type??
@@ -209,21 +208,22 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
                 response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
                 writeFileResponse(out, coords, targetDimension, exportSettings, targetCrs);
             } else {
+                if (importSettings != null){
+                    hasMoreCoordinates = importSettings.isHasMoreCoordinates();
+                }
                 response.setContentType(IOHelper.CONTENT_TYPE_JSON);
-                writeJsonResponse(out, coords, inputCoords, targetDimension);
+                writeJsonResponse(out, coords, inputCoords, targetDimension, hasMoreCoordinates);
             }
         } catch (IOException e) {
             throw new ActionException("Failed to write JSON to client");
         }
     }
     private List<Coordinate> getCoordsFromJsonArray (ActionParameters params, int dimension, boolean addZeroes) throws ActionException{
-        List<Coordinate> coords;
         try (InputStream in = params.getRequest().getInputStream()) {
-            coords = parseInputCoordinates(in, dimension, addZeroes);
+            return parseInputCoordinates(in, dimension, addZeroes);
         } catch (IOException e) {
             throw new ActionException("Failed to parse input JSON!");
         }
-        return coords;
     }
 
     protected List<Coordinate> getCoordsFromFile (CoordTransFile sourceOptions, FileItem file, int dimension, boolean addZeroes, boolean storeLineEnds) throws ActionException{
@@ -318,7 +318,7 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
                     sourceOptions.addLineEnd(lineEnd);
                 }
                 if (coordinates.size() == maxCoordsToArray){ //TODO index
-                    this.hasMoreCoordinates = true;
+                    sourceOptions.setHasMoreCoordinates(true);
                     break;
                 }
             }
@@ -440,12 +440,12 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
         }
     }
 
-    protected void writeJsonResponse(OutputStream out, List<Coordinate> coords, List<Coordinate> inputCoords, final int dimension)
+    protected void writeJsonResponse(OutputStream out, List<Coordinate> coords, List<Coordinate> inputCoords, final int dimension, final boolean hasMoreCoordinates)
             throws ActionException {
         try (JsonGenerator json = jf.createGenerator(out)) {
             json.writeStartObject();
             json.writeNumberField(RESPONSE_DIMENSION, dimension);
-            json.writeBooleanField("hasMoreCoordinates", this.hasMoreCoordinates);
+            json.writeBooleanField("hasMoreCoordinates", hasMoreCoordinates);
             json.writeFieldName(RESPONSE_COORDINATES);
             json.writeStartArray();
             for (Coordinate coord : coords) {

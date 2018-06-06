@@ -17,6 +17,7 @@ public class CoordTransFile {
     private boolean writeLineEndings;
     private boolean writeCardinals;
 
+    private boolean hasMoreCoordinates = false;
     private List <String> headerRows = new ArrayList<String>();
     private List <String> ids = new ArrayList<String>();
     private List <String> lineEnds = new ArrayList<String>();
@@ -124,6 +125,12 @@ public class CoordTransFile {
         headerRows = from.getHeaderRows();
         ids = from.getIds();
         lineEnds = from.getLineEnds();
+    }
+    public boolean isHasMoreCoordinates() {
+        return hasMoreCoordinates;
+    }
+    public void setHasMoreCoordinates(boolean hasMoreCoordinates) {
+        this.hasMoreCoordinates = hasMoreCoordinates;
     }
 }
     
