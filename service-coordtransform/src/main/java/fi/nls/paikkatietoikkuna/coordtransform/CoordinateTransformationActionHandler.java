@@ -201,11 +201,13 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
         }
 
         HttpServletResponse response = params.getResponse();
+        if (transformToFile){
+            String fileName = addFileExt(exportSettings.getFileName());
+            response.setContentType(FILE_TYPE);
+            response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+        }
         try (OutputStream out = response.getOutputStream()) {
             if (transformToFile){
-                String fileName = addFileExt(exportSettings.getFileName());
-                response.setContentType(FILE_TYPE);
-                response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
                 writeFileResponse(out, coords, targetDimension, exportSettings, targetCrs);
             } else {
                 if (importSettings != null){
@@ -261,9 +263,7 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
             transformUnit = true;
         }
         double x,y,z;
-        try{
-            BufferedReader br = new BufferedReader(
-                    new InputStreamReader(file.getInputStream()));
+        try(BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()))){
             //skip row and store row as header row
             for (int i = 0 ; i < headerLineCount && (line=br.readLine())!=null ;i++) {
                 sourceOptions.addHeaderRow(line);
@@ -322,7 +322,6 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
                     break;
                 }
             }
-            br.close();
         } catch (UnsupportedEncodingException e){
             throw new ActionParamsException("Encoding - Invalid file");
         } catch (IOException e){
@@ -480,8 +479,7 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
 
     protected void writeFileResponse(OutputStream out, List<Coordinate> coords, final int dimension, CoordTransFile opts, String crs)
         throws ActionException {
-        try {
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
+        try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out))){
             String xCoord;
             String yCoord;
             String zCoord;
@@ -562,7 +560,6 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
                 }
                 bw.write(lineSeparator);
             }
-            bw.close();
         } catch (IOException e) {
             throw new ActionException("Failed to write file", e);
         }
