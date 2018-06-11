@@ -25,7 +25,11 @@
             body, html {
                 margin: 0;
                 padding: 0;
+                height: 100%;
                 background-color: #000;
+                background: url(/static/img/background_image.jpg);
+                background-size: cover;
+                background-attachment: fixed;
             }
 
             #sidebar {
@@ -47,12 +51,9 @@
                 display: block;
                 margin-left: 40px;
                 text-align: center;
-                background: url(/static/img/background_image.jpg);
-                background-size: cover;
-                background-attachment: fixed;
                 height: calc(100% - 100px);
                 position: relative;
-                padding-top: 100px;
+                padding-top: 80px;
             }
 
             .link-to-map {
@@ -64,6 +65,21 @@
 
             .link-to-map a {
                 font-size: 18px;
+            }
+
+            /* 450px content height */
+            .verticalSpacer {
+                height: calc((100% - 450px) / 2);
+            }
+
+            .logo {
+                text-align: center;
+            }
+
+            .logo > img {
+                width: 80%;
+                min-width: 400px;
+                max-width: 555px;
             }
 
             .login-information {
@@ -101,6 +117,10 @@
     <img id="pti-icon" src="/static/img/ikkuna.svg">
 </div>
 <div id="loginContainer">
+    <div class="logo">
+        <img src="/static/landingpage/resources/images/Paikkatietoikkuna_logo_rgb.svg" viewbox="0 0 100 100">
+    </div>
+    <div class="verticalSpacer"></div>
     <c:if test="${language == 'fi'}">
         <div id="language">
             <a href="./login?lang=sv">På svenska</a> -
