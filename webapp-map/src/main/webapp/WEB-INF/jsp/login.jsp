@@ -27,6 +27,8 @@
                 padding: 0;
                 height: 100%;
                 background-color: #000;
+            }
+            body {
                 background: url(/static/img/background_image.jpg);
                 background-size: cover;
                 background-attachment: fixed;
@@ -51,7 +53,7 @@
                 display: block;
                 margin-left: 40px;
                 text-align: center;
-                height: calc(100% - 100px);
+                height: calc(100% - 80px);
                 position: relative;
                 padding-top: 80px;
             }
@@ -67,22 +69,18 @@
                 font-size: 18px;
             }
 
-            /* 450px content height */
-            .verticalSpacer {
-                height: calc((100% - 450px) / 2);
-            }
-
             .logo {
                 text-align: center;
+                margin-bottom: 15px;
             }
 
             .logo > img {
                 width: 80%;
-                min-width: 400px;
+                min-width: 200px;
                 max-width: 555px;
             }
 
-            .login-information {
+            .login-information, .intro {
                 font-size: 18px;
                 color: #CCC;
                 max-width: 600px;
@@ -90,6 +88,20 @@
                 padding: 15px 15px;
                 background-color: rgba(0, 0, 0, 0.5);
                 line-height: 1.3em;
+            }
+            @media (max-width: 420px) {
+                .login-information, .intro {
+                    font-size: 15px;
+                }
+            }
+
+            .verticalSpacer {
+                /* content height 590px */
+                height: calc((100% - 590px) * 0.3)
+            }
+
+            .intro {
+                margin: 0 auto 30px auto;
             }
 
             input {
@@ -106,6 +118,21 @@
 
             a {
                 color: #CCC;
+            }
+
+            @media (max-width: 400px) {
+                #sidebar, .intro {
+                    display: none;
+                }
+                #loginContainer {
+                    margin-left: 0;
+                }
+            }
+            @media (min-width: 1000px) {
+                #loginContainer {
+                    height: calc(100% - 20px);
+                    padding-top: 20px;
+                }
             }
         }
     </style>
@@ -131,6 +158,12 @@
             <a href="/">Karttapalveluun</a>
         </div>
 
+        <div class="intro">
+            <p>
+                Kirjautuneena pääset julkaisemaan karttoja,
+                käyttämään analyysitoimintoa sekä tallentamaan omia kohteita ja paikkatietoaineistoja.
+            </p>
+        </div>
         <div class="login-form">
             <c:if test="${error}">
                 <b style="color:red;">Väärät kirjautumistiedot</b>
@@ -164,6 +197,13 @@
             <a href="/">Till karttjänsten</a>
         </div>
 
+        <div class="intro">
+            <p>
+                Som inloggade användare kan du skapa inbäddade kartor,
+                använda geografiska analys funktion, spara dina platser och importera datamängder från dina dator.
+
+            </p>
+        </div>
         <div class="login-form">
             <c:if test="${error}">
                 <b style="color:red;">Felaktiga uppgifter</b>
@@ -198,6 +238,11 @@
             <a href="/">To the map service</a>
         </div>
 
+        <div class="intro">
+            <p>
+                As logged-in user, you can publish maps, use spatial analysis function, save own places and add import your own datasets.
+            </p>
+        </div>
         <div class="login-form">
             <c:if test="${error}">
                 <b style="color:red;">Wrong credentials</b>
