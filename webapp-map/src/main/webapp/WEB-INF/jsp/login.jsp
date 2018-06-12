@@ -199,9 +199,8 @@
 
         <div class="intro">
             <p>
-                Som inloggade användare kan du skapa inbäddade kartor,
-                använda geografiska analys funktion, spara dina platser och importera datamängder från dina dator.
-
+                Som inloggad användare kan du publicera inbäddade kartor, använda analysfuntionen
+                samt spara egna platser och hämta egna datamängder till tjänsten.
             </p>
         </div>
         <div class="login-form">
@@ -240,7 +239,8 @@
 
         <div class="intro">
             <p>
-                As logged-in user, you can publish maps, use spatial analysis function, save own places and add import your own datasets.
+                As a logged-in user, you can publish embedded maps, use the analysis tool
+                and save your own places or import your own dataset.
             </p>
         </div>
         <div class="login-form">
