@@ -117,13 +117,11 @@ public class CoordTransService {
                 value =  value.multiply(DEC_TO_GRAD, DECIMAL_PRECISION).setScale(decimals,RoundingMode.HALF_UP);
                 return value.toPlainString();
             case "DD":
-                System.out.println ("DD" + getFormatedValue(value, decimals));
                 return getFormatedValue(value, decimals); //DD.dd
             case "DD MM":
                 separator = " ";
             case "DDMM":
                 result = getPrefixedIntPart (value); //DD
-                System.out.println ("DDMM" + result);
                 fractPart = value.remainder(BigDecimal.ONE);
                 value = fractPart.multiply(HOUR_TO_MIN, DECIMAL_PRECISION);
                 return result + separator + getFormatedValue(value, decimals);// add MM.mm
