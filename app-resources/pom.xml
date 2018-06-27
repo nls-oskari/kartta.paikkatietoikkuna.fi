@@ -6,7 +6,7 @@
     <parent>
         <groupId>fi.nls.paikkatietoikkuna</groupId>
         <artifactId>kartta</artifactId>
-        <version>1.4.0</version>
+        <version>1.5.0-SNAPSHOT</version>
     </parent>
     <artifactId>app-resources</artifactId>
     <packaging>jar</packaging>
