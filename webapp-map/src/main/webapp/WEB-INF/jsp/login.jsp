@@ -25,7 +25,13 @@
             body, html {
                 margin: 0;
                 padding: 0;
+                height: 100%;
                 background-color: #000;
+            }
+            body {
+                background: url(/static/img/background_image.jpg);
+                background-size: cover;
+                background-attachment: fixed;
             }
 
             #sidebar {
@@ -47,12 +53,9 @@
                 display: block;
                 margin-left: 40px;
                 text-align: center;
-                background: url(/static/img/background_image.jpg);
-                background-size: cover;
-                background-attachment: fixed;
-                height: calc(100% - 100px);
+                height: calc(100% - 80px);
                 position: relative;
-                padding-top: 100px;
+                padding-top: 80px;
             }
 
             .link-to-map {
@@ -66,7 +69,18 @@
                 font-size: 18px;
             }
 
-            .login-information {
+            .logo {
+                text-align: center;
+                margin-bottom: 15px;
+            }
+
+            .logo > img {
+                width: 80%;
+                min-width: 200px;
+                max-width: 555px;
+            }
+
+            .login-information, .intro {
                 font-size: 18px;
                 color: #CCC;
                 max-width: 600px;
@@ -74,6 +88,20 @@
                 padding: 15px 15px;
                 background-color: rgba(0, 0, 0, 0.5);
                 line-height: 1.3em;
+            }
+            @media (max-width: 420px) {
+                .login-information, .intro {
+                    font-size: 15px;
+                }
+            }
+
+            .verticalSpacer {
+                /* content height 590px */
+                height: calc((100% - 590px) * 0.3)
+            }
+
+            .intro {
+                margin: 0 auto 30px auto;
             }
 
             input {
@@ -91,6 +119,21 @@
             a {
                 color: #CCC;
             }
+
+            @media (max-width: 400px) {
+                #sidebar, .intro {
+                    display: none;
+                }
+                #loginContainer {
+                    margin-left: 0;
+                }
+            }
+            @media (min-width: 1000px) {
+                #loginContainer {
+                    height: calc(100% - 20px);
+                    padding-top: 20px;
+                }
+            }
         }
     </style>
     <!-- ############# /css ################# -->
@@ -101,6 +144,10 @@
     <img id="pti-icon" src="/static/img/ikkuna.svg">
 </div>
 <div id="loginContainer">
+    <div class="logo">
+        <img src="/static/landingpage/resources/images/Paikkatietoikkuna_logo_rgb.svg" viewbox="0 0 100 100">
+    </div>
+    <div class="verticalSpacer"></div>
     <c:if test="${language == 'fi'}">
         <div id="language">
             <a href="./login?lang=sv">På svenska</a> -
@@ -111,6 +158,12 @@
             <a href="/">Karttapalveluun</a>
         </div>
 
+        <div class="intro">
+            <p>
+                Kirjautuneena pääset julkaisemaan karttoja,
+                käyttämään analyysitoimintoa sekä tallentamaan omia kohteita ja paikkatietoaineistoja.
+            </p>
+        </div>
         <div class="login-form">
             <c:if test="${error}">
                 <b style="color:red;">Väärät kirjautumistiedot</b>
@@ -144,6 +197,12 @@
             <a href="/">Till karttjänsten</a>
         </div>
 
+        <div class="intro">
+            <p>
+                Som inloggad användare kan du publicera inbäddade kartor, använda analysfuntionen
+                samt spara egna platser och hämta egna datamängder till tjänsten.
+            </p>
+        </div>
         <div class="login-form">
             <c:if test="${error}">
                 <b style="color:red;">Felaktiga uppgifter</b>
@@ -178,6 +237,12 @@
             <a href="/">To the map service</a>
         </div>
 
+        <div class="intro">
+            <p>
+                As a logged-in user, you can publish embedded maps, use the analysis tool
+                and save your own places or import your own dataset.
+            </p>
+        </div>
         <div class="login-form">
             <c:if test="${error}">
                 <b style="color:red;">Wrong credentials</b>
