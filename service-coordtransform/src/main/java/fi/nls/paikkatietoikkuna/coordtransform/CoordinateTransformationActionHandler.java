@@ -6,10 +6,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.vividsolutions.jts.geom.Coordinate;
 import fi.nls.oskari.annotation.OskariActionRoute;
-import fi.nls.oskari.control.ActionException;
-import fi.nls.oskari.control.ActionHandler;
-import fi.nls.oskari.control.ActionParameters;
-import fi.nls.oskari.control.ActionParamsException;
+import fi.nls.oskari.control.*;
 import fi.nls.oskari.util.IOHelper;
 import fi.nls.oskari.util.PropertyUtil;
 import java.io.IOException;
@@ -24,7 +21,7 @@ import javax.servlet.http.HttpServletResponse;
  * Handles CoordinateTransformation action_route requests
  */
 @OskariActionRoute("CoordinateTransformation")
-public class CoordinateTransformationActionHandler extends ActionHandler {
+public class CoordinateTransformationActionHandler extends RestActionHandler {
 
     private static final String PROP_END_POINT = "coordtransform.endpoint";
 
@@ -53,7 +50,7 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
     }
 
     @Override
-    public void handleAction(ActionParameters params) throws ActionException {
+    public void handlePost(ActionParameters params) throws ActionException {
         String sourceCrs = getSourceCrs(params);
         String targetCrs = getTargetCrs(params);
         int dimension = sourceCrs.indexOf(',') > 0 ? 3 : 2;
