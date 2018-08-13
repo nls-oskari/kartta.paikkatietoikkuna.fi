@@ -7,10 +7,7 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vividsolutions.jts.geom.Coordinate;
 import fi.nls.oskari.annotation.OskariActionRoute;
-import fi.nls.oskari.control.ActionException;
-import fi.nls.oskari.control.ActionHandler;
-import fi.nls.oskari.control.ActionParameters;
-import fi.nls.oskari.control.ActionParamsException;
+import fi.nls.oskari.control.*;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.util.IOHelper;
@@ -39,14 +36,13 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.io.IOUtils;
 
 
 /**
  * Handles CoordinateTransformation action_route requests
  */
 @OskariActionRoute("CoordinateTransformation")
-public class CoordinateTransformationActionHandler extends ActionHandler {
+public class CoordinateTransformationActionHandler extends RestActionHandler {
     protected static final Logger log = LogFactory.getLogger(CoordinateTransformationActionHandler.class);
 
     private static final String PROP_END_POINT = "coordtransform.endpoint";
@@ -115,7 +111,7 @@ public class CoordinateTransformationActionHandler extends ActionHandler {
     }
 
     @Override
-    public void handleAction(ActionParameters params) throws ActionException {
+    public void handlePost(ActionParameters params) throws ActionException {
         String sourceCrs = getSourceCrs(params);
         String targetCrs = getTargetCrs(params);
         String transformType = params.getHttpParam(PARAM_TRANSFORM_TYPE);

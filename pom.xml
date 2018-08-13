@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>fi.nls.paikkatietoikkuna</groupId>
     <artifactId>kartta</artifactId>
-    <version>1.4.0-SNAPSHOT</version>
+    <version>1.5.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>kartta.paikkatietoikkuna.fi</name>
 
     <properties>
-        <oskari.version>1.47.0-SNAPSHOT</oskari.version>
+        <oskari.version>1.48.0-SNAPSHOT</oskari.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
