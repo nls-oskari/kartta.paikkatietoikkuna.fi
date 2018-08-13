@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Profile("preauth")
 @Configuration
@@ -32,8 +33,8 @@ public class OskariPreAuthenticationSecurityConfig extends WebSecurityConfigurer
         // Disable HSTS header, we don't want to force HTTPS for ALL requests
         http.headers().httpStrictTransportSecurity().disable();
 
-        // Disable CRSF tokens, would require changes in Oskari
-        http.csrf().disable();
+        // Enable cookie based CRSF tokens (requires frontend to send them back)
+        http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
 
         OskariRequestHeaderAuthenticationFilter filter = new OskariRequestHeaderAuthenticationFilter();
         filter.setAuthenticationSuccessHandler(new OskariPreAuthenticationSuccessHandler());
