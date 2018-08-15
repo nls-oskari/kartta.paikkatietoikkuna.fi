@@ -34,7 +34,11 @@ public class OskariPreAuthenticationSecurityConfig extends WebSecurityConfigurer
         http.headers().httpStrictTransportSecurity().disable();
 
         // Enable cookie based CRSF tokens (requires frontend to send them back)
-        http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
+        http.csrf()
+            // ignoring logout here doesn't help for some reason. It's ignored in OskariCommonSecurityConfig
+            // if not ignored, logout fails even if everything else works
+            //.ignoringAntMatchers("/logout")
+            .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
 
         OskariRequestHeaderAuthenticationFilter filter = new OskariRequestHeaderAuthenticationFilter();
         filter.setAuthenticationSuccessHandler(new OskariPreAuthenticationSuccessHandler());
@@ -49,16 +53,22 @@ public class OskariPreAuthenticationSecurityConfig extends WebSecurityConfigurer
         filter.setContinueFilterChainOnUnsuccessfulAuthentication(false);
 
         String authorizeUrl = PropertyUtil.get("oskari.authorize.url", "/auth");
+
         // use authorization for ALL requests
         http.authorizeRequests()
+                // IF accessing /auth -> require authentication (== headers)
+                .antMatchers(authorizeUrl).authenticated()
+                // Requests can be done anonymously
+                .anyRequest().permitAll();
+
+        // Add the preauth filter listening to /auth paths
+        http
+                .requestMatchers()
+                .antMatchers(authorizeUrl)
                 .and()
-                // IF accessing /auth
-                .antMatcher(authorizeUrl).authorizeRequests()
-                // require authentication (== headers)
-                .anyRequest().authenticated()
-                .and()
-                // select filter position
-                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
+                .authorizeRequests()
+                .anyRequest().authenticated();
     }
 
     @Autowired
