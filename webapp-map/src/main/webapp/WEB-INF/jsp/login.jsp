@@ -176,10 +176,10 @@
         </div>
 
         <div id="forgotPassword">
-            <a href="https://omatili.maanmittauslaitos.fi/user/password">Unohditko salasanasi?</a>
+            <a href="https://omatili.maanmittauslaitos.fi/user/password/paikkatietoikkuna?lang=fi">Unohditko salasanasi?</a>
         </div>
         <div id="register">
-            <a href="https://omatili.maanmittauslaitos.fi/">Rekisteröidy</a>
+            <a href="https://omatili.maanmittauslaitos.fi/user/new/paikkatietoikkuna?lang=fi">Rekisteröidy</a>
         </div>
 
         <div class="login-information">
@@ -216,10 +216,10 @@
 
 
         <div id="forgotPassword">
-            <a href="https://omatili.maanmittauslaitos.fi/user/password/?lang=sv">Har du glömt lösenordet?</a>
+            <a href="https://omatili.maanmittauslaitos.fi/user/password/paikkatietoikkuna?lang=sv">Har du glömt lösenordet?</a>
         </div>
         <div id="register">
-            <a href="https://omatili.maanmittauslaitos.fi/?lang=sv">Registrera</a>
+            <a href="https://omatili.maanmittauslaitos.fi/user/new/paikkatietoikkuna?lang=sv">Registrera</a>
         </div>
 
         <div class="login-information">
@@ -255,10 +255,10 @@
         </div>
 
         <div id="forgotPassword">
-            <a href="https://omatili.maanmittauslaitos.fi/user/password/?lang=en">Forgot password?</a>
+            <a href="https://omatili.maanmittauslaitos.fi/user/password/paikkatietoikkuna?lang=en">Forgot password?</a>
         </div>
         <div id="register">
-            <a href="https://omatili.maanmittauslaitos.fi/?lang=en">Register</a>
+            <a href="https://omatili.maanmittauslaitos.fi/user/new/paikkatietoikkuna?lang=en">Register</a>
         </div>
 
         <div class="login-information">
