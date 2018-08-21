@@ -33,8 +33,8 @@ public class TerrainProfileHandler extends ActionHandler {
     protected static final String PROPERTY_DEM_COVERAGE_ID = "terrain.profile.wcs.demCoverageId";
     protected static final String PROPERTY_NODATA_VALUE = "terrain.profile.wcs.noData";
 
-    // protected static final String JSON_PROPERTY_RESOLUTION = "resolution";
     protected static final String JSON_PROPERTY_NUM_POINTS = "numPoints";
+    protected static final String JSON_PROPERTY_SCALE_FACTOR = "scaleFactor";
     protected static final String JSON_PROPERTY_DISTANCE_FROM_START = "distanceFromStart";
 
     private static final int NUM_POINTS_MAX = 1000;
@@ -87,7 +87,7 @@ public class TerrainProfileHandler extends ActionHandler {
         LineString geom = (LineString) route.getGeometry();
         double[] points = GeoJSONHelper.getCoordinates2D(geom);
         int numPoints = Math.min(getNumPoints(route), NUM_POINTS_MAX);
-        // double resolution = getResolution(route);
+        double scaleFactor = getScaleFactor(route);
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("Number of coords:", (points.length / 2),
@@ -95,7 +95,7 @@ public class TerrainProfileHandler extends ActionHandler {
         }
 
         try {
-            writeResponse(params, tps.getTerrainProfile(points, numPoints));
+            writeResponse(params, tps.getTerrainProfile(points, numPoints, scaleFactor));
         } catch (ServiceException e) {
             throw new ActionException(e.getMessage(), e);
         }
@@ -124,26 +124,6 @@ public class TerrainProfileHandler extends ActionHandler {
         }
     }
 
-    /* TODO: Add support for selecting larger grid depending on resolution
-    protected double getResolution(Feature route) throws ActionParamsException {
-        Object resolution = route.getProperty(JSON_PROPERTY_RESOLUTION);
-        if (resolution == null) {
-            throw new ActionParamsException(String.format(
-                    "Required property '%s' missing!", JSON_PROPERTY_RESOLUTION));
-        }
-        if (resolution instanceof Number) {
-            return ((Number) resolution).doubleValue();
-        }
-        if (resolution instanceof String) {
-            try {
-                return Double.parseDouble((String) resolution);
-            } catch (NumberFormatException ignore) {}
-        }
-        throw new ActionParamsException(String.format(
-                "Invalid property value '%s'", JSON_PROPERTY_RESOLUTION));
-    }
-     */
-
     protected int getNumPoints(Feature route) throws ActionParamsException {
         Object numPoints = route.getProperty(JSON_PROPERTY_NUM_POINTS);
         if (numPoints == null) {
@@ -159,6 +139,23 @@ public class TerrainProfileHandler extends ActionHandler {
         }
         throw new ActionParamsException(String.format(
                 "Invalid property value '%s'", JSON_PROPERTY_NUM_POINTS));
+    }
+
+    protected double getScaleFactor(Feature route) {
+        Object scaleFactor = route.getProperty(JSON_PROPERTY_SCALE_FACTOR);
+        if (scaleFactor != null) {
+            if (scaleFactor instanceof Number) {
+                return ((Number) scaleFactor).doubleValue();
+            }
+            if (scaleFactor instanceof String) {
+                try {
+                    return Double.parseDouble((String) scaleFactor);
+                } catch (NumberFormatException ignore) {
+                    // Ignore
+                }
+            }
+        }
+        return 0;
     }
 
     protected void writeResponse(ActionParameters params, List<DataPoint> dp) throws ActionException {

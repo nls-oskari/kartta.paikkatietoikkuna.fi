@@ -1,22 +1,21 @@
 package fi.nls.paikkatietoikkuna.terrainprofile;
 
-import fi.nls.oskari.service.ServiceException;
-import fi.nls.oskari.util.IOHelper;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.oskari.wcs.capabilities.Capabilities;
 import org.oskari.wcs.coverage.CoverageDescription;
 import org.oskari.wcs.coverage.RectifiedGridCoverage;
-import org.oskari.wcs.geotiff.IFD;
-import org.oskari.wcs.geotiff.TIFFReader;
+import org.oskari.wcs.extension.scaling.ScaleByFactor;
 import org.oskari.wcs.gml.RectifiedGrid;
 import org.oskari.wcs.parser.CapabilitiesParser;
 import org.oskari.wcs.parser.CoverageDescriptionsParser;
@@ -25,9 +24,25 @@ import org.oskari.wcs.request.GetCapabilities;
 import org.oskari.wcs.request.GetCoverage;
 import org.xml.sax.SAXException;
 
+import fi.nls.oskari.service.ServiceException;
+import fi.nls.oskari.util.IOHelper;
+
 public class TerrainProfileService {
 
     private static final String FORMAT_TIFF = "image/tiff";
+    private static final int REQUEST_MAX_SIZE_METRES = 8192;
+    private static final int REQUEST_SIZE_DEFAULT = 1024;
+    private static final int SCALE_SIZE_THRESHOLD = 2048;
+    private static final double[] SCALE_FACTORS = {
+            1,
+            0.5,
+            0.25,
+            0.125,
+            0.0625,
+            0.03125,
+            0.015625,
+            0.0078125
+    };
 
     private final String endPoint;
     private final Capabilities caps;
@@ -37,8 +52,7 @@ public class TerrainProfileService {
     private final double offsetVectorX;
     private final double offsetVectorY;
 
-    public TerrainProfileService(String endPoint, String coverageId)
-            throws ServiceException {
+    public TerrainProfileService(String endPoint, String coverageId) throws ServiceException {
         try {
             this.endPoint = endPoint;
             caps = getCapabilities(endPoint);
@@ -81,52 +95,32 @@ public class TerrainProfileService {
      * @param coordinates
      *      array of doubles [e1,n1,...,eN,nN]
      *      e = east (m), n = north (m)
-     * @param resolution
-     *      meters per pixel (used to choose appropriate level of detail)
-     * @return
-     *      array of array of floats
+     * @param numPoints
+     *      number of coordinates you want back (interpolate more points if necessary)
+     * @param scaleFactor
+     *      non-positive considered null, must be 1/2^n, where 0<=n<=8
      */
-    public List<DataPoint> getTerrainProfile(double[] coordinates, int numPoints)
+    public List<DataPoint> getTerrainProfile(double[] coordinates, int numPoints, double scaleFactor)
             throws ServiceException {
-        if (coordinates.length / 2 < numPoints) {
+        double[] extent = GeomUtil.getEnvelope(coordinates);
+
+        scaleFactor = determineScaleFactor(scaleFactor, extent);
+
+        double dx = offsetVectorX / scaleFactor;
+        double dy = offsetVectorY / scaleFactor;
+
+        int tileSize = getTileSize(extent, dx);
+
+        if (coordinates.length < numPoints * 2) {
             coordinates = interpolate(coordinates, numPoints);
         }
-        int gridTileSize = getGridTileSize(coordinates);
-        List<DataPoint> points = createDataPoints(coordinates, gridTileSize);
-        points.sort(new Comparator<DataPoint>() {
-            @Override
-            public int compare(DataPoint o1, DataPoint o2) {
-                int d = o1.getGridTileY() - o2.getGridTileY();
-                if (d != 0) {
-                    return d;
-                }
-                d = o1.getGridTileX() - o2.getGridTileX();
-                return d != 0 ? d : o1.getGridTileOffset() - o2.getGridTileOffset();
-            }
-        });
 
-        int prevGridTileY = -1;
-        int prevGridTileX = -1;
-        int prevGridTileOff = -1;
-        float[] grid = null;
-        float altitude = 0f;
+        List<DataPoint> points = createDataPoints(coordinates, tileSize, dx, dy);
 
-        for (DataPoint point : points) {
-            int gridTileX = point.getGridTileX();
-            int gridTileY = point.getGridTileY();
-            int gridTileOff = point.getGridTileOffset();
-            if (prevGridTileX != gridTileX || prevGridTileY != gridTileY) {
-                 grid = getGrid(gridTileSize, gridTileX, gridTileY);
-                 prevGridTileOff = -1;
-                 prevGridTileX = gridTileX;
-                 prevGridTileY = gridTileY;
-            }
-            // Cache the altitude to a local variable, it might be needed multiple times
-            if (prevGridTileOff != gridTileOff) {
-                altitude = grid[gridTileOff];
-                prevGridTileOff = gridTileOff;
-            }
-            point.setAltitude(altitude);
+        Map<GridTile, List<DataPoint>> pointsByTile = points.stream()
+                .collect(Collectors.groupingBy(p -> new GridTile(p.getTileX(), p.getTileY())));
+        for (List<DataPoint> pointsInTile : pointsByTile.values()) {
+            setAltitudes(pointsInTile, scaleFactor, dx, dy);
         }
 
         points.sort(new Comparator<DataPoint>() {
@@ -136,6 +130,40 @@ public class TerrainProfileService {
             }
         });
         return points;
+    }
+
+    private int getTileSize(double[] extent, double dx) {
+        int tileSize = REQUEST_SIZE_DEFAULT;
+        while (tileSize * dx > REQUEST_MAX_SIZE_METRES && tileSize > 32) {
+            tileSize /= 2;
+        }
+        if (tileSize < 64) {
+            tileSize = 1;
+        }
+        return tileSize;
+    }
+
+    private double determineScaleFactor(double scaleFactor, double[] extent) {
+        if (scaleFactor > 0) {
+            for (double temp : SCALE_FACTORS) {
+                if (scaleFactor == temp) {
+                    return scaleFactor;
+                }
+            }
+        }
+
+        double widthMetres = extent[2] - extent[0];
+        double heightMetres = extent[3] - extent[1];
+        for (double sf : SCALE_FACTORS) {
+            double xPerPx = Math.abs(offsetVectorX / sf);
+            double yPerPx = Math.abs(offsetVectorY / sf);
+            int widthPx = (int) Math.round(widthMetres / xPerPx);
+            int heightPx = (int) Math.round(heightMetres / yPerPx);
+            if (widthPx <= SCALE_SIZE_THRESHOLD && heightPx <= SCALE_SIZE_THRESHOLD) {
+                return sf;
+            }
+        }
+        return SCALE_FACTORS[SCALE_FACTORS.length - 1];
     }
 
     private double[] interpolate(double[] coordinates, int numDataPoints) {
@@ -191,46 +219,7 @@ public class TerrainProfileService {
         return interpolated;
     }
 
-    /**
-     * Determine grid tile size to use for this request
-     *
-     * Logic here is to avoid creating large requests when the
-     * envelope is large, in that case we move from range requests
-     * to single point requests.
-     *
-     * When the envelope is small enough the overhead of
-     * unnecessary altitude values within the tiles
-     * is less than the overhead of making more service requests
-     *
-     * If the width or the height of the bounding envelope is over
-     * - 50k meters use use single data point requests
-     * - 25k meters use  64x64  tiles
-     * - 10k meters use 128x128 tiles
-     * - default to 256x256 tiles
-     *
-     * TODO: This method and the logic behind it can be further improved
-     * - Current method ignores the number of coordinates
-     * - For envelopes with small width and large height (or vice versa)
-     *     larger grid tile sizes could be beneficial (compared to 1 for example)
-     *     if there's a lot of coordinates (if not then probably not)
-     */
-    private int getGridTileSize(double[] coordinates) {
-        double[] envelope = GeomUtil.getEnvelope(coordinates);
-        double w = envelope[2] - envelope[0];
-        double h = envelope[3] - envelope[1];
-        if (w > 50000 || h > 50000) {
-            return 1;
-        }
-        if (w > 25000 || h > 25000) {
-            return 64;
-        }
-        if (w > 10000 || h > 10000) {
-            return 128;
-        }
-        return 256;
-    }
-
-    private List<DataPoint> createDataPoints(double[] coordinates, int gridTileSize) {
+    private List<DataPoint> createDataPoints(double[] coordinates, int tileSize, double dx, double dy) {
         double e0 = coordinates[0];
         double n0 = coordinates[1];
         double distFromStart = 0.0;
@@ -241,47 +230,71 @@ public class TerrainProfileService {
             double n1 = coordinates[i++];
             distFromStart += GeomUtil.getDistance(e1, n1, e0, n0);
 
+            int gridX = (int) Math.round(((e1 - originEast) / dx));
+            int gridY = (int) Math.round(((n1 - originNorth) / dy));
+            int tileX = gridX / tileSize;
+            int tileY = gridY / tileSize;
+
             DataPoint dp = new DataPoint();
             dp.setE(e1);
             dp.setN(n1);
             dp.setDistFromStart(distFromStart);
-
-            int gridX = (int) ((e1 - originEast) / offsetVectorX);
-            int gridY = (int) ((n1 - originNorth) / offsetVectorY);
-            if (gridTileSize == 1) {
-                dp.setGridTileX(gridX);
-                dp.setGridTileY(gridY);
-                dp.setGridTileOffset(0);
-            } else {
-                int gridTileX = gridX / gridTileSize;
-                int gridTileY = gridY / gridTileSize;
-                int gridTileOffsetX = gridX % gridTileSize;
-                int gridTileOffsetY = gridY % gridTileSize;
-                int gridTileOffset = gridTileOffsetY * gridTileSize + gridTileOffsetX;
-                dp.setGridTileX(gridTileX);
-                dp.setGridTileY(gridTileY);
-                dp.setGridTileOffset(gridTileOffset);
-            }
+            dp.setGridX(gridX);
+            dp.setGridY(gridY);
+            dp.setTileX(tileX);
+            dp.setTileY(tileY);
             points.add(dp);
+
             e0 = e1;
             n0 = n1;
         }
         return points;
     }
 
-    private float[] getGrid(int gridTileSize, int gridTileX, int gridTileY)
+    private void setAltitudes(List<DataPoint> pointsInTile, double scaleFactor, double dx, double dy)
             throws ServiceException {
-        double e0 = gridTileX * offsetVectorX * gridTileSize + originEast;
-        double n1 = gridTileY * offsetVectorY * gridTileSize + originNorth;
+        int minGridX = Integer.MAX_VALUE;
+        int minGridY = Integer.MAX_VALUE;
+        int maxGridX = Integer.MIN_VALUE;
+        int maxGridY = Integer.MIN_VALUE;
+
+        for (DataPoint p : pointsInTile)  {
+            int gridX = p.getGridX();
+            if (gridX < minGridX) {
+                minGridX = gridX;
+            }
+            if (gridX > maxGridX) {
+                maxGridX = gridX;
+            }
+            int gridY = p.getGridY();
+            if (gridY < minGridY) {
+                minGridY = gridY;
+            }
+            if (gridY > maxGridY) {
+                maxGridY = gridY;
+            }
+        }
+
+        double eastMin = originEast + minGridX * dx;
+        double eastMax;
+        if (minGridX == maxGridX) {
+            eastMax = eastMin + dx;
+        } else {
+            eastMax = originEast + (maxGridX + 1) * dx;
+        }
+
+        double northMin = originNorth + maxGridY * dy;
+        double northMax;
+        if (minGridY == maxGridY) {
+            northMax = northMin - dy;
+        } else {
+            northMax = originNorth + (minGridY - 1) * dy;
+        }
 
         GetCoverage getCoverage = new GetCoverage(caps, desc, FORMAT_TIFF);
-        if (gridTileSize == 1) {
-            getCoverage.subset("E", e0);
-            getCoverage.subset("N", n1);
-        } else {
-            getCoverage.subset("E", e0, e0 + offsetVectorX * gridTileSize);
-            getCoverage.subset("N", n1 + offsetVectorY * gridTileSize, n1);
-        }
+        getCoverage.subset("E", eastMin, eastMax);
+        getCoverage.subset("N", northMin, northMax);
+        getCoverage.scaling(new ScaleByFactor(scaleFactor));
         Map<String, String[]> getCoverageKVP = getCoverage.toKVP();
 
         String queryString = IOHelper.getParamsMultiValue(getCoverageKVP);
@@ -295,18 +308,19 @@ public class TerrainProfileService {
         }
 
         try {
-            TIFFReader tiff = new TIFFReader(ByteBuffer.wrap(response));
-            IFD ifd = tiff.getIFD(0);
-            boolean tiled = ifd.getTileOffsets() != null;
-            float[] data = new float[gridTileSize * gridTileSize];
-            if (tiled) {
-                tiff.readTile(0, 0, data);
-            } else {
-                tiff.readStrip(0, 0, data);
-            }
-            return data;
+            FloatGeoTIFF tiff = new FloatGeoTIFF(response);
+            setAltitudes(pointsInTile, tiff, minGridX, minGridY);
         } catch (IllegalArgumentException e) {
             throw new ServiceException("Unexpected TIFF file", e);
+        }
+    }
+
+    private void setAltitudes(List<DataPoint> pointsInTile, FloatGeoTIFF tiff, int minGridX, int minGridY) {
+        for (DataPoint point : pointsInTile) {
+            int x = point.getGridX() - minGridX;
+            int y = point.getGridY() - minGridY;
+            float alt = tiff.getValue(x, y);
+            point.setAltitude(alt);
         }
     }
 
