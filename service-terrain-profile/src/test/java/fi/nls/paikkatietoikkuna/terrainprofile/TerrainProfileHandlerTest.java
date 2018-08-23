@@ -24,7 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.ParserConfigurationException;
 import org.geojson.Feature;
-import org.geojson.GeoJsonObject;
 import org.geojson.LineString;
 import org.geojson.LngLatAlt;
 import org.geojson.MultiPoint;
@@ -160,29 +159,6 @@ public class TerrainProfileHandlerTest {
     }
 
     @Test
-    @Ignore("'resolution' property is not supported yet")
-    public void whenResolutionIsMissingThrowsActionParamsException() throws JsonProcessingException, ActionException {
-        Feature feature = new Feature();
-        LineString line = new LineString();
-        line.add(new LngLatAlt(100, 100));
-        line.add(new LngLatAlt(200, 100));
-        feature.setGeometry(line);
-        String routeStr = om.writeValueAsString(feature);
-
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        when(request.getParameter(TerrainProfileHandler.PARAM_ROUTE)).thenReturn(routeStr);
-        ActionParameters params = new ActionParameters();
-        params.setRequest(request);
-
-        try {
-            handler.handleAction(params);
-            fail();
-        } catch (ActionParamsException e) {
-            assertEquals("Required property 'resolution' missing!", e.getMessage());
-        }
-    }
-
-    @Test
     @Ignore("Depends on an outside API")
     public void whenInputIsCorrectWePass() throws IOException, ActionException, ServiceException {
         Feature feature = new Feature();
@@ -190,7 +166,6 @@ public class TerrainProfileHandlerTest {
         line.add(new LngLatAlt(500000, 6822000));
         line.add(new LngLatAlt(501000, 6823000));
         feature.setGeometry(line);
-        // feature.setProperty(TerrainProfileHandler.JSON_PROPERTY_RESOLUTION, 1.0);
         String routeStr = om.writeValueAsString(feature);
 
         HttpServletRequest request = mock(HttpServletRequest.class);
@@ -211,7 +186,7 @@ public class TerrainProfileHandlerTest {
     }
 
     @Test
-    public void testwriteMultiPointFeature() throws IOException {
+    public void testWriteMultiPointFeature() throws IOException {
         DataPoint p1 = new DataPoint();
         p1.setE(0.0);
         p1.setN(0.0);

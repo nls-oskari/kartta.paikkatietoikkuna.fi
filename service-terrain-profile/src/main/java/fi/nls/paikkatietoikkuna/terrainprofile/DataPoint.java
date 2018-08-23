@@ -5,9 +5,10 @@ public class DataPoint {
     private double e;
     private double n;
     private double distFromStart;
-    private int gridTileX;
-    private int gridTileY;
-    private int gridTileOffset;
+    private int gridX;
+    private int gridY;
+    private int tileX;
+    private int tileY;
     private float altitude;
 
     public double getE() {
@@ -34,28 +35,36 @@ public class DataPoint {
         this.distFromStart = distFromStart;
     }
 
-    public int getGridTileX() {
-        return gridTileX;
+    public int getGridX() {
+        return gridX;
     }
 
-    public void setGridTileX(int gridTileX) {
-        this.gridTileX = gridTileX;
+    public void setGridX(int gridX) {
+        this.gridX = gridX;
     }
 
-    public int getGridTileY() {
-        return gridTileY;
+    public int getGridY() {
+        return gridY;
     }
 
-    public void setGridTileY(int gridTileY) {
-        this.gridTileY = gridTileY;
+    public void setGridY(int gridY) {
+        this.gridY = gridY;
     }
 
-    public int getGridTileOffset() {
-        return gridTileOffset;
+    public int getTileX() {
+        return tileX;
     }
 
-    public void setGridTileOffset(int gridTileOffset) {
-        this.gridTileOffset = gridTileOffset;
+    public void setTileX(int tileX) {
+        this.tileX = tileX;
+    }
+
+    public int getTileY() {
+        return tileY;
+    }
+
+    public void setTileY(int tileY) {
+        this.tileY = tileY;
     }
 
     public float getAltitude() {
