@@ -33,9 +33,6 @@
             "maparcgis": {
               "bundlePath": "/Oskari/packages/mapping/ol3/"
             },
-            "mapstats": {
-              "bundlePath": "/Oskari/packages/mapping/ol3/"
-            },
             "mapmodule": {
               "bundlePath": "/Oskari/packages/mapping/ol3/"
             },

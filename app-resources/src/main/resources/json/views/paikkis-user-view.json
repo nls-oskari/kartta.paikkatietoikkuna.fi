@@ -57,8 +57,6 @@
       }, {
         "id": "Oskari.mapframework.bundle.mapmyplaces.plugin.MyPlacesLayerPlugin"
       }, {
-        "id": "Oskari.mapframework.bundle.mapstats.plugin.StatsLayerPlugin"
-      }, {
         "id": "Oskari.mapframework.bundle.mapanalysis.plugin.AnalysisLayerPlugin"
       }, {
 		"id": "Oskari.mapframework.bundle.mapmodule.plugin.GeoLocationPlugin"
