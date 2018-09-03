@@ -33,12 +33,17 @@ public class V1_5__modify_start_view implements JdbcMigration {
         updateCesiumViews(connection);
     }
 
-    private void updateCesiumViews(Connection connection) {
-        try {
-            List<Long> viewIds = getCesiumViewIds(connection);
-            OskariLayer baseLyr = getNlsBaseLayer(connection);
-            List<OskariLayer> tiles3dLayers = get3DTilesLayers(connection);
+    private void updateCesiumViews(Connection connection) throws SQLException {
 
+        List<Long> viewIds = getCesiumViewIds(connection);
+        OskariLayer baseLyr = getNlsBaseLayer(connection);
+        List<OskariLayer> tiles3dLayers = get3DTilesLayers(connection);
+
+        if (tiles3dLayers.isEmpty()) {
+            throw new RuntimeException("No 3D tiles map layers found! Add them manually before continuing.");
+        }
+
+        try {
             for(Long viewId : viewIds) {
                 View modifyView = viewService.getViewWithConf(viewId);
                 Bundle mapBundle = modifyView.getBundleByName(MAP_BUNDLE_NAME);
