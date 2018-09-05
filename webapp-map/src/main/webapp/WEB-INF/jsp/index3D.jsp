@@ -7,7 +7,7 @@
 <head>
     <title>${viewName}</title>
     <link rel="shortcut icon" href="/static/img/pti_icon.png" type="image/png" />
-    <script type="text/javascript" src="/Oskari/libraries/jquery/jquery-1.10.2.min.js">
+    <script type="text/javascript" src="/Oskari/libraries/jquery/jquery-3.3.1.min.js">
     </script>
 
     <!-- ############# css ################# -->
