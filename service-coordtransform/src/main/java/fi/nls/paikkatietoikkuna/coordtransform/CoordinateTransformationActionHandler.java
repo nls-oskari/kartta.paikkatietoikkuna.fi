@@ -49,6 +49,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
     private static final String PROP_MAX_FILE_SIZE_MB = "coordtransform.max.filesize.mb";
     private static final String PROP_MAX_COORDS_TO_ARRAY = "coordtransform.max.coordinates.array";
     private static final String PROP_MAX_COORDS_TO_QUERY = "coordtransform.max.coordinates.query";
+    private static final String PROP_COORDS_TO_PREVIEW = "coordtransform.preview.size";
 
     protected static final String PARAM_SOURCE_CRS = "sourceCrs";
     protected static final String PARAM_SOURCE_H_CRS = "sourceHeightCrs";
@@ -78,6 +79,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
     private static final int MB = 1024 * 1024;
     private final int maxFileSize = PropertyUtil.getOptional(PROP_MAX_FILE_SIZE_MB, 50) * MB;
     private final int maxCoordsToArray = PropertyUtil.getOptional(PROP_MAX_COORDS_TO_ARRAY, 100);
+    private final int coordsToPreview = PropertyUtil.getOptional(PROP_COORDS_TO_PREVIEW, 10);
     private final int maxCoordsToQuery = PropertyUtil.getOptional(PROP_MAX_COORDS_TO_QUERY, 500);
 
     // Store files smaller than 128kb in memory instead of writing them to disk
