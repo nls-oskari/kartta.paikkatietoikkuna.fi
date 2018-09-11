@@ -174,27 +174,8 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         if (coords.isEmpty()){
             throw new ActionParamsException("No coordinates", "no_coordinates");
         }
-        //TODO if coords.size() > maxCoordsToQuery -> post or split to multiple queries
-        String query = CoordTransService.createQuery(sourceCrs, targetCrs, coords, queryDimension);
-        HttpURLConnection conn;
-        try {
-            conn = IOHelper.getConnection(endPoint + query);
-        } catch (IOException e) {
-            throw new ActionException("Failed to connect to CoordTrans service");
-        }
-        byte[] serviceResponseBytes;
-        try {
-            serviceResponseBytes = IOHelper.readBytes(conn);
-        } catch (IOException e) {
-            throw new ActionException("Failed to read response from CoordTrans service");
-        }
 
-        try {
-            // Reuse the double array
-            CoordTransService.parseResponse(serviceResponseBytes, coords, targetDimension);
-        } catch (IllegalArgumentException e) {
-            throw new ActionException(e.getMessage());
-        }
+        transformBatch(sourceCrs, targetCrs, queryDimension, targetDimension, coords, maxCoordsToQuery);
 
         HttpServletResponse response = params.getResponse();
         if (transformToFile){
@@ -216,6 +197,58 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
             throw new ActionException("Failed to write JSON to client");
         }
     }
+
+    protected void transformBatch(String sourceCrs, String targetCrs, int queryDimension, int targetDimension,
+            List<Coordinate> coords, int maxCoordsToQuery) throws ActionException {
+        for (List<Coordinate> coordinates : partition(coords, maxCoordsToQuery)) {
+            transform(sourceCrs, targetCrs, queryDimension, targetDimension, coordinates);
+        }
+    }
+
+    protected void transform(String sourceCrs, String targetCrs,
+            int queryDimension, int targetDimension,
+            List<Coordinate> coordinates) throws ActionException {
+        String query = CoordTransService.createQuery(sourceCrs, targetCrs, coordinates, queryDimension);
+        HttpURLConnection conn;
+        try {
+            conn = IOHelper.getConnection(endPoint + query);
+        } catch (IOException e) {
+            throw new ActionException("Failed to connect to CoordTrans service");
+        }
+        byte[] serviceResponseBytes;
+        try {
+            serviceResponseBytes = IOHelper.readBytes(conn);
+        } catch (IOException e) {
+            throw new ActionException("Failed to read response from CoordTrans service");
+        }
+
+        try {
+            // Change Coordinate.xyz values in place
+            CoordTransService.parseResponse(serviceResponseBytes, coordinates, targetDimension);
+        } catch (IllegalArgumentException e) {
+            throw new ActionException(e.getMessage());
+        }
+    }
+
+    /**
+     * Split list into sublists
+     * @param list to split
+     * @param n size of each group (last one may be smaller)
+     */
+    public static <T> List<List<T>> partition(List<T> list, int n) {
+        List<List<T>> groups = new ArrayList<>();
+        List<T> group = new ArrayList<>();
+        groups.add(group);
+        for (T item : list) {
+            if (group.size() == n) {
+                group = new ArrayList<>();
+                groups.add(group);
+            }
+            group.add(item);
+        }
+        return groups;
+    }
+
     private List<Coordinate> getCoordsFromJsonArray (ActionParameters params, int dimension, boolean addZeroes) throws ActionException{
         try (InputStream in = params.getRequest().getInputStream()) {
             return parseInputCoordinates(in, dimension, addZeroes);
