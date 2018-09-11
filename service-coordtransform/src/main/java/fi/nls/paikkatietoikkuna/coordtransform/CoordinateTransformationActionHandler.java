@@ -47,9 +47,8 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
 
     private static final String PROP_END_POINT = "coordtransform.endpoint";
     private static final String PROP_MAX_FILE_SIZE_MB = "coordtransform.max.filesize.mb";
-    private static final String PROP_MAX_COORDS_TO_ARRAY = "coordtransform.max.coordinates.array";
+    private static final String PROP_MAX_COORDS_FILE_TO_ARRAY = "coordtransform.max.coordinates.array";
     private static final String PROP_MAX_COORDS_TO_QUERY = "coordtransform.max.coordinates.query";
-    private static final String PROP_COORDS_TO_PREVIEW = "coordtransform.preview.size";
 
     protected static final String PARAM_SOURCE_CRS = "sourceCrs";
     protected static final String PARAM_SOURCE_H_CRS = "sourceHeightCrs";
@@ -78,8 +77,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final int MB = 1024 * 1024;
     private final int maxFileSize = PropertyUtil.getOptional(PROP_MAX_FILE_SIZE_MB, 50) * MB;
-    private final int maxCoordsToArray = PropertyUtil.getOptional(PROP_MAX_COORDS_TO_ARRAY, 100);
-    private final int coordsToPreview = PropertyUtil.getOptional(PROP_COORDS_TO_PREVIEW, 10);
+    private final int maxCoordsF2A = PropertyUtil.getOptional(PROP_MAX_COORDS_FILE_TO_ARRAY, 100);
     private final int maxCoordsToQuery = PropertyUtil.getOptional(PROP_MAX_COORDS_TO_QUERY, 500);
 
     // Store files smaller than 128kb in memory instead of writing them to disk
@@ -153,7 +151,8 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                 formParams = getFormParams(fileItems);
                 file = getFile(fileItems);
                 importSettings = getFileSettings(formParams, KEY_IMPORT_SETTINGS);
-                coords = getCoordsFromFile (importSettings, file, sourceDimension, addZeroes, false);
+                coords = getCoordsFromFile(importSettings, file, sourceDimension, addZeroes, false, maxCoordsF2A);
+                hasMoreCoordinates = importSettings.isHasMoreCoordinates();
                 //store input coords
                 inputCoords = coords.stream().map(c -> new Coordinate (c)).collect(Collectors.toList());
                 break;
@@ -164,7 +163,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                 file = getFile(fileItems);
                 importSettings = getFileSettings(formParams, KEY_IMPORT_SETTINGS);
                 exportSettings = getFileSettings(formParams, KEY_EXPORT_SETTINGS);
-                coords = getCoordsFromFile (importSettings, file, sourceDimension, addZeroes, exportSettings.isWriteLineEndings());
+                coords = getCoordsFromFile(importSettings, file, sourceDimension, addZeroes, exportSettings.isWriteLineEndings(), Integer.MAX_VALUE);
                 exportSettings.copyArrays(importSettings);
                 break;
             default:
@@ -182,15 +181,14 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
             String fileName = addFileExt(exportSettings.getFileName());
             response.setContentType(FILE_TYPE);
             response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+        } else {
+            response.setContentType(IOHelper.CONTENT_TYPE_JSON);
         }
+
         try (OutputStream out = response.getOutputStream()) {
             if (transformToFile){
                 writeFileResponse(out, coords, targetDimension, exportSettings, targetCrs);
             } else {
-                if (importSettings != null){
-                    hasMoreCoordinates = importSettings.isHasMoreCoordinates();
-                }
-                response.setContentType(IOHelper.CONTENT_TYPE_JSON);
                 writeJsonResponse(out, coords, inputCoords, targetDimension, hasMoreCoordinates);
             }
         } catch (IOException e) {
@@ -257,7 +255,8 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         }
     }
 
-    protected List<Coordinate> getCoordsFromFile (CoordTransFile sourceOptions, FileItem file, int dimension, boolean addZeroes, boolean storeLineEnds) throws ActionException{
+    protected List<Coordinate> getCoordsFromFile(CoordTransFile sourceOptions, FileItem file,
+            int dimension, boolean addZeroes, boolean storeLineEnds, int limit) throws ActionException {
         List<Coordinate> coordinates = new ArrayList<>();
         String line;
         String[] coords;
@@ -346,7 +345,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                     }
                     sourceOptions.addLineEnd(lineEnd);
                 }
-                if (coordinates.size() == maxCoordsToArray){ //TODO index
+                if (coordinates.size() == limit) {
                     sourceOptions.setHasMoreCoordinates(true);
                     break;
                 }
@@ -429,7 +428,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                 throw new ActionParamsException("Expected input starting with an array", "invalid_coord");
             }
 
-            List<Coordinate> coordinates = new ArrayList<>(8);
+            List<Coordinate> coordinates = new ArrayList<>();
             JsonToken token;
 
             while ((token = parser.nextToken()) != JsonToken.END_ARRAY) {
