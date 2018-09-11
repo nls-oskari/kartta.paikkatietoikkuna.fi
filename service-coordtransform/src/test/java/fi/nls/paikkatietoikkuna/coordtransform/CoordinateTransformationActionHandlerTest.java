@@ -121,7 +121,7 @@ public class CoordinateTransformationActionHandlerTest {
     }
 
     @Test
-    // @Ignore("Requires connection to external service")
+    @Ignore("Requires connection to external service")
     public void transformTest() throws ActionException {
         CoordinateTransformationActionHandler handler = new CoordinateTransformationActionHandler("https://coordtrans.maanmittauslaitos.fi/CoordTrans-1.0/CoordTrans");
         int n = 1000;
