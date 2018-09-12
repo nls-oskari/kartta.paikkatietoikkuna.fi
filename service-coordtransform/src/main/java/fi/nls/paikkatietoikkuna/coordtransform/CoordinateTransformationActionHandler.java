@@ -139,9 +139,8 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                 transformToFile = true;
                 try {
                     exportSettings = mapper.readValue(params.getHttpParam(KEY_EXPORT_SETTINGS), CoordTransFile.class);
-                } catch (IOException e) {
-                    log.warn(e, e.getMessage());
-                    throw new ActionParamsException("Invalid export file settings", "invalid_export_settings");
+                } catch (Exception e) {
+                    throw new ActionParamsException("Invalid export file settings", "invalid_export_settings", e);
                 }
                 coords = getCoordsFromJsonArray (params, sourceDimension, addZeroes);
                 break;
@@ -191,8 +190,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                 writeJsonResponse(out, coords, inputCoords, targetDimension, hasMoreCoordinates);
             }
         } catch (IOException e) {
-            log.warn(e, e.getMessage());
-            throw new ActionException("Failed to write JSON to client");
+            throw new ActionException("Failed to write JSON to client", e);
         }
     }
 
@@ -224,23 +222,20 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         try {
             conn = IOHelper.getConnection(query);
         } catch (IOException e) {
-            log.warn(e, e.getMessage());
-            throw new ActionException("Failed to connect to CoordTrans service");
+            throw new ActionException("Failed to connect to CoordTrans service", e);
         }
         byte[] serviceResponseBytes;
         try {
             serviceResponseBytes = IOHelper.readBytes(conn);
         } catch (IOException e) {
-            log.warn(e, e.getMessage());
-            throw new ActionException("Failed to read response from CoordTrans service");
+            throw new ActionException("Failed to read response from CoordTrans service", e);
         }
 
         try {
             // Change Coordinate.xyz values in place
             CoordTransService.parseResponse(serviceResponseBytes, batch, dimension);
         } catch (IllegalArgumentException e) {
-            log.warn(e, e.getMessage());
-            throw new ActionException(e.getMessage());
+            throw new ActionException(e.getMessage(), e);
         }
     }
 
@@ -248,8 +243,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         try (InputStream in = params.getRequest().getInputStream()) {
             return parseInputCoordinates(in, dimension, addZeroes);
         } catch (IOException e) {
-            log.warn(e, e.getMessage());
-            throw new ActionException("Failed to parse input JSON!");
+            throw new ActionException("Failed to parse input JSON!", e);
         }
     }
 
@@ -349,23 +343,20 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                 }
             }
         } catch (UnsupportedEncodingException e){
-            log.warn(e, e.getMessage());
-            throw new ActionParamsException("Encoding - Invalid file");
+            throw new ActionParamsException("Encoding - Invalid file", e);
         } catch (IOException e){
-            log.warn(e, e.getMessage());
-            throw new ActionParamsException("IO - Invalid file");
+            throw new ActionParamsException("IO - Invalid file", e);
         } catch (NumberFormatException e){
-            log.warn(e, e.getMessage());
-            throw new ActionParamsException("Expected a number");
+            throw new ActionParamsException("Expected a number", e);
         }
         return coordinates;
     }
-    private CoordTransFile getFileSettings (Map<String, String> formParams, String key) throws ActionParamsException{
+
+    private CoordTransFile getFileSettings(Map<String, String> formParams, String key) throws ActionParamsException {
         try {
             return mapper.readValue(formParams.get(key), CoordTransFile.class);
         } catch (Exception e) {
-            log.warn(e, e.getMessage());
-            throw new ActionParamsException("Invalid file settings: " + key, "invalid_file_settings");
+            throw new ActionParamsException("Invalid file settings: " + key, "invalid_file_settings", e);
         }
     }
 
@@ -376,7 +367,6 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
             upload.setSizeMax(maxFileSize);
             return upload.parseRequest(request);
         } catch (UnsupportedEncodingException | FileUploadException e) {
-            log.warn(e, e.getMessage());
             throw new ActionException("Failed to read request", e);
         }
     }
@@ -592,7 +582,6 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                 bw.write(lineSeparator);
             }
         } catch (IOException e) {
-            log.warn(e, e.getMessage());
             throw new ActionException("Failed to write file", e);
         }
     }
