@@ -3,22 +3,23 @@ package fi.nls.paikkatietoikkuna.coordtransform;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vividsolutions.jts.geom.Coordinate;
-import fi.nls.oskari.control.ActionException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import org.junit.Ignore;
 import org.junit.Test;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vividsolutions.jts.geom.Coordinate;
+
+import fi.nls.oskari.control.ActionException;
 
 public class CoordinateTransformationActionHandlerTest {
 
@@ -121,28 +122,12 @@ public class CoordinateTransformationActionHandlerTest {
     }
 
     @Test
-    public void partitionTest() {
-        List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8);
-
-        List<List<Integer>> groups = CoordinateTransformationActionHandler.partition(numbers, 2);
-        assertEquals(4, groups.size());
-        assertEquals(1, groups.get(0).get(0).intValue());
-        assertEquals(8, groups.get(3).get(1).intValue());
-
-        groups = CoordinateTransformationActionHandler.partition(numbers, 3);
-        assertEquals(3, groups.size());
-        assertEquals(3, groups.get(0).size());
-        assertEquals(1, groups.get(0).get(0).intValue());
-        assertEquals(2, groups.get(2).size());
-        assertEquals(8, groups.get(2).get(1).intValue());
-    }
-
-    @Test
     @Ignore("Requires connection to external service")
     public void transformTest() throws ActionException {
         CoordinateTransformationActionHandler handler = new CoordinateTransformationActionHandler("https://coordtrans.maanmittauslaitos.fi/CoordTrans-1.0/CoordTrans");
+        int n = 1000;
 
-        List<Coordinate> coordinates = getRandomCoordinates(10, 300000, 600000, 6700000, 6730000, 0, 0);
+        List<Coordinate> coordinates = getRandomCoordinates(n, 300000, 600000, 6700000, 6730000, 0, 0);
         List<Coordinate> originals = coordinates.stream().map(c -> new Coordinate(c)).collect(Collectors.toList());
         handler.transform("EPSG:3067", "EPSG:4258", 2, 2, coordinates);
         assertEquals(originals.size(), coordinates.size());
@@ -158,38 +143,9 @@ public class CoordinateTransformationActionHandlerTest {
         for (int i = 0; i < originals.size(); i++) {
             Coordinate original = originals.get(i);
             Coordinate transformed = coordinates.get(i);
-            // Allow 1/10th of a millimeter error in transformation
-            assertEquals(original.x, transformed.x, 0.0001);
-            assertEquals(original.y, transformed.y, 0.0001);
-        }
-    }
-
-    @Test
-    @Ignore("Requires connection to external service")
-    public void transformBatchTest() throws ActionException {
-        CoordinateTransformationActionHandler handler = new CoordinateTransformationActionHandler("https://coordtrans.maanmittauslaitos.fi/CoordTrans-1.0/CoordTrans");
-        int n = 1000;
-        int groupSize = 100;
-
-        List<Coordinate> coordinates = getRandomCoordinates(n, 300000, 600000, 6700000, 6730000, 0, 0);
-        List<Coordinate> originals = coordinates.stream().map(c -> new Coordinate(c)).collect(Collectors.toList());
-        handler.transformBatch("EPSG:3067", "EPSG:4258", 2, 2, coordinates, groupSize);
-        assertEquals(originals.size(), coordinates.size());
-        for (int i = 0; i < originals.size(); i++) {
-            Coordinate original = originals.get(i);
-            Coordinate transformed = coordinates.get(i);
-            assertNotEquals(original.x, transformed.x, 0);
-            assertNotEquals(original.y, transformed.y, 0);
-        }
-
-        handler.transformBatch("EPSG:4258", "EPSG:3067", 2, 2, coordinates, groupSize);
-        assertEquals(originals.size(), coordinates.size());
-        for (int i = 0; i < originals.size(); i++) {
-            Coordinate original = originals.get(i);
-            Coordinate transformed = coordinates.get(i);
-            // Allow 1/10th of a millimeter error in transformation
-            assertEquals(original.x, transformed.x, 0.0001);
-            assertEquals(original.y, transformed.y, 0.0001);
+            // Allow 1mm error in transformation
+            assertEquals(original.x, transformed.x, 0.001);
+            assertEquals(original.y, transformed.y, 0.001);
         }
     }
 

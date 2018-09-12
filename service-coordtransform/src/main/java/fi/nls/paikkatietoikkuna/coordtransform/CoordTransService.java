@@ -26,25 +26,6 @@ public class CoordTransService {
     private static final BigDecimal DEC_TO_GRAD = BigDecimal.TEN.divide(new BigDecimal(9), DECIMAL_PRECISION);
     private static final BigDecimal DEC_TO_RAD = PI2.divide(new BigDecimal(360), DECIMAL_PRECISION);
 
-    public static String createQuery(String sourceCrs, String targetCrs,
-            final List<Coordinate> coords, final int dimension) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("?sourceCRS=").append(sourceCrs);
-        sb.append("&targetCRS=").append(targetCrs);
-        sb.append("&coords=");
-        for (int i = 0; i < coords.size(); i++) {
-            if (i > 0) {
-                sb.append(SEP_COORD);
-            }
-            Coordinate coord = coords.get(i);
-            sb.append(coord.x).append(SEP_COORD_PART).append(coord.y);
-            if (dimension == 3) {
-                sb.append(SEP_COORD_PART).append(coord.z);
-            }
-        }
-        return sb.toString();
-    }
-
     public static void parseResponse(byte[] resp, List<Coordinate> coords, final int dimension) {
         if (resp[0] == 'V') {
             // "Virhe: " - send only the part after prefix
