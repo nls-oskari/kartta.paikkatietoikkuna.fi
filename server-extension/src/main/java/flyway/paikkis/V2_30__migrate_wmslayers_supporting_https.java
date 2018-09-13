@@ -145,8 +145,8 @@ public class V2_30__migrate_wmslayers_supporting_https implements JdbcMigration 
         }
     }
 
-    private String getResourceMapping(String type, String modifiedURL, String name) {
-        return String.format("%s+%s+%s", type, modifiedURL, name);
+    private String getResourceMapping(String type, String url, String name) {
+        return String.format("%s+%s+%s", type, url, name);
     }
 
     protected static class WMSLayer {
