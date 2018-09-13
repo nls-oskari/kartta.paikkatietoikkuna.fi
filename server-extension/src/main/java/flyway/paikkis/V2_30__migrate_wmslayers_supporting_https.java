@@ -140,7 +140,7 @@ public class V2_30__migrate_wmslayers_supporting_https implements JdbcMigration 
             ps.setString(2, oldMapping);
             int n = ps.executeUpdate();
             if (n == 0) {
-                LOG.info("Updated zero rows oskari_maplayer WHERE id=:", layer.getId());
+                LOG.info("Updated zero rows oskari_resource WHERE resource_mapping=:", oldMapping);
             }
         }
     }
