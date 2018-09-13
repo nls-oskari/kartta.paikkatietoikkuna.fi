@@ -24,9 +24,12 @@ import fi.nls.oskari.util.IOHelper;
 public class V2_30__migrate_wmslayers_supporting_https implements JdbcMigration {
 
     private static final Logger LOG = LogFactory.getLogger(V2_30__migrate_wmslayers_supporting_https.class);
+    private static final int TIMEOUT_MS_CONNECT = 1000;
+    private static final int TIMEOUT_MS_READ = 5000;
 
     public void migrate(Connection conn) throws Exception {
-        Map<String, List<WMSLayer>> layersByURL = getHTTPWMSLayers(conn).stream()
+        List<WMSLayer> httpWMSLayers = getHTTPWMSLayers(conn);
+        Map<String, List<WMSLayer>> layersByURL = httpWMSLayers.stream()
                 .filter(layer -> !isMultipleURL(layer))
                 .map(layer -> normalizeURL(layer))
                 .collect(Collectors.groupingBy(WMSLayer::getModifiedURL));
@@ -82,7 +85,7 @@ public class V2_30__migrate_wmslayers_supporting_https implements JdbcMigration 
 
     private boolean isMultipleURL(WMSLayer layer) {
         // URL like http://a.foo.bar,http://b.foo.bar,http://c.foo.bar
-        return layer.getUrl().indexOf("'http://", 5) > 0;
+        return layer.getUrl().indexOf("http://", 5) > 0;
     }
 
     private WMSLayer normalizeURL(WMSLayer layer) {
@@ -97,23 +100,35 @@ public class V2_30__migrate_wmslayers_supporting_https implements JdbcMigration 
             }
         }
         url = url.replace("http://", "https://");
-        LOG.debug("Changed URL", layer.getUrl(), "to", url);
         layer.setModifiedURL(url);
+        if (!url.equals(layer.getUrl())) {
+            LOG.debug("Changed URL", layer.getUrl(), "to", url);
+        }
         return layer;
     }
 
     /**
      * Tests if service responds with 200 OK and with a content type that contains 'xml' (case-insensitive)
      */
-    private boolean checkForHTTPSsupport(String url, String username, String password) {
-        String getCapabilities = url + "service=WMS&request=GetCapabilities"; 
+    private static boolean checkForHTTPSsupport(String url, String username, String password) {
         try {
+            String getCapabilities = url + "service=WMS&request=GetCapabilities";
             HttpURLConnection conn = IOHelper.getConnection(getCapabilities, username, password);
+            conn.setConnectTimeout(TIMEOUT_MS_CONNECT);
+            conn.setReadTimeout(TIMEOUT_MS_READ);
             int sc = conn.getResponseCode();
+            if (sc != 200) {
+                LOG.debug(getCapabilities, "returned status:", sc);
+                return false;
+            }
             String contentType = conn.getContentType();
-            return sc == 200 && contentType.toLowerCase().contains("xml");
+            if (!contentType.toLowerCase().contains("xml")) {
+                LOG.debug(getCapabilities, "returned unexpected content type:", contentType);
+                return false;
+            }
+            return true;
         } catch (Exception e) {
-            LOG.info(e, e.getMessage());
+            LOG.info(e.getMessage());
             return false;
         }
     }
