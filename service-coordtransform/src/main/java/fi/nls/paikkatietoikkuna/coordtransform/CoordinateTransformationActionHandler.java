@@ -47,9 +47,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
 
     private static final String PROP_END_POINT = "coordtransform.endpoint";
     private static final String PROP_MAX_FILE_SIZE_MB = "coordtransform.max.filesize.mb";
-    private static final String PROP_MAX_COORDS_TO_ARRAY = "coordtransform.max.coordinates.array";
-    private static final String PROP_MAX_COORDS_TO_QUERY = "coordtransform.max.coordinates.query";
-    private static final String PROP_COORDS_TO_PREVIEW = "coordtransform.preview.size";
+    private static final String PROP_MAX_COORDS_FILE_TO_ARRAY = "coordtransform.max.coordinates.array";
 
     protected static final String PARAM_SOURCE_CRS = "sourceCrs";
     protected static final String PARAM_SOURCE_H_CRS = "sourceHeightCrs";
@@ -78,9 +76,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final int MB = 1024 * 1024;
     private final int maxFileSize = PropertyUtil.getOptional(PROP_MAX_FILE_SIZE_MB, 50) * MB;
-    private final int maxCoordsToArray = PropertyUtil.getOptional(PROP_MAX_COORDS_TO_ARRAY, 100);
-    private final int coordsToPreview = PropertyUtil.getOptional(PROP_COORDS_TO_PREVIEW, 10);
-    private final int maxCoordsToQuery = PropertyUtil.getOptional(PROP_MAX_COORDS_TO_QUERY, 500);
+    private final int maxCoordsF2A = PropertyUtil.getOptional(PROP_MAX_COORDS_FILE_TO_ARRAY, 100);
 
     // Store files smaller than 128kb in memory instead of writing them to disk
     private static final int MAX_SIZE_MEMORY = 128 * 1024;
@@ -143,8 +139,8 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                 transformToFile = true;
                 try {
                     exportSettings = mapper.readValue(params.getHttpParam(KEY_EXPORT_SETTINGS), CoordTransFile.class);
-                } catch (IOException e) {
-                    throw new ActionParamsException("Invalid export file settings", "invalid_export_settings");
+                } catch (Exception e) {
+                    throw new ActionParamsException("Invalid export file settings", "invalid_export_settings", e);
                 }
                 coords = getCoordsFromJsonArray (params, sourceDimension, addZeroes);
                 break;
@@ -153,7 +149,8 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                 formParams = getFormParams(fileItems);
                 file = getFile(fileItems);
                 importSettings = getFileSettings(formParams, KEY_IMPORT_SETTINGS);
-                coords = getCoordsFromFile (importSettings, file, sourceDimension, addZeroes, false);
+                coords = getCoordsFromFile(importSettings, file, sourceDimension, addZeroes, false, maxCoordsF2A);
+                hasMoreCoordinates = importSettings.isHasMoreCoordinates();
                 //store input coords
                 inputCoords = coords.stream().map(c -> new Coordinate (c)).collect(Collectors.toList());
                 break;
@@ -164,7 +161,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                 file = getFile(fileItems);
                 importSettings = getFileSettings(formParams, KEY_IMPORT_SETTINGS);
                 exportSettings = getFileSettings(formParams, KEY_EXPORT_SETTINGS);
-                coords = getCoordsFromFile (importSettings, file, sourceDimension, addZeroes, exportSettings.isWriteLineEndings());
+                coords = getCoordsFromFile(importSettings, file, sourceDimension, addZeroes, exportSettings.isWriteLineEndings(), Integer.MAX_VALUE);
                 exportSettings.copyArrays(importSettings);
                 break;
             default:
@@ -174,57 +171,84 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         if (coords.isEmpty()){
             throw new ActionParamsException("No coordinates", "no_coordinates");
         }
-        //TODO if coords.size() > maxCoordsToQuery -> post or split to multiple queries
-        String query = CoordTransService.createQuery(sourceCrs, targetCrs, coords, queryDimension);
-        HttpURLConnection conn;
-        try {
-            conn = IOHelper.getConnection(endPoint + query);
-        } catch (IOException e) {
-            throw new ActionException("Failed to connect to CoordTrans service");
-        }
-        byte[] serviceResponseBytes;
-        try {
-            serviceResponseBytes = IOHelper.readBytes(conn);
-        } catch (IOException e) {
-            throw new ActionException("Failed to read response from CoordTrans service");
-        }
 
-        try {
-            // Reuse the double array
-            CoordTransService.parseResponse(serviceResponseBytes, coords, targetDimension);
-        } catch (IllegalArgumentException e) {
-            throw new ActionException(e.getMessage());
-        }
+        transform(sourceCrs, targetCrs, queryDimension, targetDimension, coords);
 
         HttpServletResponse response = params.getResponse();
         if (transformToFile){
             String fileName = addFileExt(exportSettings.getFileName());
             response.setContentType(FILE_TYPE);
             response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+        } else {
+            response.setContentType(IOHelper.CONTENT_TYPE_JSON);
         }
+
         try (OutputStream out = response.getOutputStream()) {
             if (transformToFile){
                 writeFileResponse(out, coords, targetDimension, exportSettings, targetCrs);
             } else {
-                if (importSettings != null){
-                    hasMoreCoordinates = importSettings.isHasMoreCoordinates();
-                }
-                response.setContentType(IOHelper.CONTENT_TYPE_JSON);
                 writeJsonResponse(out, coords, inputCoords, targetDimension, hasMoreCoordinates);
             }
         } catch (IOException e) {
-            throw new ActionException("Failed to write JSON to client");
+            throw new ActionException("Failed to write JSON to client", e);
         }
     }
+
+    protected void transform(String sourceCrs, String targetCrs,
+            int queryDimension, int targetDimension,
+            List<Coordinate> coords) throws ActionException {
+        CoordTransQueryBuilder queryBuilder = new CoordTransQueryBuilder(endPoint, sourceCrs, targetCrs, queryDimension);
+
+        List<Coordinate> batch = new ArrayList<>();
+        for (Coordinate c : coords) {
+            boolean fit = queryBuilder.add(c);
+            if (!fit) {
+                transform(queryBuilder.build(), batch, targetDimension);
+                queryBuilder.reset();
+                batch.clear();
+                queryBuilder.add(c);
+            }
+            batch.add(c);
+        }
+        transform(queryBuilder.build(), batch, targetDimension);
+    }
+
+    protected void transform(String query, List<Coordinate> batch, int dimension) throws ActionException {
+        if (batch.size() == 0) {
+            return;
+        }
+
+        HttpURLConnection conn;
+        try {
+            conn = IOHelper.getConnection(query);
+        } catch (IOException e) {
+            throw new ActionException("Failed to connect to CoordTrans service", e);
+        }
+        byte[] serviceResponseBytes;
+        try {
+            serviceResponseBytes = IOHelper.readBytes(conn);
+        } catch (IOException e) {
+            throw new ActionException("Failed to read response from CoordTrans service", e);
+        }
+
+        try {
+            // Change Coordinate.xyz values in place
+            CoordTransService.parseResponse(serviceResponseBytes, batch, dimension);
+        } catch (IllegalArgumentException e) {
+            throw new ActionException(e.getMessage(), e);
+        }
+    }
+
     private List<Coordinate> getCoordsFromJsonArray (ActionParameters params, int dimension, boolean addZeroes) throws ActionException{
         try (InputStream in = params.getRequest().getInputStream()) {
             return parseInputCoordinates(in, dimension, addZeroes);
         } catch (IOException e) {
-            throw new ActionException("Failed to parse input JSON!");
+            throw new ActionException("Failed to parse input JSON!", e);
         }
     }
 
-    protected List<Coordinate> getCoordsFromFile (CoordTransFile sourceOptions, FileItem file, int dimension, boolean addZeroes, boolean storeLineEnds) throws ActionException{
+    protected List<Coordinate> getCoordsFromFile(CoordTransFile sourceOptions, FileItem file,
+            int dimension, boolean addZeroes, boolean storeLineEnds, int limit) throws ActionException {
         List<Coordinate> coordinates = new ArrayList<>();
         String line;
         String[] coords;
@@ -313,25 +337,26 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                     }
                     sourceOptions.addLineEnd(lineEnd);
                 }
-                if (coordinates.size() == maxCoordsToArray){ //TODO index
+                if (coordinates.size() == limit) {
                     sourceOptions.setHasMoreCoordinates(true);
                     break;
                 }
             }
         } catch (UnsupportedEncodingException e){
-            throw new ActionParamsException("Encoding - Invalid file");
+            throw new ActionParamsException("Encoding - Invalid file", e);
         } catch (IOException e){
-            throw new ActionParamsException("IO - Invalid file");
+            throw new ActionParamsException("IO - Invalid file", e);
         } catch (NumberFormatException e){
-            throw new ActionParamsException("Expected a number");
+            throw new ActionParamsException("Expected a number", e);
         }
         return coordinates;
     }
-    private CoordTransFile getFileSettings (Map<String, String> formParams, String key) throws ActionParamsException{
+
+    private CoordTransFile getFileSettings(Map<String, String> formParams, String key) throws ActionParamsException {
         try {
             return mapper.readValue(formParams.get(key), CoordTransFile.class);
         } catch (Exception e) {
-            throw new ActionParamsException("Invalid file settings: " + key, "invalid_file_settings");
+            throw new ActionParamsException("Invalid file settings: " + key, "invalid_file_settings", e);
         }
     }
 
@@ -396,7 +421,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                 throw new ActionParamsException("Expected input starting with an array", "invalid_coord");
             }
 
-            List<Coordinate> coordinates = new ArrayList<>(8);
+            List<Coordinate> coordinates = new ArrayList<>();
             JsonToken token;
 
             while ((token = parser.nextToken()) != JsonToken.END_ARRAY) {

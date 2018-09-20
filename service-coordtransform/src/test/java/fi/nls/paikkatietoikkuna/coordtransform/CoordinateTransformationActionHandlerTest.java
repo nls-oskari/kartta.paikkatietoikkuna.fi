@@ -1,20 +1,25 @@
 package fi.nls.paikkatietoikkuna.coordtransform;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vividsolutions.jts.geom.Coordinate;
-import fi.nls.oskari.control.ActionException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
+import org.junit.Ignore;
 import org.junit.Test;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vividsolutions.jts.geom.Coordinate;
+
+import fi.nls.oskari.control.ActionException;
 
 public class CoordinateTransformationActionHandlerTest {
 
@@ -64,7 +69,7 @@ public class CoordinateTransformationActionHandlerTest {
                 + "\"decimalCount\":5,"
                 + "\"headerLineCount\":2}";
         try {
-             return mapper.readValue(json, CoordTransFile.class);
+            return mapper.readValue(json, CoordTransFile.class);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -72,13 +77,27 @@ public class CoordinateTransformationActionHandlerTest {
     }
 
     private List<Coordinate> getRandomCoordinates(int n, double min, double max) {
+        return getRandomCoordinates(n, min, max, min, max, min, max);
+    }
+
+    private List<Coordinate> getRandomCoordinates(int n,
+            double minX, double maxX,
+            double minY, double maxY,
+            double minZ, double maxZ) {
         ThreadLocalRandom random = ThreadLocalRandom.current();
         List<Coordinate> coordinates = new ArrayList<>(n);
         for (int i = 0; i < n; i++) {
-            Coordinate coord = new Coordinate(
-                    random.nextDouble(min, max),
-                    random.nextDouble(min, max),
-                    random.nextDouble(min, max));
+            Coordinate coord;
+            if (minZ == 0 && maxZ == 0) {
+                coord = new Coordinate(
+                        random.nextDouble(minX, maxX),
+                        random.nextDouble(minY, maxY));
+            } else {
+                coord = new Coordinate(
+                        random.nextDouble(minX, maxX),
+                        random.nextDouble(minY, maxY),
+                        random.nextDouble(minZ, maxZ));
+            }
             coordinates.add(coord);
         }
         return coordinates;
@@ -101,4 +120,33 @@ public class CoordinateTransformationActionHandlerTest {
         json.close();
         return baos.toByteArray();
     }
+
+    @Test
+    @Ignore("Requires connection to external service")
+    public void transformTest() throws ActionException {
+        CoordinateTransformationActionHandler handler = new CoordinateTransformationActionHandler("https://coordtrans.maanmittauslaitos.fi/CoordTrans-1.0/CoordTrans");
+        int n = 1000;
+
+        List<Coordinate> coordinates = getRandomCoordinates(n, 300000, 600000, 6700000, 6730000, 0, 0);
+        List<Coordinate> originals = coordinates.stream().map(c -> new Coordinate(c)).collect(Collectors.toList());
+        handler.transform("EPSG:3067", "EPSG:4258", 2, 2, coordinates);
+        assertEquals(originals.size(), coordinates.size());
+        for (int i = 0; i < originals.size(); i++) {
+            Coordinate original = originals.get(i);
+            Coordinate transformed = coordinates.get(i);
+            assertNotEquals(original.x, transformed.x, 0);
+            assertNotEquals(original.y, transformed.y, 0);
+        }
+
+        handler.transform("EPSG:4258", "EPSG:3067", 2, 2, coordinates);
+        assertEquals(originals.size(), coordinates.size());
+        for (int i = 0; i < originals.size(); i++) {
+            Coordinate original = originals.get(i);
+            Coordinate transformed = coordinates.get(i);
+            // Allow 1mm error in transformation
+            assertEquals(original.x, transformed.x, 0.001);
+            assertEquals(original.y, transformed.y, 0.001);
+        }
+    }
+
 }
