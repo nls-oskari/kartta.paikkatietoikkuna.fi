@@ -111,9 +111,13 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
 
     @Override
     public void handlePost(ActionParameters params) throws ActionException {
+        String transformType = params.getHttpParam(PARAM_TRANSFORM_TYPE);
+        if ("F2R".equals(transformType)){ // parse file to array without transformation
+            readFileToJsonResonse(params);
+        }
         String sourceCrs = getSourceCrs(params);
         String targetCrs = getTargetCrs(params);
-        String transformType = params.getHttpParam(PARAM_TRANSFORM_TYPE);
+
         int sourceDimension = params.getRequiredParamInt(PARAM_SOURCE_DIMENSION);
         int targetDimension = params.getRequiredParamInt(PARAM_TARGET_DIMENSION);
         boolean transformToFile = false;
@@ -315,9 +319,8 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                 if (coords.length < coordDimension){
                     if (firstCoord == true){
                         throw new ActionParamsException("Couldn't parse coordinate on the first line", createErrorResponse("invalid_first_coord"));
-                    } else {
-                        throw new ActionParamsException("Invalid coordinate line", createErrorInLineResponse(lineIndex, line, null));
                     }
+                    throw new ActionParamsException("Invalid coordinate line", createErrorInLineResponse(lineIndex, line, null));
                 }
                 if (transformUnit){
                     x = CoordTransService.transformUnitToDegree (coords[xIndex], unit);
@@ -445,7 +448,104 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         }
         return targetCrs;
     }
+    protected void readFileToJsonResonse (ActionParameters params) throws ActionException {
+        List<FileItem> fileItems = getFileItems(params.getRequest());
+        Map<String, String> formParams = getFormParams(fileItems);
+        FileItem file = getFile(fileItems);
+        CoordTransFile sourceOptions = getFileSettings(formParams, KEY_IMPORT_SETTINGS);
+        int dimension = params.getHttpParam(PARAM_SOURCE_DIMENSION, 2);
+        HttpServletResponse response = params.getResponse();
+        response.setContentType(IOHelper.CONTENT_TYPE_JSON);
+        boolean hasMoreCoordinates = false;
 
+        String line;
+        int xIndex = 0;
+        int yIndex = 1;
+        int zIndex = 2;
+        int coordDimension = dimension;
+        int headerLineCount = sourceOptions.getHeaderLineCount();
+        String coordSeparator = sourceOptions.getCoordinateSeparator();
+        boolean firstLine = true;
+        if (!coordinateSeparators.containsKey(coordSeparator)){
+            throw new ActionParamsException("Invalid coordinate separator: " + coordSeparator);
+        }
+        // get actual separator
+        coordSeparator = coordinateSeparators.get(coordSeparator);
+        if (sourceOptions.isAxisFlip()){
+            xIndex = 1;
+            yIndex = 0;
+        }
+        if (sourceOptions.isPrefixId()){
+            xIndex++;
+            yIndex++;
+            zIndex++;
+            coordDimension++;
+        }
+        try (OutputStream out = response.getOutputStream()) {
+            try (JsonGenerator json = jf.createGenerator(out)) {
+                json.writeStartObject();
+                json.writeNumberField(RESPONSE_DIMENSION, dimension);
+                json.writeFieldName(RESPONSE_INPUT_COORDINATES);
+                json.writeStartArray();
+                try(BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()))){
+                    for (int i = 0 ; (line=br.readLine())!=null ; i++) {
+                        // skip header and empty rows
+                        if (i < headerLineCount || line.trim().isEmpty()){
+                            continue;
+                        }
+                        String [] coord = line.split(coordSeparator);
+                        if (coord.length < coordDimension){
+                            json.writeEndArray();
+                            if(firstLine == true){
+                                writeJsonError(json, "invalid_first_coord");
+                                throw new ActionParamsException("Couldn't parse coordinate on the first line", createErrorResponse("invalid_first_coord"));
+                            }
+                            int lineNumber = i + 1;
+                            writeInLineJsonError(json, lineNumber, line);
+                            throw new ActionParamsException("Invalid coordinate line", createErrorInLineResponse(lineNumber, line, null));
+                        }
+                        json.writeStartArray();
+                        json.writeString(coord[xIndex]);
+                        json.writeString(coord[yIndex]);
+                        if (dimension == 3){
+                            json.writeString(coord[zIndex]);
+                        }
+                        json.writeEndArray();
+                        firstLine = false;
+                        if (i+1+headerLineCount == maxCoordsF2A){
+                            hasMoreCoordinates = true;
+                            break;
+                        }
+                    }
+                } catch (IOException e){
+                    json.writeEndArray();
+                    writeJsonError(json, "invalid_file");
+                    throw new ActionParamsException("Invalid file", createErrorResponse("invalid_file", e));
+                }
+                json.writeEndArray();
+                json.writeBooleanField("hasMoreCoordinates", hasMoreCoordinates);
+                json.writeEndObject();
+            } catch (IOException e) {
+                throw new ActionException("Failed to write JSON");
+            }
+        } catch (IOException e) {
+            throw new ActionException("Failed to write JSON to client");
+        }
+    }
+    private void writeInLineJsonError (JsonGenerator json, int lineNumber, String line) throws IOException {
+        json.writeFieldName("error");
+        json.writeStartObject();
+        json.writeNumberField("lineIndex", lineNumber);
+        json.writeStringField(KEY_FOR_ERRORS, "invalid_read_line");
+        json.writeStringField("line", line);
+        json.writeEndObject();
+    }
+    private void writeJsonError (JsonGenerator json, String errorKey) throws IOException {
+        json.writeFieldName("error");
+        json.writeStartObject();
+        json.writeStringField(KEY_FOR_ERRORS, errorKey);
+        json.writeEndObject();
+    }
 
     protected List<Coordinate> parseInputCoordinates(final InputStream in, final int dimension, final boolean addZeroes)
             throws IOException, ActionParamsException {
