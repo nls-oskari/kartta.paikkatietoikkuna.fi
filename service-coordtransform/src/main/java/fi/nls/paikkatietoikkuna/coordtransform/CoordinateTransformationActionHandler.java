@@ -130,7 +130,6 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
             sourceCrs = sourceCrs + ",EPSG:3900"; //add N2000 that coordtrans service doesn't fail
         }
         List<Coordinate> coords;
-        List<Coordinate> inputCoords = null;
 
         List<FileItem> fileItems;
         Map<String, String> formParams;
@@ -158,8 +157,6 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                 importSettings = getFileSettings(formParams, KEY_IMPORT_SETTINGS);
                 coords = getCoordsFromFile(importSettings, file, sourceDimension, addZeroes, false, maxCoordsF2A);
                 hasMoreCoordinates = importSettings.isHasMoreCoordinates();
-                //store input coords
-                inputCoords = coords.stream().map(c -> new Coordinate (c)).collect(Collectors.toList());
                 break;
             case "F2F": //From file to file transform
                 transformToFile = true;
@@ -194,7 +191,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
             if (transformToFile){
                 writeFileResponse(out, coords, targetDimension, exportSettings, targetCrs);
             } else {
-                writeJsonResponse(out, coords, inputCoords, targetDimension, hasMoreCoordinates);
+                writeJsonResponse(out, coords, targetDimension, hasMoreCoordinates);
             }
         } catch (IOException e) {
             throw new ActionException("Failed to write JSON to client", e);
@@ -593,7 +590,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         }
     }
 
-    protected void writeJsonResponse(OutputStream out, List<Coordinate> coords, List<Coordinate> inputCoords, final int dimension, final boolean hasMoreCoordinates)
+    protected void writeJsonResponse(OutputStream out, List<Coordinate> coords, final int dimension, final boolean hasMoreCoordinates)
             throws ActionException {
         try (JsonGenerator json = jf.createGenerator(out)) {
             json.writeStartObject();
@@ -611,20 +608,6 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                 json.writeEndArray();
             }
             json.writeEndArray();
-            if (inputCoords != null){
-                json.writeFieldName(RESPONSE_INPUT_COORDINATES);
-                json.writeStartArray();
-                for (Coordinate coord : inputCoords) {
-                    json.writeStartArray();
-                    json.writeNumber(coord.x);
-                    json.writeNumber(coord.y);
-                    if (dimension == 3) {
-                        json.writeNumber(coord.z);
-                    }
-                    json.writeEndArray();
-                }
-                json.writeEndArray();
-            }
             json.writeEndObject();
         } catch (IOException e) {
             throw new ActionException("Failed to write JSON");
