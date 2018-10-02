@@ -128,8 +128,8 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
 
         List<FileItem> fileItems;
         Map<String, String> formParams;
-        CoordTransFile importSettings = null;
-        CoordTransFile exportSettings = null;
+        CoordTransFileSettings importSettings = null;
+        CoordTransFileSettings exportSettings = null;
         FileItem file;
         //TODO: is there better way to get transformation type??
         switch(transformType){
@@ -139,7 +139,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
             case "A2F": //From coordinate array to file transform
                 transformToFile = true;
                 try {
-                    exportSettings = mapper.readValue(params.getHttpParam(KEY_EXPORT_SETTINGS), CoordTransFile.class);
+                    exportSettings = mapper.readValue(params.getHttpParam(KEY_EXPORT_SETTINGS), CoordTransFileSettings.class);
                 } catch (Exception e) {
                     throw new ActionParamsException("Invalid export file settings", createErrorResponse("invalid_export_settings", e));
                 }
@@ -248,8 +248,8 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         }
     }
 
-    protected List<Coordinate> getCoordsFromFile(CoordTransFile sourceOptions, FileItem file,
-            int dimension, boolean addZeroes, boolean storeLineEnds, int limit) throws ActionException {
+    protected List<Coordinate> getCoordsFromFile(CoordTransFileSettings sourceOptions, FileItem file,
+                                                 int dimension, boolean addZeroes, boolean storeLineEnds, int limit) throws ActionException {
         List<Coordinate> coordinates = new ArrayList<>();
         String line = "";
         String[] coords;
@@ -361,9 +361,9 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         return coordinates;
     }
 
-    private CoordTransFile getFileSettings(Map<String, String> formParams, String key) throws ActionParamsException {
+    private CoordTransFileSettings getFileSettings(Map<String, String> formParams, String key) throws ActionParamsException {
         try {
-            return mapper.readValue(formParams.get(key), CoordTransFile.class);
+            return mapper.readValue(formParams.get(key), CoordTransFileSettings.class);
         } catch (Exception e) {
             throw new ActionParamsException("Invalid file settings: " + key, createErrorResponse("invalid_file_settings", e));
         }
@@ -444,7 +444,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         List<FileItem> fileItems = getFileItems(params.getRequest());
         Map<String, String> formParams = getFormParams(fileItems);
         FileItem file = getFile(fileItems);
-        CoordTransFile sourceOptions = getFileSettings(formParams, KEY_IMPORT_SETTINGS);
+        CoordTransFileSettings sourceOptions = getFileSettings(formParams, KEY_IMPORT_SETTINGS);
         int dimension = params.getHttpParam(PARAM_SOURCE_DIMENSION, 2);
         HttpServletResponse response = params.getResponse();
         response.setContentType(IOHelper.CONTENT_TYPE_JSON);
@@ -617,7 +617,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
     }
 
 
-    protected void writeFileResponse(OutputStream out, List<Coordinate> coords, final int dimension, CoordTransFile opts, String crs)
+    protected void writeFileResponse(OutputStream out, List<Coordinate> coords, final int dimension, CoordTransFileSettings opts, String crs)
         throws ActionException {
         try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out))){
             String xCoord;
