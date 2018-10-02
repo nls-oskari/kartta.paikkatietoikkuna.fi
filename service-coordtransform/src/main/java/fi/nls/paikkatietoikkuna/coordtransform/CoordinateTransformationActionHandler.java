@@ -114,6 +114,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         String transformType = params.getHttpParam(PARAM_TRANSFORM_TYPE);
         if ("F2R".equals(transformType)){ // parse file to array without transformation
             readFileToJsonResonse(params);
+            return;
         }
         String sourceCrs = getSourceCrs(params);
         String targetCrs = getTargetCrs(params);
