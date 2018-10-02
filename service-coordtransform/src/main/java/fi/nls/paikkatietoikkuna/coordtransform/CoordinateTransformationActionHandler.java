@@ -11,6 +11,7 @@ import fi.nls.oskari.control.*;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.util.IOHelper;
+import fi.nls.oskari.util.JSONHelper;
 import fi.nls.oskari.util.PropertyUtil;
 
 import java.io.BufferedReader;
@@ -36,6 +37,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.json.JSONObject;
 
 
 /**
@@ -59,14 +61,15 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
     protected static final String KEY_IMPORT_SETTINGS = "importSettings";
     protected static final String KEY_EXPORT_SETTINGS = "exportSettings";
 
-    protected static final String RESPONSE_COORDINATES = "coordinates";
+    protected static final String RESPONSE_COORDINATES = "resultCoordinates";
     protected static final String RESPONSE_INPUT_COORDINATES = "inputCoordinates";
     protected static final String RESPONSE_DIMENSION = "dimension";
 
-    protected static final String[] DEGREES_TO_FORMAT = new String [] {"DD MM SS", "DD MM", "DDMMSS", "DDMM"};
     protected static final String DEGREE = "degree";
+    protected static final String METRIC = "metric";
     protected static final String FILE_EXT = "txt";
     protected static final String FILE_TYPE = "text/plain";
+    protected static final String KEY_FOR_ERRORS = "errorKey";
 
     protected final Map <String, String> lineSeparators = new HashMap<String, String>();
     protected final Map <String, String> coordinateSeparators = new HashMap<String, String>();
@@ -108,9 +111,14 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
 
     @Override
     public void handlePost(ActionParameters params) throws ActionException {
+        String transformType = params.getHttpParam(PARAM_TRANSFORM_TYPE);
+        if ("F2R".equals(transformType)){ // parse file to array without transformation
+            readFileToJsonResonse(params);
+            return;
+        }
         String sourceCrs = getSourceCrs(params);
         String targetCrs = getTargetCrs(params);
-        String transformType = params.getHttpParam(PARAM_TRANSFORM_TYPE);
+
         int sourceDimension = params.getRequiredParamInt(PARAM_SOURCE_DIMENSION);
         int targetDimension = params.getRequiredParamInt(PARAM_TARGET_DIMENSION);
         boolean transformToFile = false;
@@ -123,7 +131,6 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
             sourceCrs = sourceCrs + ",EPSG:3900"; //add N2000 that coordtrans service doesn't fail
         }
         List<Coordinate> coords;
-        List<Coordinate> inputCoords = null;
 
         List<FileItem> fileItems;
         Map<String, String> formParams;
@@ -132,29 +139,27 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         FileItem file;
         //TODO: is there better way to get transformation type??
         switch(transformType){
-            case "A2A":
+            case "A2A": //From coordinate array to coordinate array transform
                 coords = getCoordsFromJsonArray (params, sourceDimension, addZeroes);
                 break;
-            case "A2F":
+            case "A2F": //From coordinate array to file transform
                 transformToFile = true;
                 try {
                     exportSettings = mapper.readValue(params.getHttpParam(KEY_EXPORT_SETTINGS), CoordTransFile.class);
                 } catch (Exception e) {
-                    throw new ActionParamsException("Invalid export file settings", "invalid_export_settings", e);
+                    throw new ActionParamsException("Invalid export file settings", createErrorResponse("invalid_export_settings", e));
                 }
                 coords = getCoordsFromJsonArray (params, sourceDimension, addZeroes);
                 break;
-            case "F2A":
+            case "F2A": //From file to coordinate array transform
                 fileItems = getFileItems(params.getRequest());
                 formParams = getFormParams(fileItems);
                 file = getFile(fileItems);
                 importSettings = getFileSettings(formParams, KEY_IMPORT_SETTINGS);
                 coords = getCoordsFromFile(importSettings, file, sourceDimension, addZeroes, false, maxCoordsF2A);
                 hasMoreCoordinates = importSettings.isHasMoreCoordinates();
-                //store input coords
-                inputCoords = coords.stream().map(c -> new Coordinate (c)).collect(Collectors.toList());
                 break;
-            case "F2F":
+            case "F2F": //From file to file transform
                 transformToFile = true;
                 fileItems = getFileItems(params.getRequest());
                 formParams = getFormParams(fileItems);
@@ -169,7 +174,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         }
 
         if (coords.isEmpty()){
-            throw new ActionParamsException("No coordinates", "no_coordinates");
+            throw new ActionParamsException("No coordinates", createErrorResponse("no_coordinates"));
         }
 
         transform(sourceCrs, targetCrs, queryDimension, targetDimension, coords);
@@ -187,7 +192,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
             if (transformToFile){
                 writeFileResponse(out, coords, targetDimension, exportSettings, targetCrs);
             } else {
-                writeJsonResponse(out, coords, inputCoords, targetDimension, hasMoreCoordinates);
+                writeJsonResponse(out, coords, targetDimension, hasMoreCoordinates);
             }
         } catch (IOException e) {
             throw new ActionException("Failed to write JSON to client", e);
@@ -235,7 +240,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
             // Change Coordinate.xyz values in place
             CoordTransService.parseResponse(serviceResponseBytes, batch, dimension);
         } catch (IllegalArgumentException e) {
-            throw new ActionException(e.getMessage(), e);
+            throw new ActionParamsException("Failed to make transformation", createErrorResponse("transformation_error", e)); //error from transformation service
         }
     }
 
@@ -244,13 +249,15 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
             return parseInputCoordinates(in, dimension, addZeroes);
         } catch (IOException e) {
             throw new ActionException("Failed to parse input JSON!", e);
+        } catch (ActionParamsException e) {
+            throw new ActionParamsException (e.getMessage(), createErrorResponse("invalid_coord_in_array", e));
         }
     }
 
     protected List<Coordinate> getCoordsFromFile(CoordTransFile sourceOptions, FileItem file,
             int dimension, boolean addZeroes, boolean storeLineEnds, int limit) throws ActionException {
         List<Coordinate> coordinates = new ArrayList<>();
-        String line;
+        String line = "";
         String[] coords;
         int xIndex = 0;
         int yIndex = 1;
@@ -279,14 +286,17 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         }
         String unit = sourceOptions.getUnit();
         boolean transformUnit = false;
-        if (unit != null && !unit.equals(DEGREE)){
+        if (unit != null && !unit.equals(DEGREE) && !unit.equals(METRIC)){
             transformUnit = true;
         }
         double x,y,z;
+        int lineIndex = 1;
+        boolean firstCoord = true;
         try(BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()))){
             //skip row and store row as header row
             for (int i = 0 ; i < headerLineCount && (line=br.readLine())!=null ;i++) {
                 sourceOptions.addHeaderRow(line);
+                lineIndex++;
             }
             while ((line=br.readLine())!=null) {
                 /* Now coordinate separator comes from frontend
@@ -305,7 +315,10 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                 }
                 coords = line.split(coordSeparator);
                 if (coords.length < coordDimension){
-                    throw new ActionParamsException("Invalid coord in line: " + line, "invalid_coord_length");
+                    if (firstCoord == true){
+                        throw new ActionParamsException("Couldn't parse coordinate on the first line", createErrorResponse("invalid_first_coord"));
+                    }
+                    throw new ActionParamsException("Invalid coordinate line", createErrorInLineResponse(lineIndex, line, null));
                 }
                 if (transformUnit){
                     x = CoordTransService.transformUnitToDegree (coords[xIndex], unit);
@@ -341,13 +354,15 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                     sourceOptions.setHasMoreCoordinates(true);
                     break;
                 }
+                firstCoord = false;
+                lineIndex++;
             }
-        } catch (UnsupportedEncodingException e){
-            throw new ActionParamsException("Encoding - Invalid file", e);
         } catch (IOException e){
-            throw new ActionParamsException("IO - Invalid file", e);
+            throw new ActionParamsException("Invalid file", createErrorResponse("invalid_file", e));
         } catch (NumberFormatException e){
-            throw new ActionParamsException("Expected a number", e);
+            throw new ActionParamsException("Expected a number", createErrorInLineResponse(lineIndex, line, e));
+        } catch (IndexOutOfBoundsException e){
+            throw new ActionParamsException("Index out of bounds", createErrorInLineResponse(lineIndex, line, e));
         }
         return coordinates;
     }
@@ -356,8 +371,27 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         try {
             return mapper.readValue(formParams.get(key), CoordTransFile.class);
         } catch (Exception e) {
-            throw new ActionParamsException("Invalid file settings: " + key, "invalid_file_settings", e);
+            throw new ActionParamsException("Invalid file settings: " + key, createErrorResponse("invalid_file_settings", e));
         }
+    }
+    private JSONObject createErrorInLineResponse (int lineIndex, String line, Exception e){
+        JSONObject jsonError = JSONHelper.createJSONObject(KEY_FOR_ERRORS, "invalid_coord_in_line");
+        JSONHelper.putValue(jsonError, "line", line);
+        JSONHelper.putValue(jsonError, "lineIndex", lineIndex);
+        if (e != null){
+            JSONHelper.putValue(jsonError, "exception", e.getMessage());
+        }
+        return jsonError;
+    }
+    private JSONObject createErrorResponse (String errorKey, Exception e){
+        JSONObject jsonError = JSONHelper.createJSONObject(KEY_FOR_ERRORS, errorKey);
+        if (e != null){
+            JSONHelper.putValue(jsonError, "exception", e.getMessage());
+        }
+        return jsonError;
+    }
+    private JSONObject createErrorResponse (String errorKey){
+        return createErrorResponse (errorKey, null);
     }
 
     private List<FileItem> getFileItems(HttpServletRequest request) throws ActionException {
@@ -381,7 +415,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         return fileItems.stream()
             .filter(f -> !f.isFormField())
             .findAny() // If there are more files we'll get the file or fail miserably
-            .orElseThrow(() -> new ActionParamsException("No file entry", "no_file"));
+            .orElseThrow(() -> new ActionParamsException("No file entry", createErrorResponse("no_file")));
     }
     //add .txt if missing
     private String addFileExt(String name) {
@@ -412,13 +446,110 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         }
         return targetCrs;
     }
+    protected void readFileToJsonResonse (ActionParameters params) throws ActionException {
+        List<FileItem> fileItems = getFileItems(params.getRequest());
+        Map<String, String> formParams = getFormParams(fileItems);
+        FileItem file = getFile(fileItems);
+        CoordTransFile sourceOptions = getFileSettings(formParams, KEY_IMPORT_SETTINGS);
+        int dimension = params.getHttpParam(PARAM_SOURCE_DIMENSION, 2);
+        HttpServletResponse response = params.getResponse();
+        response.setContentType(IOHelper.CONTENT_TYPE_JSON);
+        boolean hasMoreCoordinates = false;
 
+        String line;
+        int xIndex = 0;
+        int yIndex = 1;
+        int zIndex = 2;
+        int coordDimension = dimension;
+        int headerLineCount = sourceOptions.getHeaderLineCount();
+        String coordSeparator = sourceOptions.getCoordinateSeparator();
+        boolean firstLine = true;
+        if (!coordinateSeparators.containsKey(coordSeparator)){
+            throw new ActionParamsException("Invalid coordinate separator: " + coordSeparator);
+        }
+        // get actual separator
+        coordSeparator = coordinateSeparators.get(coordSeparator);
+        if (sourceOptions.isAxisFlip()){
+            xIndex = 1;
+            yIndex = 0;
+        }
+        if (sourceOptions.isPrefixId()){
+            xIndex++;
+            yIndex++;
+            zIndex++;
+            coordDimension++;
+        }
+        try (OutputStream out = response.getOutputStream()) {
+            try (JsonGenerator json = jf.createGenerator(out)) {
+                json.writeStartObject();
+                json.writeNumberField(RESPONSE_DIMENSION, dimension);
+                json.writeFieldName(RESPONSE_INPUT_COORDINATES);
+                json.writeStartArray();
+                try(BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()))){
+                    for (int i = 0 ; (line=br.readLine())!=null ; i++) {
+                        // skip header and empty rows
+                        if (i < headerLineCount || line.trim().isEmpty()){
+                            continue;
+                        }
+                        String [] coord = line.split(coordSeparator);
+                        if (coord.length < coordDimension){
+                            json.writeEndArray();
+                            if(firstLine == true){
+                                writeJsonError(json, "invalid_first_coord");
+                                throw new ActionParamsException("Couldn't parse coordinate on the first line", createErrorResponse("invalid_first_coord"));
+                            }
+                            int lineNumber = i + 1;
+                            writeInLineJsonError(json, lineNumber, line);
+                            throw new ActionParamsException("Invalid coordinate line", createErrorInLineResponse(lineNumber, line, null));
+                        }
+                        json.writeStartArray();
+                        json.writeString(coord[xIndex]);
+                        json.writeString(coord[yIndex]);
+                        if (dimension == 3){
+                            json.writeString(coord[zIndex]);
+                        }
+                        json.writeEndArray();
+                        firstLine = false;
+                        if (i+1+headerLineCount == maxCoordsF2A){
+                            hasMoreCoordinates = true;
+                            break;
+                        }
+                    }
+                } catch (IOException e){
+                    json.writeEndArray();
+                    writeJsonError(json, "invalid_file");
+                    throw new ActionParamsException("Invalid file", createErrorResponse("invalid_file", e));
+                }
+                json.writeEndArray();
+                json.writeBooleanField("hasMoreCoordinates", hasMoreCoordinates);
+                json.writeEndObject();
+            } catch (IOException e) {
+                throw new ActionException("Failed to write JSON");
+            }
+        } catch (IOException e) {
+            throw new ActionException("Failed to write JSON to client");
+        }
+    }
+    private void writeInLineJsonError (JsonGenerator json, int lineNumber, String line) throws IOException {
+        json.writeFieldName("error");
+        json.writeStartObject();
+        json.writeNumberField("lineIndex", lineNumber);
+        json.writeStringField(KEY_FOR_ERRORS, "invalid_read_line");
+        json.writeStringField("line", line);
+        json.writeEndObject();
+    }
+    private void writeJsonError (JsonGenerator json, String errorKey) throws IOException {
+        json.writeFieldName("error");
+        json.writeStartObject();
+        json.writeStringField(KEY_FOR_ERRORS, errorKey);
+        json.writeEndObject();
+    }
 
     protected List<Coordinate> parseInputCoordinates(final InputStream in, final int dimension, final boolean addZeroes)
             throws IOException, ActionParamsException {
         try (JsonParser parser = jf.createParser(in)) {
             if (parser.nextToken() != JsonToken.START_ARRAY) {
-                throw new ActionParamsException("Expected input starting with an array", "invalid_coord");
+                throw new ActionParamsException("Expected input starting with an array");
             }
 
             List<Coordinate> coordinates = new ArrayList<>();
@@ -426,7 +557,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
 
             while ((token = parser.nextToken()) != JsonToken.END_ARRAY) {
                 if (token != JsonToken.START_ARRAY) {
-                    throw new ActionParamsException("Expected array opening", "invalid_coord");
+                    throw new ActionParamsException("Expected array opening");
                 }
 
                 assertNumber(parser.nextToken(), "Expected a number");
@@ -446,7 +577,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                 }
 
                 if (parser.nextToken() != JsonToken.END_ARRAY) {
-                    throw new ActionParamsException("Expected array closing", "invalid_coord");
+                    throw new ActionParamsException("Expected array closing");
                 }
             }
 
@@ -460,7 +591,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         }
     }
 
-    protected void writeJsonResponse(OutputStream out, List<Coordinate> coords, List<Coordinate> inputCoords, final int dimension, final boolean hasMoreCoordinates)
+    protected void writeJsonResponse(OutputStream out, List<Coordinate> coords, final int dimension, final boolean hasMoreCoordinates)
             throws ActionException {
         try (JsonGenerator json = jf.createGenerator(out)) {
             json.writeStartObject();
@@ -478,25 +609,12 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                 json.writeEndArray();
             }
             json.writeEndArray();
-            if (inputCoords != null){
-                json.writeFieldName(RESPONSE_INPUT_COORDINATES);
-                json.writeStartArray();
-                for (Coordinate coord : inputCoords) {
-                    json.writeStartArray();
-                    json.writeNumber(coord.x);
-                    json.writeNumber(coord.y);
-                    if (dimension == 3) {
-                        json.writeNumber(coord.z);
-                    }
-                    json.writeEndArray();
-                }
-                json.writeEndArray();
-            }
             json.writeEndObject();
         } catch (IOException e) {
             throw new ActionException("Failed to write JSON");
         }
     }
+
 
     protected void writeFileResponse(OutputStream out, List<Coordinate> coords, final int dimension, CoordTransFile opts, String crs)
         throws ActionException {
@@ -548,10 +666,17 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                     xCoord = xCoord.replace('.',',');
                     yCoord = yCoord.replace('.',',');
                 }
-                //TODO: should we use also W, S for negative coordinates
                 if (writeCardinals){
-                    xCoord += "E";
-                    yCoord += "N";
+                    if (xCoord.indexOf('-') == 0 ){
+                        xCoord = xCoord.substring(1) + "W";
+                    } else {
+                        xCoord += "E";
+                    }
+                    if (yCoord.indexOf('-') == 0 ){
+                        yCoord = yCoord.substring(1) + "S";
+                    } else {
+                        yCoord += "N";
+                    }
                 }
                 if (prefixId && prefixWithIndex){
                     bw.write(i + coordSeparator);
