@@ -65,8 +65,8 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
     protected static final String FILE_TYPE = "text/plain";
     protected static final String KEY_FOR_ERRORS = "errorKey";
 
-    protected final Map <String, String> lineSeparators = new HashMap<String, String>();
-    protected final Map <String, String> coordinateSeparators = new HashMap<String, String>();
+    protected final Map<String, String> lineSeparators = new HashMap<String, String>();
+    protected final Map<String, String> coordinateSeparators = new HashMap<String, String>();
 
     private JsonFactory jf;
     private String endPoint;
@@ -93,9 +93,9 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         if (endPoint == null) {
             endPoint = PropertyUtil.getNecessary(PROP_END_POINT);
         }
-        lineSeparators.put("win","\r\n");
-        lineSeparators.put("mac","\n");
-        lineSeparators.put("unix","\r");
+        lineSeparators.put("win", "\r\n");
+        lineSeparators.put("mac", "\n");
+        lineSeparators.put("unix", "\r");
 
         coordinateSeparators.put("space", " ");
         coordinateSeparators.put("tab", "\t");
@@ -106,7 +106,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
     @Override
     public void handlePost(ActionParameters params) throws ActionException {
         String transformType = params.getHttpParam(PARAM_TRANSFORM_TYPE);
-        if ("F2R".equals(transformType)){ // parse file to array without transformation
+        if ("F2R".equals(transformType)) { // parse file to array without transformation
             readFileToJsonResonse(params);
             return;
         }
@@ -119,7 +119,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         boolean hasMoreCoordinates = false;
         int queryDimension = sourceDimension;
         boolean addZeroes = false;
-        if (sourceDimension == 2 && targetDimension == 3){
+        if (sourceDimension == 2 && targetDimension == 3) {
             addZeroes = true;
             queryDimension = 3; //parse added zeroes to query
             sourceCrs = sourceCrs + ",EPSG:3900"; //add N2000 that coordtrans service doesn't fail
@@ -132,9 +132,9 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         CoordTransFileSettings exportSettings = null;
         FileItem file;
         //TODO: is there better way to get transformation type??
-        switch(transformType){
+        switch (transformType) {
             case "A2A": //From coordinate array to coordinate array transform
-                coords = getCoordsFromJsonArray (params, sourceDimension, addZeroes);
+                coords = getCoordsFromJsonArray(params, sourceDimension, addZeroes);
                 break;
             case "A2F": //From coordinate array to file transform
                 transformToFile = true;
@@ -143,7 +143,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                 } catch (Exception e) {
                     throw new ActionParamsException("Invalid export file settings", createErrorResponse("invalid_export_settings", e));
                 }
-                coords = getCoordsFromJsonArray (params, sourceDimension, addZeroes);
+                coords = getCoordsFromJsonArray(params, sourceDimension, addZeroes);
                 break;
             case "F2A": //From file to coordinate array transform
                 fileItems = getFileItems(params.getRequest());
@@ -167,14 +167,14 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                 throw new ActionParamsException("Unknown transform type");
         }
 
-        if (coords.isEmpty()){
+        if (coords.isEmpty()) {
             throw new ActionParamsException("No coordinates", createErrorResponse("no_coordinates"));
         }
 
         transform(sourceCrs, targetCrs, queryDimension, targetDimension, coords);
 
         HttpServletResponse response = params.getResponse();
-        if (transformToFile){
+        if (transformToFile) {
             String fileName = addFileExt(exportSettings.getFileName());
             response.setContentType(FILE_TYPE);
             response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
@@ -183,7 +183,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         }
 
         try (OutputStream out = response.getOutputStream()) {
-            if (transformToFile){
+            if (transformToFile) {
                 writeFileResponse(out, coords, targetDimension, exportSettings, targetCrs);
             } else {
                 writeJsonResponse(out, coords, targetDimension, hasMoreCoordinates);
@@ -194,8 +194,8 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
     }
 
     protected void transform(String sourceCrs, String targetCrs,
-            int queryDimension, int targetDimension,
-            List<Coordinate> coords) throws ActionException {
+                             int queryDimension, int targetDimension,
+                             List<Coordinate> coords) throws ActionException {
         CoordTransQueryBuilder queryBuilder = new CoordTransQueryBuilder(endPoint, sourceCrs, targetCrs, queryDimension);
 
         List<Coordinate> batch = new ArrayList<>();
@@ -238,13 +238,13 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         }
     }
 
-    private List<Coordinate> getCoordsFromJsonArray (ActionParameters params, int dimension, boolean addZeroes) throws ActionException{
+    private List<Coordinate> getCoordsFromJsonArray(ActionParameters params, int dimension, boolean addZeroes) throws ActionException {
         try (InputStream in = params.getRequest().getInputStream()) {
             return parseInputCoordinates(in, dimension, addZeroes);
         } catch (IOException e) {
             throw new ActionException("Failed to parse input JSON!", e);
         } catch (ActionParamsException e) {
-            throw new ActionParamsException (e.getMessage(), createErrorResponse("invalid_coord_in_array", e));
+            throw new ActionParamsException(e.getMessage(), createErrorResponse("invalid_coord_in_array", e));
         }
     }
 
@@ -259,40 +259,40 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         int coordDimension = dimension;
         int headerLineCount = sourceOptions.getHeaderLineCount();
         String coordSeparator = sourceOptions.getCoordinateSeparator();
-        if (!coordinateSeparators.containsKey(coordSeparator)){
+        if (!coordinateSeparators.containsKey(coordSeparator)) {
             throw new ActionParamsException("Invalid coordinate separator: " + coordSeparator);
         }
         // get actual separator
         coordSeparator = coordinateSeparators.get(coordSeparator);
-        if (sourceOptions.isAxisFlip()){
+        if (sourceOptions.isAxisFlip()) {
             xIndex = 1;
             yIndex = 0;
         }
-        if (sourceOptions.isPrefixId()){
+        if (sourceOptions.isPrefixId()) {
             xIndex++;
             yIndex++;
             zIndex++;
             coordDimension++;
         }
         boolean replaceCommas = false;
-        if (sourceOptions.getDecimalSeparator()==','){
+        if (sourceOptions.getDecimalSeparator() == ',') {
             replaceCommas = true;
         }
         String unit = sourceOptions.getUnit();
         boolean transformUnit = false;
-        if (unit != null && !unit.equals(DEGREE) && !unit.equals(METRIC)){
+        if (unit != null && !unit.equals(DEGREE) && !unit.equals(METRIC)) {
             transformUnit = true;
         }
-        double x,y,z;
+        double x, y, z;
         int lineIndex = 1;
         boolean firstCoord = true;
-        try(BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()))){
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             //skip row and store row as header row
-            for (int i = 0 ; i < headerLineCount && (line=br.readLine())!=null ;i++) {
+            for (int i = 0; i < headerLineCount && (line = br.readLine()) != null; i++) {
                 sourceOptions.addHeaderRow(line);
                 lineIndex++;
             }
-            while ((line=br.readLine())!=null) {
+            while ((line = br.readLine()) != null) {
                 /* Now coordinate separator comes from frontend
                 //try to get coordinate separator from first coordinate line
                 if(coordSeparator==null){
@@ -300,43 +300,43 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                     sourceOptions.setCoordinateSeparator(coordSeparator);
                 }*/
                 //skip empty lines
-                if (line.trim().isEmpty()){
+                if (line.trim().isEmpty()) {
                     continue;
                 }
                 //replace commas
-                if (replaceCommas){
-                    line = line.replace(',','.');
+                if (replaceCommas) {
+                    line = line.replace(',', '.');
                 }
                 coords = line.split(coordSeparator);
-                if (coords.length < coordDimension){
-                    if (firstCoord == true){
+                if (coords.length < coordDimension) {
+                    if (firstCoord == true) {
                         throw new ActionParamsException("Couldn't parse coordinate on the first line", createErrorResponse("invalid_first_coord"));
                     }
                     throw new ActionParamsException("Invalid coordinate line", createErrorInLineResponse(lineIndex, line, null));
                 }
-                if (transformUnit){
-                    x = CoordTransService.transformUnitToDegree (coords[xIndex], unit);
-                    y = CoordTransService.transformUnitToDegree (coords[yIndex], unit);
+                if (transformUnit) {
+                    x = CoordTransService.transformUnitToDegree(coords[xIndex], unit);
+                    y = CoordTransService.transformUnitToDegree(coords[yIndex], unit);
                 } else {
                     x = Double.valueOf(coords[xIndex]);
                     y = Double.valueOf(coords[yIndex]);
                 }
-                if (dimension == 3){
+                if (dimension == 3) {
                     z = Double.valueOf(coords[zIndex]);
                     coordinates.add(new Coordinate(x, y, z));
-                }else if (addZeroes == true){
+                } else if (addZeroes == true) {
                     coordinates.add(new Coordinate(x, y, 0));
                 } else {
                     coordinates.add(new Coordinate(x, y));
                 }
-                if (sourceOptions.isPrefixId()){
+                if (sourceOptions.isPrefixId()) {
                     sourceOptions.addId(coords[0]);
                 }
-                if (storeLineEnds == true){
+                if (storeLineEnds == true) {
                     String lineEnd = "";
                     //add coordSeparator back if lineEnding string is slitted (e.g. coordSeparator is " ")
-                    for (int i = coordDimension; i < coords.length; i++){
-                        if (i == coordDimension){
+                    for (int i = coordDimension; i < coords.length; i++) {
+                        if (i == coordDimension) {
                             lineEnd += coords[i];
                         } else {
                             lineEnd += coordSeparator + coords[i];
@@ -351,11 +351,11 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                 firstCoord = false;
                 lineIndex++;
             }
-        } catch (IOException e){
+        } catch (IOException e) {
             throw new ActionParamsException("Invalid file", createErrorResponse("invalid_file", e));
-        } catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
             throw new ActionParamsException("Expected a number", createErrorInLineResponse(lineIndex, line, e));
-        } catch (IndexOutOfBoundsException e){
+        } catch (IndexOutOfBoundsException e) {
             throw new ActionParamsException("Index out of bounds", createErrorInLineResponse(lineIndex, line, e));
         }
         return coordinates;
@@ -368,24 +368,27 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
             throw new ActionParamsException("Invalid file settings: " + key, createErrorResponse("invalid_file_settings", e));
         }
     }
-    private JSONObject createErrorInLineResponse (int lineIndex, String line, Exception e){
+
+    private JSONObject createErrorInLineResponse(int lineIndex, String line, Exception e) {
         JSONObject jsonError = JSONHelper.createJSONObject(KEY_FOR_ERRORS, "invalid_coord_in_line");
         JSONHelper.putValue(jsonError, "line", line);
         JSONHelper.putValue(jsonError, "lineIndex", lineIndex);
-        if (e != null){
+        if (e != null) {
             JSONHelper.putValue(jsonError, "exception", e.getMessage());
         }
         return jsonError;
     }
-    private JSONObject createErrorResponse (String errorKey, Exception e){
+
+    private JSONObject createErrorResponse(String errorKey, Exception e) {
         JSONObject jsonError = JSONHelper.createJSONObject(KEY_FOR_ERRORS, errorKey);
-        if (e != null){
+        if (e != null) {
             JSONHelper.putValue(jsonError, "exception", e.getMessage());
         }
         return jsonError;
     }
-    private JSONObject createErrorResponse (String errorKey){
-        return createErrorResponse (errorKey, null);
+
+    private JSONObject createErrorResponse(String errorKey) {
+        return createErrorResponse(errorKey, null);
     }
 
     private List<FileItem> getFileItems(HttpServletRequest request) throws ActionException {
@@ -398,6 +401,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
             throw new ActionException("Failed to read request", e);
         }
     }
+
     private Map<String, String> getFormParams(List<FileItem> fileItems) {
         return fileItems.stream()
                 .filter(f -> f.isFormField())
@@ -405,24 +409,27 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                         f -> f.getFieldName(),
                         f -> new String(f.get(), StandardCharsets.UTF_8)));
     }
-    private FileItem getFile (List<FileItem> fileItems) throws ActionParamsException {
+
+    private FileItem getFile(List<FileItem> fileItems) throws ActionParamsException {
         return fileItems.stream()
-            .filter(f -> !f.isFormField())
-            .findAny() // If there are more files we'll get the file or fail miserably
-            .orElseThrow(() -> new ActionParamsException("No file entry", createErrorResponse("no_file")));
+                .filter(f -> !f.isFormField())
+                .findAny() // If there are more files we'll get the file or fail miserably
+                .orElseThrow(() -> new ActionParamsException("No file entry", createErrorResponse("no_file")));
     }
+
     //add .txt if missing
     private String addFileExt(String name) {
         int i = name.lastIndexOf('.');
         if (i < 0 || i + 1 == name.length()) {
             return name + "." + FILE_EXT;
         }
-        if (FILE_EXT.equals(name.substring(i + 1))){
+        if (FILE_EXT.equals(name.substring(i + 1))) {
             return name;
         } else {
             return name + "." + FILE_EXT;
         }
     }
+
     private String getSourceCrs(ActionParameters params) throws ActionParamsException {
         String sourceCrs = params.getRequiredParam(PARAM_SOURCE_CRS);
         String sourceHeightCrs = params.getHttpParam(PARAM_SOURCE_H_CRS);
@@ -440,7 +447,8 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         }
         return targetCrs;
     }
-    protected void readFileToJsonResonse (ActionParameters params) throws ActionException {
+
+    protected void readFileToJsonResonse(ActionParameters params) throws ActionException {
         List<FileItem> fileItems = getFileItems(params.getRequest());
         Map<String, String> formParams = getFormParams(fileItems);
         FileItem file = getFile(fileItems);
@@ -458,16 +466,16 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         int headerLineCount = sourceOptions.getHeaderLineCount();
         String coordSeparator = sourceOptions.getCoordinateSeparator();
         boolean firstLine = true;
-        if (!coordinateSeparators.containsKey(coordSeparator)){
+        if (!coordinateSeparators.containsKey(coordSeparator)) {
             throw new ActionParamsException("Invalid coordinate separator: " + coordSeparator);
         }
         // get actual separator
         coordSeparator = coordinateSeparators.get(coordSeparator);
-        if (sourceOptions.isAxisFlip()){
+        if (sourceOptions.isAxisFlip()) {
             xIndex = 1;
             yIndex = 0;
         }
-        if (sourceOptions.isPrefixId()){
+        if (sourceOptions.isPrefixId()) {
             xIndex++;
             yIndex++;
             zIndex++;
@@ -479,16 +487,16 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                 json.writeNumberField(RESPONSE_DIMENSION, dimension);
                 json.writeFieldName(RESPONSE_INPUT_COORDINATES);
                 json.writeStartArray();
-                try(BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()))){
-                    for (int i = 0 ; (line=br.readLine())!=null ; i++) {
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+                    for (int i = 0; (line = br.readLine()) != null; i++) {
                         // skip header and empty rows
-                        if (i < headerLineCount || line.trim().isEmpty()){
+                        if (i < headerLineCount || line.trim().isEmpty()) {
                             continue;
                         }
-                        String [] coord = line.split(coordSeparator);
-                        if (coord.length < coordDimension){
+                        String[] coord = line.split(coordSeparator);
+                        if (coord.length < coordDimension) {
                             json.writeEndArray();
-                            if(firstLine == true){
+                            if (firstLine == true) {
                                 writeJsonError(json, "invalid_first_coord");
                                 throw new ActionParamsException("Couldn't parse coordinate on the first line", createErrorResponse("invalid_first_coord"));
                             }
@@ -499,17 +507,17 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                         json.writeStartArray();
                         json.writeString(coord[xIndex]);
                         json.writeString(coord[yIndex]);
-                        if (dimension == 3){
+                        if (dimension == 3) {
                             json.writeString(coord[zIndex]);
                         }
                         json.writeEndArray();
                         firstLine = false;
-                        if (i+1+headerLineCount == maxCoordsF2A){
+                        if (i + 1 + headerLineCount == maxCoordsF2A) {
                             hasMoreCoordinates = true;
                             break;
                         }
                     }
-                } catch (IOException e){
+                } catch (IOException e) {
                     json.writeEndArray();
                     writeJsonError(json, "invalid_file");
                     throw new ActionParamsException("Invalid file", createErrorResponse("invalid_file", e));
@@ -524,7 +532,8 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
             throw new ActionException("Failed to write JSON to client");
         }
     }
-    private void writeInLineJsonError (JsonGenerator json, int lineNumber, String line) throws IOException {
+
+    private void writeInLineJsonError(JsonGenerator json, int lineNumber, String line) throws IOException {
         json.writeFieldName("error");
         json.writeStartObject();
         json.writeNumberField("lineIndex", lineNumber);
@@ -532,7 +541,8 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         json.writeStringField("line", line);
         json.writeEndObject();
     }
-    private void writeJsonError (JsonGenerator json, String errorKey) throws IOException {
+
+    private void writeJsonError(JsonGenerator json, String errorKey) throws IOException {
         json.writeFieldName("error");
         json.writeStartObject();
         json.writeStringField(KEY_FOR_ERRORS, errorKey);
@@ -542,7 +552,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
     /**
      * Parses input stream to a list of coordinates
      *
-     * @param in array of array of numbers [[1,2,3], [4,5,6]]
+     * @param in        array of array of numbers [[1,2,3], [4,5,6]]
      * @param dimension if not 2, tries to read third oordinate as z
      * @param addZeroes if dimension 2, sets z as 0 for true or leaves null for false
      * @return list of coordinates parsed from inputstream
@@ -618,8 +628,8 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
 
 
     protected void writeFileResponse(OutputStream out, List<Coordinate> coords, final int dimension, CoordTransFileSettings opts, String crs)
-        throws ActionException {
-        try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out))){
+            throws ActionException {
+        try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out))) {
             String xCoord;
             String yCoord;
             String zCoord;
@@ -631,77 +641,77 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
             boolean flipAxis = opts.isAxisFlip();
             boolean prefixWithIndex = false;
             boolean writeCardinals = opts.isWriteCardinals();
-            List <String> ids = opts.getIds();
-            List <String> lineEndings = opts.getLineEnds();
+            List<String> ids = opts.getIds();
+            List<String> lineEndings = opts.getLineEnds();
             boolean writeEndings = opts.isWriteLineEndings() && !lineEndings.isEmpty();
             String unit = opts.getUnit();
             boolean transformUnit = false;
-            if (unit != null && !unit.equals(DEGREE)){
+            if (unit != null && !unit.equals(DEGREE)) {
                 transformUnit = true;
             }
-            if (opts.isPrefixId()){
-                if(ids.isEmpty()){
+            if (opts.isPrefixId()) {
+                if (ids.isEmpty()) {
                     prefixWithIndex = true;
                 }
             }
             // TODO: should we add only: Coordinate Reference System: KKJ
             // if we want localized header then frontend should send header String instead of boolean
-            if (opts.isWriteHeader()){
+            if (opts.isWriteHeader()) {
                 bw.write("Coordinate Reference System:" + crs);
                 bw.write(lineSeparator);
-                for (String headerRow : opts.getHeaderRows()){
+                for (String headerRow : opts.getHeaderRows()) {
                     bw.write(headerRow);
                     bw.write(lineSeparator);
                 }
             }
-            for (int i = 0; i < coords.size() ; i++) {
+            for (int i = 0; i < coords.size(); i++) {
                 Coordinate coord = coords.get(i);
-                if (transformUnit){
+                if (transformUnit) {
                     xCoord = CoordTransService.transformDegreeToUnit(coord.x, unit, decimals);
                     yCoord = CoordTransService.transformDegreeToUnit(coord.y, unit, decimals);
                 } else {
                     xCoord = CoordTransService.round(coord.x, decimals);
                     yCoord = CoordTransService.round(coord.y, decimals);
                 }
-                if (replaceCommas){
-                    xCoord = xCoord.replace('.',',');
-                    yCoord = yCoord.replace('.',',');
+                if (replaceCommas) {
+                    xCoord = xCoord.replace('.', ',');
+                    yCoord = yCoord.replace('.', ',');
                 }
-                if (writeCardinals){
-                    if (xCoord.indexOf('-') == 0 ){
+                if (writeCardinals) {
+                    if (xCoord.indexOf('-') == 0) {
                         xCoord = xCoord.substring(1) + "W";
                     } else {
                         xCoord += "E";
                     }
-                    if (yCoord.indexOf('-') == 0 ){
+                    if (yCoord.indexOf('-') == 0) {
                         yCoord = yCoord.substring(1) + "S";
                     } else {
                         yCoord += "N";
                     }
                 }
-                if (prefixId && prefixWithIndex){
+                if (prefixId && prefixWithIndex) {
                     bw.write(i + coordSeparator);
-                } else if (prefixId){
+                } else if (prefixId) {
                     bw.write(ids.get(i) + coordSeparator);
                 }
-                if (flipAxis){
+                if (flipAxis) {
                     bw.write(yCoord);
                     bw.write(coordSeparator);
                     bw.write(xCoord);
-                }else {
+                } else {
                     bw.write(xCoord);
                     bw.write(coordSeparator);
                     bw.write(yCoord);
                 }
                 if (dimension == 3) {
                     zCoord = CoordTransService.round(coord.z, decimals);
-                    if (replaceCommas){
-                        zCoord = zCoord.replace('.',',');
+                    if (replaceCommas) {
+                        zCoord = zCoord.replace('.', ',');
                     }
                     bw.write(coordSeparator);
                     bw.write(zCoord);
                 }
-                if (writeEndings){
+                if (writeEndings) {
                     bw.write(coordSeparator);
                     bw.write(lineEndings.get(i));
                 }
