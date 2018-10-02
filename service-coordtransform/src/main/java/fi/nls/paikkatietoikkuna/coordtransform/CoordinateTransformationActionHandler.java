@@ -7,21 +7,24 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vividsolutions.jts.geom.Coordinate;
 import fi.nls.oskari.annotation.OskariActionRoute;
-import fi.nls.oskari.control.*;
+import fi.nls.oskari.control.ActionException;
+import fi.nls.oskari.control.ActionParameters;
+import fi.nls.oskari.control.ActionParamsException;
+import fi.nls.oskari.control.RestActionHandler;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.util.IOHelper;
 import fi.nls.oskari.util.JSONHelper;
 import fi.nls.oskari.util.PropertyUtil;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -29,15 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.json.JSONObject;
 
 
 /**
@@ -545,6 +539,16 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         json.writeEndObject();
     }
 
+    /**
+     * Parses input stream to a list of coordinates
+     *
+     * @param in array of array of numbers [[1,2,3], [4,5,6]]
+     * @param dimension if not 2, tries to read third oordinate as z
+     * @param addZeroes if dimension 2, sets z as 0 for true or leaves null for false
+     * @return list of coordinates parsed from inputstream
+     * @throws IOException
+     * @throws ActionParamsException
+     */
     protected List<Coordinate> parseInputCoordinates(final InputStream in, final int dimension, final boolean addZeroes)
             throws IOException, ActionParamsException {
         try (JsonParser parser = jf.createParser(in)) {
@@ -559,22 +563,19 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                 if (token != JsonToken.START_ARRAY) {
                     throw new ActionParamsException("Expected array opening");
                 }
-
                 assertNumber(parser.nextToken(), "Expected a number");
                 double x = parser.getDoubleValue();
                 assertNumber(parser.nextToken(), "Expected a number");
                 double y = parser.getDoubleValue();
-                if (dimension == 2) {
-                    if (addZeroes == true){
-                        coordinates.add(new Coordinate(x, y, 0));
-                    }else{
-                        coordinates.add(new Coordinate(x, y));
-                    }
-                } else {
+                Coordinate parsed = new Coordinate(x, y);
+                if (dimension != 2) {
                     assertNumber(parser.nextToken(), "Expected a number");
                     double z = parser.getDoubleValue();
-                    coordinates.add(new Coordinate(x, y, z));
+                    parsed.setOrdinate(Coordinate.Z, z);
+                } else if (addZeroes) {
+                    parsed.setOrdinate(Coordinate.Z, 0);
                 }
+                coordinates.add(parsed);
 
                 if (parser.nextToken() != JsonToken.END_ARRAY) {
                     throw new ActionParamsException("Expected array closing");
