@@ -12,7 +12,7 @@ public class CoordTransQueryBuilderTest {
 
     @Test
     public void simpleTest() {
-        CoordTransQueryBuilder b = new CoordTransQueryBuilder("foo", "bar", "baz", 2);
+        CoordTransQueryBuilder b = new CoordTransQueryBuilder("foo", "bar", "baz");
         List<Coordinate> coords = Arrays.asList(
                 new Coordinate(500000, 6822000),
                 new Coordinate(501000, 6823000)
@@ -28,7 +28,7 @@ public class CoordTransQueryBuilderTest {
 
     @Test
     public void resetTest() {
-        CoordTransQueryBuilder b = new CoordTransQueryBuilder("foo", "bar", "baz", 2);
+        CoordTransQueryBuilder b = new CoordTransQueryBuilder("foo", "bar", "baz");
         List<Coordinate> coords = Arrays.asList(
                 new Coordinate(500000, 6822000),
                 new Coordinate(501000, 6823000)
