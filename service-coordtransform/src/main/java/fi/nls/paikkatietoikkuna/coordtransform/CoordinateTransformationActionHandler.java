@@ -107,6 +107,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
     public void handlePost(ActionParameters params) throws ActionException {
         String transformType = params.getHttpParam(PARAM_TRANSFORM_TYPE);
         if ("F2R".equals(transformType)) { // parse file to array without transformation
+            // basically pretty much the same as any type starting with F
             readFileToJsonResonse(params);
             return;
         }
@@ -274,6 +275,8 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
             zIndex++;
             coordDimension++;
         }
+
+
         boolean replaceCommas = false;
         if (sourceOptions.getDecimalSeparator() == ',') {
             replaceCommas = true;
@@ -285,7 +288,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         }
         double x, y, z;
         int lineIndex = 1;
-        boolean firstCoord = true;
+        boolean firstCoord = true; // same as "firstLine" in readFileToJsonResonse()
         try (BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             //skip row and store row as header row
             for (int i = 0; i < headerLineCount && (line = br.readLine()) != null; i++) {
