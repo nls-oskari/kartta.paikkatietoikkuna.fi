@@ -39,6 +39,7 @@ public class CoordTransService {
             coord.x = Double.parseDouble(coordinateParts[0]);
             coord.y = Double.parseDouble(coordinateParts[1]);
             if (dimension == 3) {
+                // FIXME: just check if coordinateParts.length > 3 instead of sending dimension?
                 coord.z = Double.parseDouble(coordinateParts[2]);
             }
         }

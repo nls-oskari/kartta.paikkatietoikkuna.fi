@@ -129,7 +129,7 @@ public class CoordinateTransformationActionHandlerTest {
 
         List<Coordinate> coordinates = getRandomCoordinates(n, 300000, 600000, 6700000, 6730000, 0, 0);
         List<Coordinate> originals = coordinates.stream().map(c -> new Coordinate(c)).collect(Collectors.toList());
-        handler.transform("EPSG:3067", "EPSG:4258", 2, 2, coordinates);
+        handler.transform("EPSG:3067", "EPSG:4258", 2, coordinates);
         assertEquals(originals.size(), coordinates.size());
         for (int i = 0; i < originals.size(); i++) {
             Coordinate original = originals.get(i);
@@ -138,7 +138,7 @@ public class CoordinateTransformationActionHandlerTest {
             assertNotEquals(original.y, transformed.y, 0);
         }
 
-        handler.transform("EPSG:4258", "EPSG:3067", 2, 2, coordinates);
+        handler.transform("EPSG:4258", "EPSG:3067", 2, coordinates);
         assertEquals(originals.size(), coordinates.size());
         for (int i = 0; i < originals.size(); i++) {
             Coordinate original = originals.get(i);

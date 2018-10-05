@@ -93,20 +93,22 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         String sourceCrs = transformParams.sourceCRS;
         String targetCrs = transformParams.targetCRS;
 
-        int sourceDimension = transformParams.inputDimensions;
         int targetDimension = transformParams.outputDimensions;
-        int queryDimension = sourceDimension;
-        boolean addZeroes = false;
-        if (sourceDimension == 2 && targetDimension == 3) {
-            addZeroes = true;
-            queryDimension = 3; //parse added zeroes to query
-            sourceCrs = sourceCrs + ",EPSG:3900"; //add N2000 that coordtrans service doesn't fail
+        boolean addZeroes = transformParams.inputDimensions == 2 && targetDimension == 3;
+        if (addZeroes) {
+            // add N2000 that coordtrans service doesn't fail
+            // TODO: service requires 3 inputs if output is 3 axis???
+            sourceCrs = sourceCrs + ",EPSG:3900";
         }
         CoordinatesPayload coords = getCoordinatesFromPayload(transformParams, addZeroes);
         if (coords.getCoords().isEmpty()) {
             throw new ActionParamsException("No coordinates", TransformParams.createErrorResponse("no_coordinates"));
         }
-        // TODO: move addZeroes handling here
+        // TODO: move addZeroes handling here from getCoordinatesFromPayload()
+        // if (addZeroes) {coords.getCoords().forEach(c => c.setOrdinate(Coordinate.Z, 0)) }
+
+        // make the calls to actual service
+        // TODO: why would we need to send targetDimension as param?
         transform(sourceCrs, targetCrs, targetDimension, coords.getCoords());
 
         HttpServletResponse response = params.getResponse();
