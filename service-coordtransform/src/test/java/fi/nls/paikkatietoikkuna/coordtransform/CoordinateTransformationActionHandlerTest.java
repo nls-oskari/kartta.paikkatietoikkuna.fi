@@ -42,7 +42,7 @@ public class CoordinateTransformationActionHandlerTest {
 
     @Test
     public void testCreateFileSettings (){
-        CoordTransFile file = getFileSettings();
+        CoordTransFileSettings file = getFileSettings();
         assertEquals("test.txt", file.getFileName());
         assertEquals('.', file.getDecimalSeparator());
         assertEquals("tab", file.getCoordinateSeparator());
@@ -55,7 +55,7 @@ public class CoordinateTransformationActionHandlerTest {
         assertEquals(true, file.isWriteLineEndings());
         assertEquals(true, file.isWriteHeader());
     }
-    private CoordTransFile getFileSettings (){
+    private CoordTransFileSettings getFileSettings (){
         ObjectMapper mapper = new ObjectMapper();
         String json = "{\"fileName\":\"test.txt\","
                 + "\"unit\":\"degree\","
@@ -69,7 +69,7 @@ public class CoordinateTransformationActionHandlerTest {
                 + "\"decimalCount\":5,"
                 + "\"headerLineCount\":2}";
         try {
-            return mapper.readValue(json, CoordTransFile.class);
+            return mapper.readValue(json, CoordTransFileSettings.class);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -1,6 +1,7 @@
 package fi.nls.paikkatietoikkuna.coordtransform;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.impl.PackedCoordinateSequence;
 
 public class CoordTransQueryBuilder {
 
@@ -11,15 +12,13 @@ public class CoordTransQueryBuilder {
     private final String endPoint;
     private final String sourceCrs;
     private final String targetCrs;
-    private final int dimension;
     private final StringBuilder sb;
     boolean firstCoordinate;
 
-    public CoordTransQueryBuilder(String endPoint, String sourceCrs, String targetCrs, int dimension) {
+    public CoordTransQueryBuilder(String endPoint, String sourceCrs, String targetCrs) {
         this.endPoint = endPoint;
         this.sourceCrs = sourceCrs;
         this.targetCrs = targetCrs;
-        this.dimension = dimension;
         this.sb = new StringBuilder();
         reset();
     }
@@ -39,7 +38,7 @@ public class CoordTransQueryBuilder {
             sb.append(SEP_COORD);
         }
         sb.append(c.x).append(SEP_COORD_PART).append(c.y);
-        if (dimension == 3) {
+        if (!Double.isNaN(c.getOrdinate(Coordinate.Z))) {
             sb.append(SEP_COORD_PART).append(c.z);
         }
         firstCoordinate = false;
