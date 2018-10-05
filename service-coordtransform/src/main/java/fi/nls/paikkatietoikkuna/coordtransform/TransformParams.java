@@ -17,9 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * Created by zakar on 04/10/2018.
- */
 public class TransformParams {
 
     protected static final String PARAM_TRANSFORM_TYPE = "transformType";
@@ -61,32 +58,48 @@ public class TransformParams {
 
         inputDimensions = params.getHttpParam(PARAM_SOURCE_DIMENSION, 2);
         outputDimensions = params.getHttpParam(PARAM_TARGET_DIMENSION, 2);
-
-        List<FileItem> fileItems = getFileItems(params.getRequest());
-        formParams = getFormParams(fileItems);
-
+        List<FileItem> fileItems = null;
+        if (isMultipart(params.getRequest())) {
+            fileItems = getFileItems(params.getRequest());
+            formParams = getFormParams(fileItems);
+        } else {
+            formParams = null;
+            if(type.isFileInput()) {
+                throw new ActionParamsException("Expected multipart request for file input");
+            }
+        }
         if (type.isFileInput()) {
             file = getFile(fileItems);
-            importSettings = getFileSettings(formParams, KEY_IMPORT_SETTINGS);
+            importSettings = getFileSettings(formParams.get(KEY_IMPORT_SETTINGS), KEY_IMPORT_SETTINGS);
         } else {
             file = null;
             importSettings = null;
         }
 
         if (type.isFileOutput()) {
-            exportSettings = getFileSettings(formParams, KEY_EXPORT_SETTINGS);
+            String settingsJSON;
+            if(formParams == null) {
+                settingsJSON = params.getHttpParam(KEY_EXPORT_SETTINGS);
+            } else {
+                settingsJSON = formParams.get(KEY_EXPORT_SETTINGS);
+            }
+            exportSettings = getFileSettings(settingsJSON, KEY_EXPORT_SETTINGS);
         } else {
             exportSettings = null;
         }
-
-
     }
 
-    private CoordTransFileSettings getFileSettings(Map<String, String> formParams, String key) throws ActionParamsException {
+
+    private boolean isMultipart(HttpServletRequest request) {
+        return request.getContentType() != null &&
+                request.getContentType().toLowerCase().indexOf("multipart/form-data") != -1;
+    }
+
+    private CoordTransFileSettings getFileSettings(String settingsJSON, String errorKey) throws ActionParamsException {
         try {
-            return CoordinateTransformationActionHandler.mapper.readValue(formParams.get(key), CoordTransFileSettings.class);
+            return CoordinateTransformationActionHandler.mapper.readValue(settingsJSON, CoordTransFileSettings.class);
         } catch (Exception e) {
-            throw new ActionParamsException("Invalid file settings: " + key /*, createErrorResponse("invalid_file_settings", e) */);
+            throw new ActionParamsException("Invalid file settings: " + errorKey, createErrorResponse("invalid_file_settings", e));
         }
     }
 
