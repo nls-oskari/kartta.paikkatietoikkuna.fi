@@ -1,7 +1,6 @@
 package fi.nls.paikkatietoikkuna.coordtransform;
 
 import com.vividsolutions.jts.geom.Coordinate;
-
 import fi.nls.oskari.control.ActionException;
 
 import java.math.BigDecimal;
@@ -40,18 +39,20 @@ public class CoordTransService {
             coord.x = Double.parseDouble(coordinateParts[0]);
             coord.y = Double.parseDouble(coordinateParts[1]);
             if (dimension == 3) {
+                // FIXME: just check if coordinateParts.length > 3 instead of sending dimension?
                 coord.z = Double.parseDouble(coordinateParts[2]);
             }
         }
     }
-    public static double transformUnitToDegree (String coord, String unit) throws ActionException{
+
+    public static double transformUnitToDegree(String coord, String unit) throws ActionException {
         coord = coord.trim();
         BigDecimal value;
-        if (GRADIAN.equals(unit)){
+        if (GRADIAN.equals(unit)) {
             value = new BigDecimal(coord);
             value = value.divide(DEC_TO_GRAD, DECIMAL_PRECISION);
             return value.doubleValue();
-        }else if (RADIAN.equals(unit)){
+        } else if (RADIAN.equals(unit)) {
             value = new BigDecimal(coord);
             value = value.divide(DEC_TO_RAD, DECIMAL_PRECISION);
             return value.doubleValue();
@@ -62,22 +63,22 @@ public class CoordTransService {
         BigDecimal ss;
         switch (unit) {
             case "DDMM":
-                mm =  new BigDecimal(coord.substring(2));
+                mm = new BigDecimal(coord.substring(2));
                 dd = dd.add(mm.divide(HOUR_TO_MIN, DECIMAL_PRECISION));
                 return dd.doubleValue();
             case "DD MM":
-                mm =  new BigDecimal(coord.substring(3));
+                mm = new BigDecimal(coord.substring(3));
                 dd = dd.add(mm.divide(HOUR_TO_MIN, DECIMAL_PRECISION));
                 return dd.doubleValue();
             case "DDMMSS":
-                mm =  new BigDecimal(coord.substring(2, 4));
-                ss =  new BigDecimal(coord.substring(4));
+                mm = new BigDecimal(coord.substring(2, 4));
+                ss = new BigDecimal(coord.substring(4));
                 dd = dd.add(mm.divide(HOUR_TO_MIN, DECIMAL_PRECISION));
                 dd = dd.add(ss.divide(HOUR_TO_SEC, DECIMAL_PRECISION));
                 return dd.doubleValue();
             case "DD MM SS":
-                mm =  new BigDecimal(coord.substring(3, 5));
-                ss =  new BigDecimal(coord.substring(6));
+                mm = new BigDecimal(coord.substring(3, 5));
+                ss = new BigDecimal(coord.substring(6));
                 dd = dd.add(mm.divide(HOUR_TO_MIN, DECIMAL_PRECISION));
                 dd = dd.add(ss.divide(HOUR_TO_SEC, DECIMAL_PRECISION));
                 return dd.doubleValue();
@@ -85,34 +86,35 @@ public class CoordTransService {
                 throw new ActionException("Invalid unit");
         }
     }
-    public static String transformDegreeToUnit (double coord, String unit, int decimals) throws ActionException{
+
+    public static String transformDegreeToUnit(double coord, String unit, int decimals) throws ActionException {
         BigDecimal value = new BigDecimal(coord, DECIMAL_PRECISION);
         BigDecimal fractPart;
         String separator = "";
         String result;
         switch (unit) {
             case RADIAN:
-                value =  value.multiply(DEC_TO_RAD, DECIMAL_PRECISION).setScale(decimals,RoundingMode.HALF_UP);
+                value = value.multiply(DEC_TO_RAD, DECIMAL_PRECISION).setScale(decimals, RoundingMode.HALF_UP);
                 return value.toPlainString();
             case GRADIAN:
-                value =  value.multiply(DEC_TO_GRAD, DECIMAL_PRECISION).setScale(decimals,RoundingMode.HALF_UP);
+                value = value.multiply(DEC_TO_GRAD, DECIMAL_PRECISION).setScale(decimals, RoundingMode.HALF_UP);
                 return value.toPlainString();
             case "DD":
                 return getFormatedValue(value, decimals); //DD.dd
             case "DD MM":
                 separator = " ";
             case "DDMM":
-                result = getPrefixedIntPart (value); //DD
+                result = getPrefixedIntPart(value); //DD
                 fractPart = value.remainder(BigDecimal.ONE);
                 value = fractPart.multiply(HOUR_TO_MIN, DECIMAL_PRECISION);
                 return result + separator + getFormatedValue(value, decimals);// add MM.mm
             case "DD MM SS":
                 separator = " ";
             case "DDMMSS":
-                result = getPrefixedIntPart (value); //DD
+                result = getPrefixedIntPart(value); //DD
                 fractPart = value.remainder(BigDecimal.ONE);
                 value = fractPart.multiply(HOUR_TO_MIN, DECIMAL_PRECISION);
-                result += separator + getPrefixedIntPart (value); //add MM
+                result += separator + getPrefixedIntPart(value); //add MM
                 fractPart = value.remainder(BigDecimal.ONE);
                 value = fractPart.multiply(HOUR_TO_MIN, DECIMAL_PRECISION);
                 return result + separator + getFormatedValue(value, decimals); //add SS.ss
@@ -120,30 +122,32 @@ public class CoordTransService {
                 throw new ActionException("Invalid unit");
         }
     }
+
     public static String round(double value, int decimals) {
         BigDecimal bd = new BigDecimal(value);
         bd = bd.setScale(decimals, RoundingMode.HALF_UP);
         return bd.toPlainString();
     }
+
     //Min and sec values cannot be negative so we can use this for formating them also
-    private static String getFormatedValue (BigDecimal value, int decimals){
+    private static String getFormatedValue(BigDecimal value, int decimals) {
         value = value.setScale(decimals, RoundingMode.HALF_UP);
         // 10 > value < -10
-        if (value.compareTo(BigDecimal.TEN)>= 0 || value.compareTo(BigDecimal.TEN.negate()) <= 0){
+        if (value.compareTo(BigDecimal.TEN) >= 0 || value.compareTo(BigDecimal.TEN.negate()) <= 0) {
             return value.toPlainString();
-        //value -9 - 0
-        } else if (value.compareTo(BigDecimal.ZERO) == -1){
+            //value -9 - 0
+        } else if (value.compareTo(BigDecimal.ZERO) == -1) {
             return "-0" + value.negate().toPlainString();
         }
         //value 0 - 9
         return "0" + value.toPlainString();
     }
-    private static String getPrefixedIntPart (BigDecimal value){
+
+    private static String getPrefixedIntPart(BigDecimal value) {
         int intPart = value.intValue();
-        if (intPart >=10 || intPart <= -10){
+        if (intPart >= 10 || intPart <= -10) {
             return Integer.toString(intPart);
-        }
-        else if (intPart < 0 ){
+        } else if (intPart < 0) {
             return "-0" + intPart * -1;
         }
         return "0" + intPart;

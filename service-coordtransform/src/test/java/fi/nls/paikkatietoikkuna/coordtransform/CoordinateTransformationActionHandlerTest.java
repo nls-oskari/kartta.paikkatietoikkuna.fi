@@ -42,7 +42,7 @@ public class CoordinateTransformationActionHandlerTest {
 
     @Test
     public void testCreateFileSettings (){
-        CoordTransFile file = getFileSettings();
+        CoordTransFileSettings file = getFileSettings();
         assertEquals("test.txt", file.getFileName());
         assertEquals('.', file.getDecimalSeparator());
         assertEquals("tab", file.getCoordinateSeparator());
@@ -55,7 +55,7 @@ public class CoordinateTransformationActionHandlerTest {
         assertEquals(true, file.isWriteLineEndings());
         assertEquals(true, file.isWriteHeader());
     }
-    private CoordTransFile getFileSettings (){
+    private CoordTransFileSettings getFileSettings (){
         ObjectMapper mapper = new ObjectMapper();
         String json = "{\"fileName\":\"test.txt\","
                 + "\"unit\":\"degree\","
@@ -69,7 +69,7 @@ public class CoordinateTransformationActionHandlerTest {
                 + "\"decimalCount\":5,"
                 + "\"headerLineCount\":2}";
         try {
-            return mapper.readValue(json, CoordTransFile.class);
+            return mapper.readValue(json, CoordTransFileSettings.class);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -129,7 +129,7 @@ public class CoordinateTransformationActionHandlerTest {
 
         List<Coordinate> coordinates = getRandomCoordinates(n, 300000, 600000, 6700000, 6730000, 0, 0);
         List<Coordinate> originals = coordinates.stream().map(c -> new Coordinate(c)).collect(Collectors.toList());
-        handler.transform("EPSG:3067", "EPSG:4258", 2, 2, coordinates);
+        handler.transform("EPSG:3067", "EPSG:4258", 2, coordinates);
         assertEquals(originals.size(), coordinates.size());
         for (int i = 0; i < originals.size(); i++) {
             Coordinate original = originals.get(i);
@@ -138,7 +138,7 @@ public class CoordinateTransformationActionHandlerTest {
             assertNotEquals(original.y, transformed.y, 0);
         }
 
-        handler.transform("EPSG:4258", "EPSG:3067", 2, 2, coordinates);
+        handler.transform("EPSG:4258", "EPSG:3067", 2, coordinates);
         assertEquals(originals.size(), coordinates.size());
         for (int i = 0; i < originals.size(); i++) {
             Coordinate original = originals.get(i);
