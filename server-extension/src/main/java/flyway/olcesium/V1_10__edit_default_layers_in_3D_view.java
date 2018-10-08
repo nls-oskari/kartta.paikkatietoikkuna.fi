@@ -21,9 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class V1_9__edit_default_layers_in_3D_view implements JdbcMigration {
+public class V1_10__edit_default_layers_in_3D_view implements JdbcMigration {
 
-    private static final Logger LOG = LogFactory.getLogger(V1_9__edit_default_layers_in_3D_view.class);
+    private static final Logger LOG = LogFactory.getLogger(V1_10__edit_default_layers_in_3D_view.class);
     private static final String CESIUM_VIEW_NAME = "Geoportal Ol Cesium";
     private static final String MAP_BUNDLE_NAME = "mapfull";
     private static final String BASELAYER_PLUGIN_NAME = "BackgroundLayerSelectionPlugin";
@@ -35,7 +35,7 @@ public class V1_9__edit_default_layers_in_3D_view implements JdbcMigration {
         updateCesiumViews(connection);
     }
 
-    private void updateCesiumViews(Connection connection) throws SQLException {
+    private void updateCesiumViews(Connection connection) {
         try {
             List<Long> viewIds = getCesiumViewIds(connection);
             List<OskariLayer> layers = getNlsBaseLayers(connection);
@@ -103,7 +103,7 @@ public class V1_9__edit_default_layers_in_3D_view implements JdbcMigration {
         return null;
     }
 
-    private List<Long> getCesiumViewIds(Connection conn) throws SQLException {
+    private List<Long> getCesiumViewIds(Connection conn) {
         List<Long> list = new ArrayList<>();
         final String sql = "SELECT id FROM portti_view WHERE name=?";
 
@@ -129,7 +129,7 @@ public class V1_9__edit_default_layers_in_3D_view implements JdbcMigration {
                 "and dp.locale like '%Maanmittauslaitos%'",
                 "and lyr.type = 'wmtslayer'",
                 "and (lyr.name = 'taustakartta' or lyr.name = 'maastokartta')",
-                "and lyr.locale not like 'Taustakarttasarja'");
+                "and lyr.locale not like '%Taustakarttasarja%'");
         try(PreparedStatement statement = conn.prepareStatement(sql)) {
             try (ResultSet rs = statement.executeQuery()) {
                 while(rs.next()) {

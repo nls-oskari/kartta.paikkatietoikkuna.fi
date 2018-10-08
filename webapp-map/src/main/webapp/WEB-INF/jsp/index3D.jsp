@@ -166,10 +166,6 @@
         src="/Oskari/libraries/ol-cesium/Cesium/Cesium.js">
 </script>
 
-<script type="text/javascript"
-        src="/Oskari/libraries/ol-cesium/olcesium.js">
-</script>
-
 <!--  OSKARI -->
 
 <script type="text/javascript">
