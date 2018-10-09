@@ -18,4 +18,7 @@ public enum TransformationType {
         return toString().charAt(2) == 'F';
     }
 
+    public boolean isTransform() {
+        return toString().charAt(2) != 'R';
+    }
 }

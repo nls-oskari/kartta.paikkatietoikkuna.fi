@@ -87,6 +87,8 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         if (TransformationType.F2R.equals(transformParams.type)) { // parse file to array without transformation
             // basically pretty much the same as any type starting with F
             // FIXME: remove custom handling and use getCoordsFromFile()
+            // don't transform F2R coordinates and can't set to Coordinate (double values) because has to be String (24 14 15,35353)
+            // check if some common file parsing can be done
             readFileToJsonResponse(transformParams);
             return;
         }
@@ -98,6 +100,8 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         if (addZeroes) {
             // add N2000 that coordtrans service doesn't fail
             // TODO: service requires 3 inputs if output is 3 axis???
+            // yes, but instead of adding zeroes and source height system here, coordtransform service should add zeroes to result if 2D->3D is really needed
+            // also then dimensions must not be sent by frontend
             sourceCrs = sourceCrs + ",EPSG:3900";
         }
         CoordinatesPayload coords = getCoordinatesFromPayload(transformParams, addZeroes);
@@ -109,6 +113,9 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
 
         // make the calls to actual service
         // TODO: why would we need to send targetDimension as param?
+        // targetDimension is used in parseResponse
+        // also can be checked e.g. coordinateParts.length == 3 (parseResponse)
+        // in query !Double.isNaN(coord.z)
         transform(sourceCrs, targetCrs, targetDimension, coords.getCoords());
 
         HttpServletResponse response = params.getResponse();
@@ -138,6 +145,9 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
             // payload is json
             List<Coordinate> coord = getCoordsFromJsonArray(params.actionParameters, dimensionCount, addZeroes);
             payload.addCoordinates(coord);
+            if (params.type.isFileOutput()){
+                payload.setExportSettings(params.exportSettings);
+            }
             return payload;
         }
 
@@ -550,7 +560,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
             boolean writeEndings = opts.isWriteLineEndings() && !lineEndings.isEmpty();
             String unit = opts.getUnit();
             boolean transformUnit = false;
-            if (unit != null && !unit.equals(DEGREE)) {
+            if (unit != null && !unit.equals(DEGREE) && !unit.equals(METRIC)) {
                 transformUnit = true;
             }
             if (opts.isPrefixId()) {
