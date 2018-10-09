@@ -181,6 +181,15 @@
         <div id="register">
             <a href="https://omatili.maanmittauslaitos.fi/user/new/paikkatietoikkuna?lang=fi">Rekisteröidy</a>
         </div>
+        <div class="login-information">
+            <div id="termsOfUse">
+                Rekisteröitymällä hyväksyt Paikkatietoikkunan
+                <a target="_blank" href="http://maanmittauslaitos.fi/asioi-verkossa/paikkatietoikkuna">käyttöehdot</a>
+            </div>
+            <div id="dataProtectionDescription">
+                <a target="_blank" href="https://maanmittauslaitos.fi/tietoa-maanmittauslaitoksesta/organisaatio/tietosuojaselosteet/asiakassuhderekisteri">Asiakassuhderekisterin tietosuojaseloste</a>
+            </div>
+        </div>
 
         <div class="login-information">
             <p>Ongelmatilanteissa ota yhteyttä asiakaspalveluumme: paikkatietoikkuna@maanmittauslaitos.fi.</p>
@@ -223,6 +232,16 @@
         </div>
 
         <div class="login-information">
+            <div id="termsOfUse">
+                Genom att registrera dig som användare godkänner du
+                <a target="_blank" href="http://maanmittauslaitos.fi/sv/e-tjanster/geodataportalen-paikkatietoikkuna">användarvillkoren</a>
+            </div>
+            <div id="dataProtectionDescription">
+                <a target="_blank" href="https://maanmittauslaitos.fi/sv/information-om-lantmateriverket/organisation/dataskyddbeskrivningar/register-over-kundforhallanden">Dataskyddbeskrivningen för register över kundförhållanden</a>
+            </div>
+        </div>
+
+        <div class="login-information">
             <p>Vid problem, kontakta vår kundservice paikkatietoikkuna@lantmateriverket.fi.</p>
         </div>
     </c:if>
@@ -259,6 +278,15 @@
         </div>
         <div id="register">
             <a href="https://omatili.maanmittauslaitos.fi/user/new/paikkatietoikkuna?lang=en">Register</a>
+        </div>
+        <div class="login-information">
+            <div id="termsOfUse">
+                By registering, you agree to the
+                <a target="_blank" href="http://maanmittauslaitos.fi/en/e-services/geodata-portal-paikkatietoikkuna">Terms of Use of Paikkatietoikkuna</a>
+            </div>
+            <div id="dataProtectionDescription">
+                <a target="_blank" href="https://maanmittauslaitos.fi/en/about-nls/organisation/data-protection-description/customer-relations-register">The data protection description of the customer relations register</a>
+            </div>
         </div>
 
         <div class="login-information">

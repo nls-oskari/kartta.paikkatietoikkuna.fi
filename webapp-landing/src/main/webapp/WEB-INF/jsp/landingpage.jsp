@@ -9,10 +9,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Paikkatietoikkuna</title>
-    <link href="/static/css/style.css" rel="stylesheet">
-
     <!-- Bootstrap -->
     <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
 
 </head>
 <body>
@@ -94,7 +93,7 @@
         </div>
     </div>
     <footer>
-        <div class="row">
+        <div class="row some-link">
             <a href="<spring:message code="landing.social.tw.link"/>">
                 <img src="/static/resources/images/twitter-logo.svg" class="footer-image">
             </a>
@@ -105,6 +104,11 @@
         <div class="row footer-text">
             <p><spring:message code="landing.help"/></p>
         </div>
+
+        <div class="row tos-link">
+            <a href="<spring:message code="landing.tos.link"/>"><spring:message code="landing.tos.label"/></a>
+        </div>
+
         <div class="row">
             <c:if test="${pageContext.response.locale.language != 'sv'}"><a href="/?lang=sv" class="language-link">På svenska</a></c:if>
             <c:if test="${pageContext.response.locale.language != 'en'}"><a href="/?lang=en" class="language-link">In English</a></c:if>
