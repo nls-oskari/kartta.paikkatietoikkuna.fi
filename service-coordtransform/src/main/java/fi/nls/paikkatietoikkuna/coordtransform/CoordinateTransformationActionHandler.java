@@ -138,6 +138,9 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
             // payload is json
             List<Coordinate> coord = getCoordsFromJsonArray(params.actionParameters, dimensionCount, addZeroes);
             payload.addCoordinates(coord);
+            if (params.type.isFileOutput()){
+                payload.setExportSettings(params.exportSettings);
+            }
             return payload;
         }
 
@@ -550,7 +553,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
             boolean writeEndings = opts.isWriteLineEndings() && !lineEndings.isEmpty();
             String unit = opts.getUnit();
             boolean transformUnit = false;
-            if (unit != null && !unit.equals(DEGREE)) {
+            if (unit != null && !unit.equals(DEGREE) && !unit.equals(METRIC)) {
                 transformUnit = true;
             }
             if (opts.isPrefixId()) {

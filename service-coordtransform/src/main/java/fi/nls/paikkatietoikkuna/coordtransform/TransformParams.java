@@ -53,8 +53,13 @@ public class TransformParams {
         } catch (IllegalArgumentException e) {
             throw new ActionParamsException("Unknown transform type");
         }
-        sourceCRS = getSourceCrs(params);
-        targetCRS = getTargetCrs(params);
+        if (type.isTransform() == false) {
+            sourceCRS = null;
+            targetCRS = null;
+        } else {
+            sourceCRS = getSourceCrs(params);
+            targetCRS = getTargetCrs(params);
+        }
 
         inputDimensions = params.getHttpParam(PARAM_SOURCE_DIMENSION, 2);
         outputDimensions = params.getHttpParam(PARAM_TARGET_DIMENSION, 2);
