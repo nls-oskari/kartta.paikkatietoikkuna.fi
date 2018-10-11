@@ -4,6 +4,7 @@ import fi.nls.oskari.domain.map.view.Bundle;
 import fi.nls.oskari.domain.map.view.View;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
+import fi.nls.oskari.map.view.ViewException;
 import fi.nls.oskari.map.view.ViewService;
 import fi.nls.oskari.map.view.ViewServiceIbatisImpl;
 import fi.nls.oskari.util.FlywayHelper;
@@ -75,7 +76,6 @@ public class V1_11__add_modules implements JdbcMigration {
             for(Long viewId : viewIds) {
                 View modifyView = viewService.getViewWithConf(viewId);
                 updateMapFullBundle(modifyView);
-                viewService.updateView(modifyView);
                 addBundlesToView(connection, modifyView.getId());
             }
         } catch (Exception e) {
@@ -84,7 +84,7 @@ public class V1_11__add_modules implements JdbcMigration {
         }
     }
 
-    private void updateMapFullBundle(View view) throws JSONException {
+    private void updateMapFullBundle(View view) throws JSONException, ViewException {
         Bundle mapfull = view.getBundleByName(MAP_BUNDLE_NAME);
         JSONObject config = mapfull.getConfigJSON();
         JSONArray plugins = config.getJSONArray("plugins");
@@ -107,6 +107,7 @@ public class V1_11__add_modules implements JdbcMigration {
             }
         });
         mapfull.setConfig(config.toString());
+        viewService.updateBundleSettingsForView(view.getId(), mapfull);
     }
 
     private void addBundlesToView(Connection conn, Long viewId) {
