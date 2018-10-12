@@ -174,7 +174,7 @@
 
     var Oskari3D = {
         setLang: function(lang) {
-            let url = './?lang=' + lang;
+            var url = './?lang=' + lang;
             if (Oskari.app.getUuid()) {
                 url += '&uuid=' + Oskari.app.getUuid();
             }
