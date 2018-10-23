@@ -37,11 +37,6 @@ public class V1_5__modify_start_view implements JdbcMigration {
 
         List<Long> viewIds = getCesiumViewIds(connection);
         OskariLayer baseLyr = getNlsBaseLayer(connection);
-        List<OskariLayer> tiles3dLayers = get3DTilesLayers(connection);
-
-        if (tiles3dLayers.isEmpty()) {
-            throw new RuntimeException("No 3D tiles map layers found! Add them manually before continuing.");
-        }
 
         try {
             for(Long viewId : viewIds) {
@@ -56,11 +51,7 @@ public class V1_5__modify_start_view implements JdbcMigration {
                         if (baseLyr != null) {
                             selectedLayers.put(JSONHelper.createJSONObject("id", baseLyr.getId()));
                         }
-                        tiles3dLayers
-                                .stream()
-                                .forEach(lyr -> selectedLayers.put(
-                                        JSONHelper.createJSONObject("id", lyr.getId()))
-                                );
+
                         bundleState.put("selectedLayers", selectedLayers);
                         // camera settings
                         JSONObject location = new JSONObject();
@@ -160,29 +151,5 @@ public class V1_5__modify_start_view implements JdbcMigration {
             }
         }
         return null;
-    }
-
-    private List<OskariLayer> get3DTilesLayers(Connection conn) throws SQLException {
-        List<OskariLayer> layers = new ArrayList<>();
-        final String sql = String.join(" ",
-                "SELECT lyr.id, lyr.name, lyr.url, lyr.type, lyr.username, lyr.password, lyr.srs_name, lyr.version",
-                "FROM oskari_maplayer lyr where lyr.type = 'tiles3dlayer'");
-        try(PreparedStatement statement = conn.prepareStatement(sql)) {
-            try (ResultSet rs = statement.executeQuery()) {
-                while(rs.next()) {
-                    OskariLayer layer = new OskariLayer();
-                    layer.setId(rs.getInt("id"));
-                    layer.setName(rs.getString("name"));
-                    layer.setUrl(rs.getString("url"));
-                    layer.setType(rs.getString("type"));
-                    layer.setUsername(rs.getString("username"));
-                    layer.setPassword(rs.getString("password"));
-                    layer.setSrs_name(rs.getString("srs_name"));
-                    layer.setVersion(rs.getString("version"));
-                    layers.add(layer);
-                }
-            }
-        }
-        return layers;
     }
 }

@@ -46,6 +46,7 @@ public class CoordinateTransformationActionHandlerTest {
         assertEquals("test.txt", file.getFileName());
         assertEquals('.', file.getDecimalSeparator());
         assertEquals("tab", file.getCoordinateSeparator());
+        assertEquals("win", file.getLineSeparator());
         assertEquals(2, file.getHeaderLineCount());
         assertEquals(5, file.getDecimalCount());
         assertEquals("degree", file.getUnit());
@@ -66,6 +67,7 @@ public class CoordinateTransformationActionHandlerTest {
                 + "\"axisFlip\":true,"
                 + "\"writeCardinals\":false,"
                 + "\"writeLineEndings\":true,"
+                + "\"lineSeparator\":\"win\","
                 + "\"decimalCount\":5,"
                 + "\"headerLineCount\":2}";
         try {

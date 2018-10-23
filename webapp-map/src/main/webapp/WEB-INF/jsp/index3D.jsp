@@ -125,16 +125,16 @@
             </div>
             <div id="language">
                 <c:if test="${language == 'fi'}">
-                    <a href="./?lang=sv">På svenska</a> -
-                    <a href="./?lang=en">In English</a>
+                    <a href="#" onclick="Oskari3D.setLang('sv')">På svenska</a> -
+                    <a href="#" onclick="Oskari3D.setLang('en')">In English</a>
                 </c:if>
                 <c:if test="${language == 'sv'}">
-                    <a href="./?lang=fi">Suomeksi</a> -
-                    <a href="./?lang=en">In English</a>
+                    <a href="#" onclick="Oskari3D.setLang('fi')">Suomeksi</a> -
+                    <a href="#" onclick="Oskari3D.setLang('en')">In English</a>
                 </c:if>
                 <c:if test="${language == 'en'}">
-                    <a href="./?lang=fi">Suomeksi</a> -
-                    <a href="./?lang=sv">På svenska</a>
+                    <a href="#" onclick="Oskari3D.setLang('fi')">Suomeksi</a> -
+                    <a href="#" onclick="Oskari3D.setLang('sv')">På svenska</a>
                 </c:if>
             </div>
             <div id="toolbar">
@@ -166,15 +166,21 @@
         src="/Oskari/libraries/ol-cesium/Cesium/Cesium.js">
 </script>
 
-<script type="text/javascript"
-        src="/Oskari/libraries/ol-cesium/olcesium.js">
-</script>
-
 <!--  OSKARI -->
 
 <script type="text/javascript">
     var ajaxUrl = '${ajaxUrl}';
     var controlParams = ${controlParams};
+
+    var Oskari3D = {
+        setLang: function(lang) {
+            var url = './?lang=' + lang;
+            if (Oskari.app.getUuid()) {
+                url += '&uuid=' + Oskari.app.getUuid();
+            }
+            window.location.href = url;
+        }
+    }
 </script>
 
 <c:if test="${preloaded}">
