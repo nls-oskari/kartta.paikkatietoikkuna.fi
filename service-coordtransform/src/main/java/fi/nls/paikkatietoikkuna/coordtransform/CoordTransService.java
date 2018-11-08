@@ -25,7 +25,7 @@ public class CoordTransService {
     private static final BigDecimal DEC_TO_GRAD = BigDecimal.TEN.divide(new BigDecimal(9), DECIMAL_PRECISION);
     private static final BigDecimal DEC_TO_RAD = PI2.divide(new BigDecimal(360), DECIMAL_PRECISION);
 
-    public static void parseResponse(byte[] resp, List<Coordinate> coords, final int dimension) {
+    public static void parseResponse(byte[] resp, List<Coordinate> coords) {
         if (resp[0] == 'V') {
             // "Virhe: " - send only the part after prefix
             throw new IllegalArgumentException(new String(resp, 7, resp.length - 7, StandardCharsets.UTF_8));
@@ -38,8 +38,7 @@ public class CoordTransService {
             String[] coordinateParts = coordinates[i].split(SEP_COORD_PART);
             coord.x = Double.parseDouble(coordinateParts[0]);
             coord.y = Double.parseDouble(coordinateParts[1]);
-            if (dimension == 3) {
-                // FIXME: just check if coordinateParts.length > 3 instead of sending dimension?
+            if (coordinateParts.length > 2) {
                 coord.z = Double.parseDouble(coordinateParts[2]);
             }
         }
@@ -48,6 +47,7 @@ public class CoordTransService {
     public static double transformUnitToDegree(String coord, String unit) throws ActionException {
         coord = coord.trim();
         BigDecimal value;
+        //FIXME: move to switch
         if (GRADIAN.equals(unit)) {
             value = new BigDecimal(coord);
             value = value.divide(DEC_TO_GRAD, DECIMAL_PRECISION);
@@ -62,6 +62,9 @@ public class CoordTransService {
         BigDecimal mm;
         BigDecimal ss;
         switch (unit) {
+            //TODO: Could also remove all whitespaces from coord and use same parsing
+            //trim -> coord = coord.replaceAll("\\s",""); (or compile Pattern for it)
+            //case "DD MM":
             case "DDMM":
                 mm = new BigDecimal(coord.substring(2));
                 dd = dd.add(mm.divide(HOUR_TO_MIN, DECIMAL_PRECISION));

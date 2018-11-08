@@ -112,11 +112,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         // if (addZeroes) {coords.getCoords().forEach(c => c.setOrdinate(Coordinate.Z, 0)) }
 
         // make the calls to actual service
-        // TODO: why would we need to send targetDimension as param?
-        // targetDimension is used in parseResponse
-        // also can be checked e.g. coordinateParts.length == 3 (parseResponse)
-        // in query !Double.isNaN(coord.z)
-        transform(sourceCrs, targetCrs, targetDimension, coords.getCoords());
+        transform(sourceCrs, targetCrs, coords.getCoords());
 
         HttpServletResponse response = params.getResponse();
         if (transformParams.type.isFileOutput()) {
@@ -152,10 +148,10 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         }
 
         // There's a file to be parsed
-        int resultCount = Integer.MAX_VALUE;
+        int resultCount = maxCoordsF2A;
         boolean fileEndings = false;
         if (params.type.isFileOutput()) {
-            resultCount = maxCoordsF2A;
+            resultCount = Integer.MAX_VALUE;
             fileEndings = params.exportSettings.isWriteLineEndings();
         }
         List<Coordinate> coord = getCoordsFromFile(params.importSettings, params.file, dimensionCount, addZeroes, fileEndings, resultCount);
@@ -171,7 +167,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         return payload;
     }
 
-    protected void transform(String sourceCrs, String targetCrs, int targetDimension,
+    protected void transform(String sourceCrs, String targetCrs,
                              List<Coordinate> coords) throws ActionException {
         CoordTransQueryBuilder queryBuilder = new CoordTransQueryBuilder(endPoint, sourceCrs, targetCrs);
 
@@ -179,17 +175,17 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         for (Coordinate c : coords) {
             boolean fit = queryBuilder.add(c);
             if (!fit) {
-                transform(queryBuilder.build(), batch, targetDimension);
+                transform(queryBuilder.build(), batch);
                 queryBuilder.reset();
                 batch.clear();
                 queryBuilder.add(c);
             }
             batch.add(c);
         }
-        transform(queryBuilder.build(), batch, targetDimension);
+        transform(queryBuilder.build(), batch);
     }
 
-    protected void transform(String query, List<Coordinate> batch, int dimension) throws ActionException {
+    protected void transform(String query, List<Coordinate> batch) throws ActionException {
         if (batch.size() == 0) {
             return;
         }
@@ -209,7 +205,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
 
         try {
             // Change Coordinate.xyz values in place
-            CoordTransService.parseResponse(serviceResponseBytes, batch, dimension);
+            CoordTransService.parseResponse(serviceResponseBytes, batch);
         } catch (IllegalArgumentException e) {
             throw new ActionParamsException("Failed to make transformation", TransformParams.createErrorResponse("transformation_error", e)); //error from transformation service
         }
@@ -293,6 +289,10 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                     }
                     throw new ActionParamsException("Invalid coordinate line", createErrorInLineResponse(lineIndex, line, null));
                 }
+
+                // TODO: if there is more than one coordinate separators between coordinates, transformation should still work
+                // loop coords, skip if item is empty and try to find next x,y,z value (handle prefixId, axisFlip, dimension and addZeroes)
+                // "25.4545  64.3434"
                 if (transformUnit) {
                     x = CoordTransService.transformUnitToDegree(coords[xIndex], unit);
                     y = CoordTransService.transformUnitToDegree(coords[yIndex], unit);
@@ -367,7 +367,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
     protected void readFileToJsonResponse(TransformParams params) throws ActionException {
         FileItem file = params.file;
         CoordTransFileSettings sourceOptions = params.importSettings;
-        int dimension = params.inputDimensions;
+        int dimension = params.inputDimensions; //input dimension is now forced to 3 in frontend (F2R), if file is selected before crs selections
         HttpServletResponse response = params.actionParameters.getResponse();
         response.setContentType(IOHelper.CONTENT_TYPE_JSON);
         boolean hasMoreCoordinates = false;
@@ -376,7 +376,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         int xIndex = 0;
         int yIndex = 1;
         int zIndex = 2;
-        int coordDimension = dimension;
+        int coordDimension = 2; //force to check that lines contain at least x and y
         int headerLineCount = sourceOptions.getHeaderLineCount();
         String coordSeparator = sourceOptions.getCoordinateSeparator();
         boolean firstLine = true;
@@ -421,8 +421,10 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                         json.writeStartArray();
                         json.writeString(coord[xIndex]);
                         json.writeString(coord[yIndex]);
-                        if (dimension == 3) {
+                        if (coord.length > zIndex ) {
                             json.writeString(coord[zIndex]);
+                        } else {
+                            json.writeString("");
                         }
                         json.writeEndArray();
                         firstLine = false;
