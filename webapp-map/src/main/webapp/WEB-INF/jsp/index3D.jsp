@@ -7,18 +7,8 @@
 <head>
     <title>${viewName}</title>
     <link rel="shortcut icon" href="/static/img/pti_icon.png" type="image/png" />
-    <script type="text/javascript" src="/Oskari/libraries/jquery/jquery-3.3.1.min.js">
-    </script>
 
     <!-- ############# css ################# -->
-    <link
-            rel="stylesheet"
-            type="text/css"
-            href="/Oskari/resources/css/forms.css"/>
-    <link
-            rel="stylesheet"
-            type="text/css"
-            href="/Oskari/resources/css/portal.css"/>
     <link
             rel="stylesheet"
             type="text/css"

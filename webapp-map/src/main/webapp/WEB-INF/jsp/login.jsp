@@ -8,18 +8,16 @@
     <title>Paikkatietoikkuna</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="/static/img/pti_icon.png" type="image/png" />
-    <script type="text/javascript" src="/Oskari/libraries/jquery/jquery-1.10.2.min.js">
-    </script>
 
     <!-- ############# css ################# -->
     <link
             rel="stylesheet"
             type="text/css"
-            href="/Oskari/resources/css/forms.css"/>
+            href="/static/css/forms.css"/>
     <link
             rel="stylesheet"
             type="text/css"
-            href="/Oskari/resources/css/portal.css"/>
+            href="/static/css/portal.css"/>
     <style type="text/css">
         @media screen {
             body, html {
