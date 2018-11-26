@@ -19,6 +19,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
+
 import org.geojson.Feature;
 import org.geojson.LineString;
 
@@ -54,18 +56,27 @@ public class TerrainProfileHandler extends ActionHandler {
 
     @Override
     public void init() {
-        if (tps == null) {
-            try {
-                tps = new TerrainProfileService(
-                        PropertyUtil.get(PROPERTY_ENDPOINT),
-                        PropertyUtil.get(PROPERTY_DEM_COVERAGE_ID));
-            } catch (ServiceException ex) {
-                throw new ServiceRuntimeException(
-                        "Failed to init TerrainProfileService: " + ex.getMessage(), ex);
-            }
+        try {
+            tps = getService();
+        } catch (NoSuchElementException propertyMissing) {
+            // fatal, throw an exception so this route is not added to available actions
+            throw new ServiceRuntimeException(
+                    "Failed to init TerrainProfileService: " + propertyMissing.getMessage());
+        } catch (ServiceException ex) {
+            // not fatal, proceed with init and try again later
+            LOG.error("Failed to init TerrainProfileService: " + ex.getMessage(), ex);
         }
         noDataValue = getNoDataValue();
         LOG.debug("NODATA value:", noDataValue);
+    }
+
+    protected synchronized TerrainProfileService getService() throws ServiceException {
+        if (tps == null) {
+            tps = new TerrainProfileService(
+                    PropertyUtil.getNecessary(PROPERTY_ENDPOINT),
+                    PropertyUtil.getNecessary(PROPERTY_DEM_COVERAGE_ID));
+        }
+        return tps;
     }
 
     private float getNoDataValue() {
@@ -95,7 +106,7 @@ public class TerrainProfileHandler extends ActionHandler {
         }
 
         try {
-            writeResponse(params, tps.getTerrainProfile(points, numPoints, scaleFactor));
+            writeResponse(params, getService().getTerrainProfile(points, numPoints, scaleFactor));
         } catch (ServiceException e) {
             throw new ActionException(e.getMessage(), e);
         }
