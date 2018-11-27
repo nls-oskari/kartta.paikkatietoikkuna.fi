@@ -13,10 +13,7 @@
             rel="stylesheet"
             type="text/css"
             href="/Oskari${path}/icons.css"/>
-    <link
-            rel="stylesheet"
-            type="text/css"
-            href="/Oskari${path}/css/overwritten.css"/>
+
     <style type="text/css">
         @media screen {
             body {
