@@ -17,7 +17,6 @@
         <javax.servlet.version>3.1.0</javax.servlet.version>
         <javax.servlet.jsp.version>2.0</javax.servlet.jsp.version>
         <javax.servlet.jstl.version>1.2</javax.servlet.jstl.version>
-        <jackson.version>2.5.4</jackson.version>
         <log4j.version>1.2.17</log4j.version>
     </properties>
 
