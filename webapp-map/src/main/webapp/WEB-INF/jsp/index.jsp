@@ -91,6 +91,10 @@
 
         }
     </style>
+    <link
+            rel="stylesheet"
+            type="text/css"
+            href="/Oskari${path}/oskari.css"/>
     <!-- ############# /css ################# -->
 </head>
 <body class="mml-map">
