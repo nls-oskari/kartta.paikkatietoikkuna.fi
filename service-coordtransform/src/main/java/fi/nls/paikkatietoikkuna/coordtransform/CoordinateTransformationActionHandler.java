@@ -378,6 +378,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         int zIndex = 2;
         int coordDimension = 2; //force to check that lines contain at least x and y
         int headerLineCount = sourceOptions.getHeaderLineCount();
+        int writtenCoords = 0;
         String coordSeparator = sourceOptions.getCoordinateSeparator();
         boolean firstLine = true;
         if (!coordinateSeparators.containsKey(coordSeparator)) {
@@ -427,8 +428,9 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                             json.writeString("");
                         }
                         json.writeEndArray();
+                        writtenCoords++;
                         firstLine = false;
-                        if (i + 1 + headerLineCount == maxCoordsF2A) {
+                        if (writtenCoords == maxCoordsF2A) {
                             hasMoreCoordinates = true;
                             break;
                         }
@@ -606,7 +608,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                     }
                 }
                 if (prefixId && prefixWithIndex) {
-                    bw.write(i + coordSeparator);
+                    bw.write((i + 1) + coordSeparator);
                 } else if (prefixId) {
                     bw.write(ids.get(i) + coordSeparator);
                 }
