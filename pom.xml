@@ -10,7 +10,7 @@
     <name>kartta.paikkatietoikkuna.fi</name>
 
     <properties>
-        <oskari.version>1.49.0</oskari.version>
+        <oskari.version>1.50.0-SNAPSHOT</oskari.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
