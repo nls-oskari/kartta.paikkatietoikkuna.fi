@@ -28,19 +28,28 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.oskari</groupId>
-            <artifactId>control-userlayer</artifactId>
-            <version>${oskari.version}</version>
+            <groupId>fi.nls.paikkatietoikkuna</groupId>
+            <artifactId>app-resources</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.oskari</groupId>
-            <artifactId>control-mvt</artifactId>
-            <version>${oskari.version}</version>
+            <groupId>fi.nls.paikkatietoikkuna</groupId>
+            <artifactId>server-extension</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>fi.nls.paikkatietoikkuna</groupId>
             <artifactId>service-coordtransform</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.oskari</groupId>
+            <artifactId>control-userlayer</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.oskari</groupId>
+            <artifactId>control-mvt</artifactId>
         </dependency>
         <!-- https://github.com/nlsfi/oskari-server-extras -->
         <dependency>
@@ -59,48 +68,31 @@
         <dependency>
             <groupId>fi.nls.oskari.service</groupId>
             <artifactId>oskari-control-statistics</artifactId>
-            <version>${oskari.version}</version>
         </dependency>
         <!-- Statistics plugins -->
         <dependency>
             <groupId>fi.nls.oskari.service</groupId>
             <artifactId>oskari-statistics-eurostat</artifactId>
-            <version>${oskari.version}</version>
         </dependency>
         <dependency>
             <groupId>fi.nls.oskari.service</groupId>
             <artifactId>service-statistics-pxweb</artifactId>
-            <version>${oskari.version}</version>
         </dependency>
         <!-- /Statistics plugins -->
         <!-- artifactId "oskari-control-base" is implied by adding extended actions -->
         <dependency>
             <groupId>fi.nls.oskari.service</groupId>
             <artifactId>oskari-control-myplaces</artifactId>
-            <version>${oskari.version}</version>
         </dependency>
 
         <dependency>
             <groupId>fi.nls.oskari.service</groupId>
             <artifactId>oskari-control-admin</artifactId>
-            <version>${oskari.version}</version>
         </dependency>
 
         <dependency>
             <groupId>fi.nls.oskari.service</groupId>
             <artifactId>oskari-control-routing</artifactId>
-            <version>${oskari.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>fi.nls.paikkatietoikkuna</groupId>
-            <artifactId>app-resources</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>fi.nls.paikkatietoikkuna</groupId>
-            <artifactId>server-extension</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <!-- Replace icu4j version included by axiom-api with newer version
@@ -115,13 +107,11 @@
         <dependency>
             <groupId>fi.nls.oskari.service</groupId>
             <artifactId>oskari-search-opendata</artifactId>
-            <version>${oskari.version}</version>
         </dependency>
 
         <dependency>
             <groupId>fi.nls.oskari</groupId>
             <artifactId>servlet-map</artifactId>
-            <version>${oskari.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.ibm.icu</groupId>
@@ -133,24 +123,20 @@
         <dependency>
             <groupId>fi.nls.oskari</groupId>
             <artifactId>service-logging</artifactId>
-            <version>${oskari.version}</version>
         </dependency>
         <!-- /oskari -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>${slf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-dbcp2</artifactId>
-            <version>${commons-dbcp2.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>${postgresql.version}</version>
         </dependency>
 
     </dependencies>
