@@ -15,7 +15,6 @@
         <dependency>
             <groupId>fi.nls.oskari</groupId>
             <artifactId>content-resources</artifactId>
-            <version>${oskari.version}</version>
         </dependency>
     </dependencies>
 </project>
