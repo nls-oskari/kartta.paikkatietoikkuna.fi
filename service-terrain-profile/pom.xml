@@ -13,12 +13,10 @@
         <dependency>
             <groupId>fi.nls.oskari.service</groupId>
             <artifactId>oskari-control</artifactId>
-            <version>${oskari.version}</version>
         </dependency>
         <dependency>
             <groupId>org.oskari</groupId>
             <artifactId>service-wcs</artifactId>
-            <version>${oskari.version}</version>
         </dependency>
         <dependency>
             <groupId>de.grundid.opendatalab</groupId>
@@ -28,7 +26,6 @@
         <dependency>
             <groupId>fi.nls.oskari</groupId>
             <artifactId>shared-test-resources</artifactId>
-            <version>${oskari.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
