@@ -15,16 +15,21 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
 
-        <commons-dbcp2.version>2.0.1</commons-dbcp2.version>
-        <postgresql.version>42.2.5</postgresql.version>
-        <junit.version>4.11</junit.version>
-        <slf4j.version>1.7.12</slf4j.version>
-        <jackson.version>2.9.7</jackson.version>
-        <jsoup.version>1.11.3</jsoup.version>
-        <servlet.version>3.1.0</servlet.version>
         <geojson-jackson.version>1.8</geojson-jackson.version>
         <commons-fileupload.version>1.3.2</commons-fileupload.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>fi.nls.oskari</groupId>
+                <artifactId>oskari-parent</artifactId>
+                <version>${oskari.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <repositories>
         <repository>

@@ -14,17 +14,14 @@
         <dependency>
             <groupId>fi.nls.oskari.service</groupId>
             <artifactId>service-scheduler</artifactId>
-            <version>${oskari.version}</version>
         </dependency>
         <dependency>
             <groupId>fi.nls.oskari.service</groupId>
             <artifactId>oskari-map</artifactId>
-            <version>${oskari.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
