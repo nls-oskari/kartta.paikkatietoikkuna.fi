@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -23,6 +24,8 @@ import org.oskari.wcs.request.DescribeCoverage;
 import org.oskari.wcs.request.GetCapabilities;
 import org.oskari.wcs.request.GetCoverage;
 import org.xml.sax.SAXException;
+
+import com.netflix.hystrix.exception.HystrixRuntimeException;
 
 import fi.nls.oskari.service.ServiceException;
 import fi.nls.oskari.util.IOHelper;
@@ -301,9 +304,11 @@ public class TerrainProfileService {
         String request = endPoint + "?" + queryString;
         byte[] response;
         try {
-            HttpURLConnection conn = IOHelper.getConnection(request);
-            response = IOHelper.readBytes(conn);
-        } catch (IOException e) {
+            response = new CommandGetCoverage(request).execute();
+        } catch (HystrixRuntimeException e) {
+            if (e.getCause() instanceof TimeoutException) {
+                throw new ServiceException("Timeout");
+            }
             throw new ServiceException("Failed to retrieve data from WCS", e);
         }
 

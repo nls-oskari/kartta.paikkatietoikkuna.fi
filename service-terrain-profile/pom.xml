@@ -28,5 +28,9 @@
             <artifactId>shared-test-resources</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.netflix.hystrix</groupId>
+            <artifactId>hystrix-core</artifactId>
+        </dependency>
     </dependencies>
 </project>
