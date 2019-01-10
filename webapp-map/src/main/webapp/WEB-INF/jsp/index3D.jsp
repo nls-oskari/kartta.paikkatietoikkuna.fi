@@ -171,7 +171,7 @@
             }
             window.location.href = url;
         }
-    }
+    };
 
     // Polyfills DOM4 MouseEvent
     (function (window) {
