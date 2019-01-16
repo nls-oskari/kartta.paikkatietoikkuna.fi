@@ -77,16 +77,20 @@
                 padding-left: 0.3em;
             }
 
-            #language {
+            #language, #pti-feedback {
                 padding: 0px 10px 0px 16px;
                 color: #CCC;
             }
 
-            #language a {
+            #language a, #pti-feedback a {
                 color: #FFDE00;
                 font-size: 12px;
                 cursor: pointer;
                 text-decoration: underline;
+            }
+
+            #language {
+                margin-bottom: 8px;
             }
 
         }
@@ -131,6 +135,17 @@
                 <c:if test="${language == 'en'}">
                     <a href="./?lang=fi">Suomeksi</a> -
                     <a href="./?lang=sv">På svenska</a>
+                </c:if>
+            </div>
+            <div id="pti-feedback">
+                <c:if test="${language == 'fi'}">
+                    <a target="_blank" href="https://www.maanmittauslaitos.fi/lomakkeet/karttoihin_liittyva_palaute">Palaute</a>
+                </c:if>
+                <c:if test="${language == 'sv'}">
+                    <a target="_blank" href="https://www.maanmittauslaitos.fi/sv/lomakkeet/karttoihin_liittyva_palaute">Respons</a>
+                </c:if>
+                <c:if test="${language == 'en'}">
+                    <a target="_blank" href="https://www.maanmittauslaitos.fi/en/lomakkeet/karttoihin_liittyva_palaute">Feedback</a>
                 </c:if>
             </div>
             <div id="toolbar">
