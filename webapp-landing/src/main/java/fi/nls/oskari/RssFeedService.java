@@ -4,7 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.nls.oskari.domain.RssFeedChannel;
 import fi.nls.oskari.domain.RssFeedItem;
 import fi.nls.oskari.domain.RssFeedXmlRoot;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.json.JSONObject;
 import org.json.XML;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +26,7 @@ import java.util.List;
 @Service
 public class RssFeedService {
 
-    private static final Logger logger = Logger.getLogger("RssFeedReader");
+    private static final Logger logger = LogManager.getLogger("RssFeedReader");
 
     @Value("${rss.url.notifications}")
     private String notificationsUrl;
