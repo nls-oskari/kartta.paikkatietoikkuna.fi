@@ -13,11 +13,14 @@ import fi.nls.oskari.control.ActionParamsException;
 import fi.nls.oskari.control.RestActionHandler;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
+import fi.nls.oskari.service.OskariComponentManager;
 import fi.nls.oskari.util.IOHelper;
 import fi.nls.oskari.util.JSONHelper;
 import fi.nls.oskari.util.PropertyUtil;
+import fi.nls.oskari.util.ResponseHelper;
 import org.apache.commons.fileupload.FileItem;
 import org.json.JSONObject;
+import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -55,7 +58,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
     private String endPoint;
     protected static final ObjectMapper mapper = new ObjectMapper();
     private final int maxCoordsF2A = PropertyUtil.getOptional(PROP_MAX_COORDS_FILE_TO_ARRAY, 100);
-
+    private CoordTransWorker worker;
 
     public CoordinateTransformationActionHandler() {
         this(null);
@@ -64,6 +67,7 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
     protected CoordinateTransformationActionHandler(String endPoint) {
         this.jf = new JsonFactory();
         this.endPoint = endPoint;
+        this.worker = OskariComponentManager.getComponentOfType(CoordTransWorker.class);
     }
 
     @Override
@@ -111,8 +115,57 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         // TODO: move addZeroes handling here from getCoordinatesFromPayload()
         // if (addZeroes) {coords.getCoords().forEach(c => c.setOrdinate(Coordinate.Z, 0)) }
 
+        CoordTransQueryBuilder queryBuilder = new CoordTransQueryBuilder(endPoint, sourceCrs, targetCrs);
         // make the calls to actual service
-        transform(sourceCrs, targetCrs, coords.getCoords());
+        String jobId = worker.transformAsync(queryBuilder, transformParams, coords);
+        ResponseHelper.writeResponse(params, JSONHelper.createJSONObject("jobId", jobId));
+    }
+
+    // Move to own Spring controller? Can't return Deferred result
+    public void handleGet(ActionParameters params) throws ActionException {
+        String jobId = params.getHttpParam("id");
+        if (jobId == null) {
+            throw new ActionParamsException("Missing id", TransformParams.createErrorResponse("no_job_key"));
+        }
+        DeferredResult deferredResult = worker.getTransformJob(jobId);
+        if (deferredResult == null) {
+            throw new ActionParamsException("No active job", TransformParams.createErrorResponse("no_job"));
+        }
+        TransformParams transformParams = worker.getTransformParams(jobId);
+
+        if (deferredResult.hasResult()) {
+            handleDeferredResult(deferredResult, params, transformParams);
+            worker.clearJob(jobId);
+            return;
+        }
+
+        // TODO; Returns too early. Results an empty response to the client -> result is handled (and cleared) afterwards.
+        deferredResult.setResultHandler(obj -> {
+            try {
+                handleDeferredResult(deferredResult, params, transformParams);
+            } catch (ActionException ex) {
+                deferredResult.setErrorResult(ex);
+            } finally {
+                worker.clearJob(jobId);
+            }
+        });
+    }
+
+    private void handleDeferredResult (DeferredResult deferredResult, ActionParameters params,
+                                       TransformParams transformParams) throws ActionException, ActionParamsException {
+        Object obj = deferredResult.getResult();
+        if (obj instanceof ActionException) {
+            throw (ActionException)obj;
+        } else if (obj instanceof ActionParamsException) {
+            throw (ActionParamsException)obj;
+        }
+        writeResponse(params, transformParams, (CoordinatesPayload)obj);
+    }
+
+    private void writeResponse(ActionParameters params, TransformParams transformParams,
+                               CoordinatesPayload coords) throws ActionException {
+        String targetCrs = transformParams.targetCRS;
+        int targetDimension = transformParams.outputDimensions;
 
         HttpServletResponse response = params.getResponse();
         if (transformParams.type.isFileOutput()) {
@@ -122,7 +175,6 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         } else {
             response.setContentType(IOHelper.CONTENT_TYPE_JSON);
         }
-
         try (OutputStream out = response.getOutputStream()) {
             if (transformParams.type.isFileOutput()) {
                 writeFileResponse(out, coords.getCoords(), targetDimension, coords.getExportSettings(), targetCrs);
