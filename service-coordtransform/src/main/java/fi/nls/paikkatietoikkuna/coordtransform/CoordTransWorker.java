@@ -6,8 +6,6 @@ import fi.nls.oskari.control.ActionException;
 import fi.nls.oskari.control.ActionParamsException;
 import fi.nls.oskari.service.OskariComponent;
 import fi.nls.oskari.util.IOHelper;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import java.io.IOException;
@@ -17,30 +15,37 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.RejectedExecutionException;
 
 @Oskari
 public class CoordTransWorker extends OskariComponent {
 
-    private ConcurrentHashMap<String, DeferredResult<List<Coordinate>>> resultMap;
+    private ConcurrentHashMap<String, Object> resultMap;
+    private ConcurrentHashMap<String, DeferredResult<CoordinatesPayload>> clientResponseMap;
     private ConcurrentHashMap<String, TransformParams> paramsMap;
     private ConcurrentHashMap<String, DeferredResult.DeferredResultHandler> handlerMap;
 
+    public static final String RESULT_PENDING = "pending";
+
     public CoordTransWorker() {
         resultMap = new ConcurrentHashMap<>();
+        clientResponseMap = new ConcurrentHashMap<>();
         paramsMap = new ConcurrentHashMap<>();
         handlerMap = new ConcurrentHashMap<>();
     }
 
-    public String transformAsync(CoordTransQueryBuilder queryBuilder, TransformParams params, CoordinatesPayload coords) {
+    public String transformAsync(CoordTransQueryBuilder queryBuilder, TransformParams params, CoordinatesPayload coords)
+        throws RejectedExecutionException {
         String jobId = UUID.randomUUID().toString();
-        resultMap.put(jobId, new DeferredResult<>());
+        resultMap.put(jobId, RESULT_PENDING);
         paramsMap.put(jobId, params);
         // startTransformJob(jobId, queryBuilder, coords);
         startMockJob(jobId, coords);
         return jobId;
     };
 
-    public DeferredResult<List<Coordinate>> getTransformJob(String jobId) {
+    public Object getTransformResult(String jobId) {
         return resultMap.get(jobId);
     }
     public TransformParams getTransformParams(String jobId) {
@@ -49,21 +54,22 @@ public class CoordTransWorker extends OskariComponent {
     public void clearJob(String jobId) {
         resultMap.remove(jobId);
         paramsMap.remove(jobId);
-        handlerMap.remove(jobId);
+        clientResponseMap.remove(jobId);
     }
 
-    public void watchJob(String jobId, DeferredResult<List<Coordinate>> deferred, DeferredResult.DeferredResultHandler handler) {
-        resultMap.put(jobId, deferred);
-        if (handler != null) {
-            handlerMap.put(jobId, handler);
-        }
+    public void watchJob(String jobId, DeferredResult<CoordinatesPayload> deferred,
+                         DeferredResult.DeferredResultHandler handler) {
+        clientResponseMap.put(jobId, deferred);
+        handlerMap.put(jobId, handler);
     }
 
-    private void startMockJob(String jobId, CoordinatesPayload coords) {
+    private void startMockJob(String jobId, CoordinatesPayload coords) throws RejectedExecutionException {
         ForkJoinPool.commonPool().submit(() -> {
             try {
-                Thread.sleep((long)(1000 * 10 * Math.random()));
-                if (Math.random() > 0.3) {
+                double random = Math.random();
+                double sleepTime = 1000.0 * 5.0 * random;
+                Thread.sleep((long)sleepTime);
+                if (Math.random() > 0.9) {
                     setResult(jobId, new ActionException("Just testing"));
                     return;
                 }
@@ -71,25 +77,32 @@ public class CoordTransWorker extends OskariComponent {
             catch (Exception ex) { }
             setResult(jobId, coords);
         });
+        throw new RejectedExecutionException();
     }
+
+    private void startMockJobFuture(String jobId, CoordinatesPayload coords) {
+        ForkJoinTask future = ForkJoinPool.commonPool().submit(() -> {
+            try {
+                double random = Math.random();
+                double sleepTime = 1000.0 * 5.0 * random;
+                Thread.sleep((long)sleepTime);
+                if (Math.random() > 0.9) {
+                    return new ActionException("Just testing");
+                }
+            }
+            catch (InterruptedException ex) {
+                return new ActionException("Interrupted");
+            }
+            return coords;
+        });
+        resultMap.put(jobId, future);
+    }
+
 
     private void startTransformJob(String jobId, CoordTransQueryBuilder queryBuilder, CoordinatesPayload coords) {
         ForkJoinPool.commonPool().submit(() -> {
             try {
-                List<Coordinate> batch = new ArrayList<>();
-                for (Coordinate c : coords.getCoords()) {
-                    boolean fit = queryBuilder.add(c);
-                    if (!fit) {
-                        transform(queryBuilder.build(), batch);
-                        queryBuilder.reset();
-                        batch.clear();
-                        queryBuilder.add(c);
-                    }
-                    batch.add(c);
-                }
-                if (batch.size() != 0) {
-                    transform(queryBuilder.build(), batch);
-                }
+                transform(queryBuilder, coords);
                 setResult(jobId, coords);
             }
             catch (IOException e) {
@@ -103,6 +116,23 @@ public class CoordTransWorker extends OskariComponent {
         });
     }
 
+    protected void transform (CoordTransQueryBuilder queryBuilder, CoordinatesPayload coords) throws IOException {
+        List<Coordinate> batch = new ArrayList<>();
+        for (Coordinate c : coords.getCoords()) {
+            boolean fit = queryBuilder.add(c);
+            if (!fit) {
+                transform(queryBuilder.build(), batch);
+                queryBuilder.reset();
+                batch.clear();
+                queryBuilder.add(c);
+            }
+            batch.add(c);
+        }
+        if (batch.size() != 0) {
+            transform(queryBuilder.build(), batch);
+        }
+    }
+
     private void transform (String query, List<Coordinate> batch) throws IOException, IllegalArgumentException {
         HttpURLConnection conn = IOHelper.getConnection(query);
         byte[] serviceResponseBytes = IOHelper.readBytes(conn);
@@ -110,18 +140,17 @@ public class CoordTransWorker extends OskariComponent {
     }
 
     private void setResult(String jobId, Object result) {
-        DeferredResult<List<Coordinate>> deferred = resultMap.get(jobId);
+        resultMap.put(jobId, result);
+        DeferredResult<CoordinatesPayload> deferred = clientResponseMap.get(jobId);
         DeferredResult.DeferredResultHandler handler = handlerMap.get(jobId);
         if (deferred == null) {
             return;
         }
         deferred.setResultHandler(handler);
         if (result instanceof Exception) {
-            deferred.setErrorResult(
-                    ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED)
-                    .body(TransformParams.createErrorResponse("transformation_error", (Exception)result)));
+            deferred.setErrorResult(result);
         } else {
-            deferred.setResult((List<Coordinate>) result);
+            deferred.setResult((CoordinatesPayload) result);
         }
     }
 

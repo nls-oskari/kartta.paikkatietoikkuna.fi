@@ -9,12 +9,7 @@ import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.service.OskariComponentManager;
 import fi.nls.oskari.spring.extension.OskariParam;
 import fi.nls.oskari.util.IOHelper;
-import fi.nls.oskari.util.JSONHelper;
-import fi.nls.oskari.util.ResponseHelper;
 import fi.nls.paikkatietoikkuna.coordtransform.*;
-import org.json.JSONObject;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,7 +42,8 @@ public class CoordinateTransformationJobHandler {
     protected final Map<String, String> lineSeparators = new HashMap<>();
     protected final Map<String, String> coordinateSeparators = new HashMap<>();
 
-    private static long POLLING_TIMEOUT = 10000l; // 45000l;
+    private static long POLLING_TIMEOUT = 2000l; // 45000l;
+    private static final String RESULT_TIMEOUT = "timeout";
     private static final String ROUTE = "/coordinatetransform/watch/{jobId}";
     private JsonFactory jf;
     private CoordTransWorker worker;
@@ -55,42 +51,52 @@ public class CoordinateTransformationJobHandler {
     public CoordinateTransformationJobHandler() {
         this.jf = new JsonFactory();
         this.worker = OskariComponentManager.getComponentOfType(CoordTransWorker.class);
+
+        lineSeparators.put("win", "\r\n");
+        lineSeparators.put("mac", "\n");
+        lineSeparators.put("unix", "\r");
+
+        coordinateSeparators.put("space", " ");
+        coordinateSeparators.put("tab", "\t");
+        coordinateSeparators.put("comma", ",");
+        coordinateSeparators.put("semicolon", ";");
     }
 
     @RequestMapping(ROUTE)
-    public @ResponseBody DeferredResult<ResponseEntity> watchJob(@PathVariable("jobId") String jobId, @OskariParam ActionParameters params) {
+    public @ResponseBody DeferredResult<CoordinatesPayload> watchJob(@PathVariable("jobId") String jobId, @OskariParam ActionParameters params) {
         if (jobId == null) {
             handleActionParamsException(new ActionParamsException(
                     "Missing job id", TransformParams.createErrorResponse("no_job_key")),
                     params);
             return null;
         }
-        // Get the job from worker
-        DeferredResult transformJob = worker.getTransformJob(jobId);
+        // Get the result from worker
+        Object transformResult = worker.getTransformResult(jobId);
         TransformParams transformParams = worker.getTransformParams(jobId);
 
-        if (transformJob == null) {
+        if (transformResult == null) {
             handleActionParamsException(new ActionParamsException(
                     "No active job", TransformParams.createErrorResponse("no_job")),
                     params);
             return null;
         }
-        // If job has already finished
-        if (transformJob.hasResult()) {
-            handleTransformResult(jobId, transformJob.getResult(), params, transformParams);
+        // Handle finished transform job
+        if (!transformResult.equals(CoordTransWorker.RESULT_PENDING)) {
+            handleTransformResult(jobId, transformResult, params, transformParams);
             return null;
         }
-        DeferredResult result = new DeferredResult(POLLING_TIMEOUT, null);
-        result.onTimeout(() -> handleTimeout(jobId, params));
-        worker.watchJob(jobId, result, obj -> handleTransformResult(jobId, obj, params, transformParams));
-        return result;
+        // Keep watching for the result
+        DeferredResult<CoordinatesPayload> async =
+                new DeferredResult<>(POLLING_TIMEOUT, RESULT_TIMEOUT);
+        async.onTimeout(() -> handleTimeout(jobId, params));
+        worker.watchJob(jobId, async, obj -> handleTransformResult(jobId, obj, params, transformParams));
+        return async;
     }
 
     private void handleTimeout(String jobId, ActionParameters params) {
         try {
             // Send job id to client to keep polling
             writeJobIdResponse(params.getResponse(), jobId);
-            worker.watchJob(jobId, new DeferredResult(), null);
         } catch (Exception ex) {
             handleActionException(ex, params);
         }
@@ -98,12 +104,18 @@ public class CoordinateTransformationJobHandler {
 
     private void handleTransformResult(String jobId, Object result, ActionParameters params,
                                        TransformParams transformParams) {
-        worker.clearJob(jobId);
         try {
+            if (result == null || result.equals(RESULT_TIMEOUT)) {
+                handleTimeout(jobId, params);
+                return;
+            }
             if (result instanceof Exception) {
                 handleException((Exception)result, params);
+                worker.clearJob(jobId);
+                return;
             }
             writeResponse(params, transformParams, (CoordinatesPayload)result);
+            worker.clearJob(jobId);
         } catch (Exception e) {
             handleActionException(e, params);
         }

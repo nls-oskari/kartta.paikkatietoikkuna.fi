@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.RejectedExecutionException;
 
 
 /**
@@ -116,73 +117,12 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         // if (addZeroes) {coords.getCoords().forEach(c => c.setOrdinate(Coordinate.Z, 0)) }
 
         CoordTransQueryBuilder queryBuilder = new CoordTransQueryBuilder(endPoint, sourceCrs, targetCrs);
-        // make the calls to actual service
-        String jobId = worker.transformAsync(queryBuilder, transformParams, coords);
-        ResponseHelper.writeResponse(params, JSONHelper.createJSONObject("jobId", jobId));
-    }
-
-    // Move to own Spring controller? Can't return Deferred result
-    public void handleGet(ActionParameters params) throws ActionException {
-        String jobId = params.getHttpParam("id");
-        if (jobId == null) {
-            throw new ActionParamsException("Missing id", TransformParams.createErrorResponse("no_job_key"));
+        try {
+            String jobId = worker.transformAsync(queryBuilder, transformParams, coords);
+            ResponseHelper.writeResponse(params, JSONHelper.createJSONObject("jobId", jobId));
         }
-        DeferredResult deferredResult = worker.getTransformJob(jobId);
-        if (deferredResult == null) {
-            throw new ActionParamsException("No active job", TransformParams.createErrorResponse("no_job"));
-        }
-        TransformParams transformParams = worker.getTransformParams(jobId);
-
-        if (deferredResult.hasResult()) {
-            handleDeferredResult(deferredResult, params, transformParams);
-            worker.clearJob(jobId);
-            return;
-        }
-
-        // TODO; Returns too early. Results an empty response to the client -> result is handled (and cleared) afterwards.
-        deferredResult.setResultHandler(obj -> {
-            try {
-                handleDeferredResult(deferredResult, params, transformParams);
-            } catch (ActionException ex) {
-                deferredResult.setErrorResult(ex);
-            } finally {
-                worker.clearJob(jobId);
-            }
-        });
-    }
-
-    private void handleDeferredResult (DeferredResult deferredResult, ActionParameters params,
-                                       TransformParams transformParams) throws ActionException, ActionParamsException {
-        Object obj = deferredResult.getResult();
-        if (obj instanceof ActionException) {
-            throw (ActionException)obj;
-        } else if (obj instanceof ActionParamsException) {
-            throw (ActionParamsException)obj;
-        }
-        writeResponse(params, transformParams, (CoordinatesPayload)obj);
-    }
-
-    private void writeResponse(ActionParameters params, TransformParams transformParams,
-                               CoordinatesPayload coords) throws ActionException {
-        String targetCrs = transformParams.targetCRS;
-        int targetDimension = transformParams.outputDimensions;
-
-        HttpServletResponse response = params.getResponse();
-        if (transformParams.type.isFileOutput()) {
-            String fileName = addFileExt(transformParams.exportSettings.getFileName());
-            response.setContentType(FILE_TYPE);
-            response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-        } else {
-            response.setContentType(IOHelper.CONTENT_TYPE_JSON);
-        }
-        try (OutputStream out = response.getOutputStream()) {
-            if (transformParams.type.isFileOutput()) {
-                writeFileResponse(out, coords.getCoords(), targetDimension, coords.getExportSettings(), targetCrs);
-            } else {
-                writeJsonResponse(out, coords.getCoords(), targetDimension, coords.hasMore());
-            }
-        } catch (IOException e) {
-            throw new ActionException("Failed to write JSON to client", e);
+        catch (RejectedExecutionException e) {
+            throw new ActionParamsException("Service busy", TransformParams.createErrorResponse("service_busy"));
         }
     }
 
