@@ -32,6 +32,7 @@ public class CoordTransWorker extends OskariComponent {
     private ConcurrentHashMap<String, DeferredResult.DeferredResultHandler> handlerMap;
     private Cache<Object> resultCache;
     private static final int READ_TIMEOUT_MS = 1000 * 60 * 15;
+    private static final int CONCURRENT_USERS_LIMIT = 100;
 
     public static final String RESULT_PENDING = "pending";
 
@@ -40,7 +41,7 @@ public class CoordTransWorker extends OskariComponent {
         paramsMap = new ConcurrentHashMap<>();
         handlerMap = new ConcurrentHashMap<>();
         resultCache = CacheManager.getCache(CoordTransWorker.class.getCanonicalName());
-        resultCache.setLimit(100);
+        resultCache.setLimit(CONCURRENT_USERS_LIMIT);
     }
 
     public String transformAsync(CoordTransQueryBuilder queryBuilder, TransformParams params, CoordinatesPayload coords)
