@@ -36,7 +36,7 @@ public class CoordinateTransformationAsyncController {
     protected static final String FILE_EXT = "txt";
     protected static final String FILE_TYPE = "text/plain";
 
-    private static long POLLING_TIMEOUT_MS = 45000l;
+    private static long POLLING_TIMEOUT_MS = 45000;
     private static final String RESULT_TIMEOUT = "timeout";
     private static final String ROUTE = "/coordinatetransform/watch/";
     private JsonFactory jf;
@@ -162,15 +162,13 @@ public class CoordinateTransformationAsyncController {
 
     //add .txt if missing
     private String addFileExt(String name) {
-        int i = name.lastIndexOf('.');
-        if (i < 0 || i + 1 == name.length()) {
-            return name + "." + FILE_EXT;
-        }
-        if (FILE_EXT.equals(name.substring(i + 1))) {
+        if (name.endsWith("." + FILE_EXT)) {
             return name;
-        } else {
-            return name + "." + FILE_EXT;
         }
+        if (name.endsWith(".")) {
+            return name + FILE_EXT;
+        }
+        return name + "." + FILE_EXT;
     }
 
     protected void writeJsonResponse(OutputStream out, List<Coordinate> coords, final int dimension, final boolean hasMoreCoordinates)
