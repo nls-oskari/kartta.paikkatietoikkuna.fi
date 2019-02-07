@@ -9,7 +9,10 @@ import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.service.OskariComponentManager;
 import fi.nls.oskari.spring.extension.OskariParam;
 import fi.nls.oskari.util.IOHelper;
+import fi.nls.oskari.util.JSONHelper;
 import fi.nls.paikkatietoikkuna.coordtransform.*;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -126,6 +129,7 @@ public class CoordinateTransformationAsyncController {
             if (transformParams.type.isFileOutput()) {
                 fileHelper.writeFileResponse(out, coords.getCoords(), targetDimension, coords.getExportSettings(), targetCrs);
             } else {
+                response.setContentType("application/json;charset=utf-8");
                 writeJsonResponse(out, coords.getCoords(), targetDimension, coords.hasMore());
             }
         } catch (IOException e) {
@@ -197,6 +201,7 @@ public class CoordinateTransformationAsyncController {
 
     protected void writeJobIdResponse(HttpServletResponse response, final String id)
             throws ActionException {
+        response.setContentType("application/json;charset=utf-8");
         try (JsonGenerator json = jf.createGenerator(response.getOutputStream())) {
             json.writeStartObject();
             json.writeStringField(RESPONSE_JOB_ID, id);
@@ -206,17 +211,16 @@ public class CoordinateTransformationAsyncController {
         }
     }
 
-    protected void writeErrorResponse(HttpServletResponse response, String message, int errCode, Object info) {
+    protected void writeErrorResponse(HttpServletResponse response, String message, int errCode, JSONObject info) {
         response.setStatus(errCode);
         response.setContentType("application/json;charset=utf-8");
-        try (JsonGenerator json = jf.createGenerator(response.getOutputStream())) {
-            json.writeStartObject();
-            json.writeStringField("error", message);
+        try (Writer writer = new OutputStreamWriter(response.getOutputStream())) {
+            JSONObject jsonResponse = JSONHelper.createJSONObject("error", message);
             if (info != null) {
-                json.writeObjectField("info", info);
+                jsonResponse.put("info", info);
             }
-            json.writeEndObject();
-        } catch (IOException e) {
+            writer.write(jsonResponse.toString());
+        } catch (Exception e) {
             log.error("Failed to write error JSON response");
         }
     }
