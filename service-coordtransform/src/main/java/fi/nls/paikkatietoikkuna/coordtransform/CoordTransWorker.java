@@ -2,9 +2,14 @@ package fi.nls.paikkatietoikkuna.coordtransform;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import fi.nls.oskari.annotation.Oskari;
+import fi.nls.oskari.cache.Cache;
+import fi.nls.oskari.cache.CacheManager;
 import fi.nls.oskari.control.ActionException;
 import fi.nls.oskari.control.ActionParamsException;
+import fi.nls.oskari.control.metadata.MetadataFieldHandler;
+import fi.nls.oskari.domain.SelectItem;
 import fi.nls.oskari.service.OskariComponent;
+import fi.nls.oskari.service.OskariComponentManager;
 import fi.nls.oskari.util.IOHelper;
 import org.springframework.web.context.request.async.DeferredResult;
 
@@ -12,6 +17,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
@@ -21,37 +27,39 @@ import java.util.concurrent.RejectedExecutionException;
 @Oskari
 public class CoordTransWorker extends OskariComponent {
 
-    private ConcurrentHashMap<String, Object> resultMap;
     private ConcurrentHashMap<String, DeferredResult<CoordinatesPayload>> clientResponseMap;
     private ConcurrentHashMap<String, TransformParams> paramsMap;
     private ConcurrentHashMap<String, DeferredResult.DeferredResultHandler> handlerMap;
+    private Cache<Object> resultCache;
+    private static final int READ_TIMEOUT_MS = 1000 * 60 * 15;
 
     public static final String RESULT_PENDING = "pending";
 
     public CoordTransWorker() {
-        resultMap = new ConcurrentHashMap<>();
         clientResponseMap = new ConcurrentHashMap<>();
         paramsMap = new ConcurrentHashMap<>();
         handlerMap = new ConcurrentHashMap<>();
+        resultCache = CacheManager.getCache(CoordTransWorker.class.getCanonicalName());
+        resultCache.setLimit(100);
     }
 
     public String transformAsync(CoordTransQueryBuilder queryBuilder, TransformParams params, CoordinatesPayload coords)
         throws RejectedExecutionException {
         String jobId = UUID.randomUUID().toString();
-        resultMap.put(jobId, RESULT_PENDING);
+        resultCache.put(jobId, RESULT_PENDING);
         paramsMap.put(jobId, params);
         startTransformJob(jobId, queryBuilder, coords);
         return jobId;
     };
 
     public Object getTransformResult(String jobId) {
-        return resultMap.get(jobId);
+        return resultCache.get(jobId);
     }
     public TransformParams getTransformParams(String jobId) {
         return paramsMap.get(jobId);
     }
     public void clearJob(String jobId) {
-        resultMap.remove(jobId);
+        resultCache.remove(jobId);
         paramsMap.remove(jobId);
         clientResponseMap.remove(jobId);
     }
@@ -98,12 +106,13 @@ public class CoordTransWorker extends OskariComponent {
 
     public void transform (String query, List<Coordinate> batch) throws IOException, IllegalArgumentException {
         HttpURLConnection conn = IOHelper.getConnection(query);
+        conn.setReadTimeout(READ_TIMEOUT_MS);
         byte[] serviceResponseBytes = IOHelper.readBytes(conn);
         CoordTransService.parseResponse(serviceResponseBytes, batch);
     }
 
     private void setResult(String jobId, Object result) {
-        resultMap.put(jobId, result);
+        resultCache.put(jobId, result);
         DeferredResult<CoordinatesPayload> deferred = clientResponseMap.get(jobId);
         DeferredResult.DeferredResultHandler handler = handlerMap.get(jobId);
         if (deferred == null) {
