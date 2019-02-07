@@ -18,51 +18,38 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 /**
- * Handles CoordinateTransformation endpoint for watching transform jobs
+ * Handles long polling requests for coordinate transformation.
+ * Timeouts with the job id, or returns transformation result.
  */
 @Controller
-public class CoordinateTransformationJobHandler {
-    protected static final Logger log = LogFactory.getLogger(CoordinateTransformationJobHandler.class);
+public class CoordinateTransformationAsyncController {
+    protected static final Logger log = LogFactory.getLogger(CoordinateTransformationAsyncController.class);
 
     protected static final String RESPONSE_COORDINATES = "resultCoordinates";
     protected static final String RESPONSE_DIMENSION = "dimension";
     protected static final String RESPONSE_JOB_ID = "jobId";
 
-    protected static final String DEGREE = "degree";
-    protected static final String METRIC = "metric";
     protected static final String FILE_EXT = "txt";
     protected static final String FILE_TYPE = "text/plain";
 
-    protected final Map<String, String> lineSeparators = new HashMap<>();
-    protected final Map<String, String> coordinateSeparators = new HashMap<>();
-
-    private static long POLLING_TIMEOUT = 2000l; // 45000l;
+    private static long POLLING_TIMEOUT_MS = 45000l;
     private static final String RESULT_TIMEOUT = "timeout";
-    private static final String ROUTE = "/coordinatetransform/watch/{jobId}";
+    private static final String ROUTE = "/coordinatetransform/watch/";
     private JsonFactory jf;
+    private CoordFileHelper fileHelper;
     private CoordTransWorker worker;
 
-    public CoordinateTransformationJobHandler() {
+    public CoordinateTransformationAsyncController() {
         this.jf = new JsonFactory();
+        this.fileHelper = new CoordFileHelper();
         this.worker = OskariComponentManager.getComponentOfType(CoordTransWorker.class);
-
-        lineSeparators.put("win", "\r\n");
-        lineSeparators.put("mac", "\n");
-        lineSeparators.put("unix", "\r");
-
-        coordinateSeparators.put("space", " ");
-        coordinateSeparators.put("tab", "\t");
-        coordinateSeparators.put("comma", ",");
-        coordinateSeparators.put("semicolon", ";");
     }
 
-    @RequestMapping(ROUTE)
+    @RequestMapping(ROUTE + "/{jobId}")
     public @ResponseBody DeferredResult<CoordinatesPayload> watchJob(@PathVariable("jobId") String jobId, @OskariParam ActionParameters params) {
         if (jobId == null) {
             handleActionParamsException(new ActionParamsException(
@@ -87,7 +74,7 @@ public class CoordinateTransformationJobHandler {
         }
         // Keep watching for the result
         DeferredResult<CoordinatesPayload> async =
-                new DeferredResult<>(POLLING_TIMEOUT, RESULT_TIMEOUT);
+                new DeferredResult<>(POLLING_TIMEOUT_MS, RESULT_TIMEOUT);
         async.onTimeout(() -> handleTimeout(jobId, params));
         worker.watchJob(jobId, async, obj -> handleTransformResult(jobId, obj, params, transformParams));
         return async;
@@ -105,16 +92,17 @@ public class CoordinateTransformationJobHandler {
     private void handleTransformResult(String jobId, Object result, ActionParameters params,
                                        TransformParams transformParams) {
         try {
-            if (result == null || result.equals(RESULT_TIMEOUT)) {
+            final Object res = result;
+            if (res == null || res.equals(RESULT_TIMEOUT)) {
                 handleTimeout(jobId, params);
                 return;
             }
-            if (result instanceof Exception) {
-                handleException((Exception)result, params);
+            if (res instanceof Exception) {
+                handleException((Exception)res, params);
                 worker.clearJob(jobId);
                 return;
             }
-            writeResponse(params, transformParams, (CoordinatesPayload)result);
+            writeResponse(params, transformParams, (CoordinatesPayload)res);
             worker.clearJob(jobId);
         } catch (Exception e) {
             handleActionException(e, params);
@@ -136,7 +124,7 @@ public class CoordinateTransformationJobHandler {
         }
         try (OutputStream out = response.getOutputStream()) {
             if (transformParams.type.isFileOutput()) {
-                writeFileResponse(out, coords.getCoords(), targetDimension, coords.getExportSettings(), targetCrs);
+                fileHelper.writeFileResponse(out, coords.getCoords(), targetDimension, coords.getExportSettings(), targetCrs);
             } else {
                 writeJsonResponse(out, coords.getCoords(), targetDimension, coords.hasMore());
             }
@@ -152,6 +140,7 @@ public class CoordinateTransformationJobHandler {
             handleActionException(e, params);
         }
     }
+
     private void handleActionException(Exception e, ActionParameters params) {
         Throwable error = e;
         if(e.getCause() != null) {
@@ -163,6 +152,7 @@ public class CoordinateTransformationJobHandler {
                 ". Parameters: ", params.getRequest().getParameterMap());
         writeErrorResponse(params.getResponse(), e.getMessage(),  HttpServletResponse.SC_INTERNAL_SERVER_ERROR, null);
     }
+
     private void handleActionParamsException(ActionParamsException e, ActionParameters params) {
         log.error("Couldn't handle action: " + ROUTE,
                 "Message: ", e.getMessage(),
@@ -233,98 +223,4 @@ public class CoordinateTransformationJobHandler {
         }
     }
 
-    protected void writeFileResponse(OutputStream out, List<Coordinate> coords, final int dimension, CoordTransFileSettings opts, String crs)
-            throws ActionException {
-        try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out))) {
-            String xCoord;
-            String yCoord;
-            String zCoord;
-            String lineSeparator = lineSeparators.get(opts.getLineSeparator());
-            String coordSeparator = coordinateSeparators.get(opts.getCoordinateSeparator());
-            int decimals = opts.getDecimalCount();
-            boolean replaceCommas = opts.getDecimalSeparator() == ',';
-            boolean prefixId = opts.isPrefixId();
-            boolean flipAxis = opts.isAxisFlip();
-            boolean prefixWithIndex = false;
-            boolean writeCardinals = opts.isWriteCardinals();
-            List<String> ids = opts.getIds();
-            List<String> lineEndings = opts.getLineEnds();
-            boolean writeEndings = opts.isWriteLineEndings() && !lineEndings.isEmpty();
-            String unit = opts.getUnit();
-            boolean transformUnit = false;
-            if (unit != null && !unit.equals(DEGREE) && !unit.equals(METRIC)) {
-                transformUnit = true;
-            }
-            if (opts.isPrefixId()) {
-                if (ids.isEmpty()) {
-                    prefixWithIndex = true;
-                }
-            }
-            // TODO: should we add only: Coordinate Reference System: KKJ
-            // if we want localized header then frontend should send header String instead of boolean
-            if (opts.isWriteHeader()) {
-                bw.write("Coordinate Reference System:" + crs);
-                bw.write(lineSeparator);
-                for (String headerRow : opts.getHeaderRows()) {
-                    bw.write(headerRow);
-                    bw.write(lineSeparator);
-                }
-            }
-            for (int i = 0; i < coords.size(); i++) {
-                Coordinate coord = coords.get(i);
-                if (transformUnit) {
-                    xCoord = CoordTransService.transformDegreeToUnit(coord.x, unit, decimals);
-                    yCoord = CoordTransService.transformDegreeToUnit(coord.y, unit, decimals);
-                } else {
-                    xCoord = CoordTransService.round(coord.x, decimals);
-                    yCoord = CoordTransService.round(coord.y, decimals);
-                }
-                if (replaceCommas) {
-                    xCoord = xCoord.replace('.', ',');
-                    yCoord = yCoord.replace('.', ',');
-                }
-                if (writeCardinals) {
-                    if (xCoord.indexOf('-') == 0) {
-                        xCoord = xCoord.substring(1) + "W";
-                    } else {
-                        xCoord += "E";
-                    }
-                    if (yCoord.indexOf('-') == 0) {
-                        yCoord = yCoord.substring(1) + "S";
-                    } else {
-                        yCoord += "N";
-                    }
-                }
-                if (prefixId && prefixWithIndex) {
-                    bw.write((i + 1) + coordSeparator);
-                } else if (prefixId) {
-                    bw.write(ids.get(i) + coordSeparator);
-                }
-                if (flipAxis) {
-                    bw.write(yCoord);
-                    bw.write(coordSeparator);
-                    bw.write(xCoord);
-                } else {
-                    bw.write(xCoord);
-                    bw.write(coordSeparator);
-                    bw.write(yCoord);
-                }
-                if (dimension == 3) {
-                    zCoord = CoordTransService.round(coord.z, decimals);
-                    if (replaceCommas) {
-                        zCoord = zCoord.replace('.', ',');
-                    }
-                    bw.write(coordSeparator);
-                    bw.write(zCoord);
-                }
-                if (writeEndings) {
-                    bw.write(coordSeparator);
-                    bw.write(lineEndings.get(i));
-                }
-                bw.write(lineSeparator);
-            }
-        } catch (IOException e) {
-            throw new ActionException("Failed to write file", e);
-        }
-    }
 }
