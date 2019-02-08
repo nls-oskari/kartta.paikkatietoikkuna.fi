@@ -152,7 +152,7 @@ public class TransformParams {
                 .orElseThrow(() -> new ActionParamsException("No file entry", createErrorResponse("no_file")));
     }
 
-    protected static JSONObject createErrorResponse(String errorKey, Exception e) {
+    public static JSONObject createErrorResponse(String errorKey, Exception e) {
         JSONObject jsonError = JSONHelper.createJSONObject(CoordinateTransformationActionHandler.KEY_FOR_ERRORS, errorKey);
         if (e != null) {
             JSONHelper.putValue(jsonError, "exception", e.getMessage());
@@ -160,7 +160,7 @@ public class TransformParams {
         return jsonError;
     }
 
-    protected static JSONObject createErrorResponse(String errorKey) {
+    public static JSONObject createErrorResponse(String errorKey) {
         return createErrorResponse(errorKey, null);
     }
 

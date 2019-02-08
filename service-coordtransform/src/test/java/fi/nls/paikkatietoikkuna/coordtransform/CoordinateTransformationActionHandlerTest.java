@@ -126,12 +126,17 @@ public class CoordinateTransformationActionHandlerTest {
     @Test
     @Ignore("Requires connection to external service")
     public void transformTest() throws ActionException {
-        CoordinateTransformationActionHandler handler = new CoordinateTransformationActionHandler("https://coordtrans.maanmittauslaitos.fi/CoordTrans-1.0/CoordTrans");
+        String serviceUrl = "https://coordtrans.maanmittauslaitos.fi/CoordTrans-1.0/CoordTrans";
+        CoordTransWorker worker = new CoordTransWorker();
         int n = 1000;
 
         List<Coordinate> coordinates = getRandomCoordinates(n, 300000, 600000, 6700000, 6730000, 0, 0);
         List<Coordinate> originals = coordinates.stream().map(c -> new Coordinate(c)).collect(Collectors.toList());
-        handler.transform("EPSG:3067", "EPSG:4258", coordinates);
+        try {
+            worker.transform(new CoordTransQueryBuilder(serviceUrl, "EPSG:3067", "EPSG:4258"), coordinates);
+        } catch (IOException e) {
+            throw new ActionException("Could not connect to coordinate transformation service", e);
+        }
         assertEquals(originals.size(), coordinates.size());
         for (int i = 0; i < originals.size(); i++) {
             Coordinate original = originals.get(i);
@@ -140,7 +145,11 @@ public class CoordinateTransformationActionHandlerTest {
             assertNotEquals(original.y, transformed.y, 0);
         }
 
-        handler.transform("EPSG:4258", "EPSG:3067", coordinates);
+        try {
+            worker.transform(new CoordTransQueryBuilder(serviceUrl, "EPSG:4258", "EPSG:3067"), coordinates);
+        } catch (IOException e) {
+            throw new ActionException("Could not connect to coordinate transformation service", e);
+        }
         assertEquals(originals.size(), coordinates.size());
         for (int i = 0; i < originals.size(); i++) {
             Coordinate original = originals.get(i);
