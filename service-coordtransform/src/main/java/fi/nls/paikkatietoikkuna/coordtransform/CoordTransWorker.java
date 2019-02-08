@@ -22,7 +22,6 @@ import java.util.concurrent.RejectedExecutionException;
 public class CoordTransWorker extends OskariComponent {
 
     private Cache<CoordinateTransformationJob> jobCache;
-    private static final int READ_TIMEOUT_MS = 1000 * 60 * 15;
     private static final int CONCURRENT_USERS_LIMIT = 100;
 
     public CoordTransWorker() {
@@ -90,7 +89,6 @@ public class CoordTransWorker extends OskariComponent {
 
     public void transform (String query, List<Coordinate> batch) throws IOException, IllegalArgumentException {
         HttpURLConnection conn = IOHelper.getConnection(query);
-        conn.setReadTimeout(READ_TIMEOUT_MS);
         byte[] serviceResponseBytes = IOHelper.readBytes(conn);
         CoordTransService.parseResponse(serviceResponseBytes, batch);
     }
