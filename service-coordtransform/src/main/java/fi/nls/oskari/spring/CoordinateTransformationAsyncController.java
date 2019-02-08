@@ -61,25 +61,23 @@ public class CoordinateTransformationAsyncController {
             return null;
         }
         // Get the result from worker
-        Object transformResult = worker.getTransformResult(jobId);
-        TransformParams transformParams = worker.getTransformParams(jobId);
-
-        if (transformResult == null) {
+        CoordinateTransformationJob job = worker.getTransformJob(jobId);
+        if (job == null) {
             handleActionParamsException(new ActionParamsException(
                     "No active job", TransformParams.createErrorResponse("no_job")),
                     params);
             return null;
         }
         // Handle finished transform job
-        if (!transformResult.equals(CoordTransWorker.RESULT_PENDING)) {
-            handleTransformResult(jobId, transformResult, params, transformParams);
+        if (job.isCompleted()) {
+            handleTransformResult(job, params);
             return null;
         }
         // Keep watching for the result
         DeferredResult<CoordinatesPayload> async =
                 new DeferredResult<>(POLLING_TIMEOUT_MS, RESULT_TIMEOUT);
         async.onTimeout(() -> handleTimeout(jobId, params));
-        worker.watchJob(jobId, async, obj -> handleTransformResult(jobId, obj, params, transformParams));
+        worker.watchJob(jobId, async, __ -> handleTransformResult(job, params));
         return async;
     }
 
@@ -92,21 +90,16 @@ public class CoordinateTransformationAsyncController {
         }
     }
 
-    private void handleTransformResult(String jobId, Object result, ActionParameters params,
-                                       TransformParams transformParams) {
+    private void handleTransformResult(CoordinateTransformationJob job, ActionParameters params) {
         try {
-            final Object res = result;
-            if (res == null || res.equals(RESULT_TIMEOUT)) {
-                handleTimeout(jobId, params);
+            final Object result = job.getResult();
+            if (result instanceof Exception) {
+                handleException((Exception)result, params);
+                worker.clearJob(job.getId());
                 return;
             }
-            if (res instanceof Exception) {
-                handleException((Exception)res, params);
-                worker.clearJob(jobId);
-                return;
-            }
-            writeResponse(params, transformParams, (CoordinatesPayload)res);
-            worker.clearJob(jobId);
+            writeResponse(params, job.getParams(), (CoordinatesPayload)result);
+            worker.clearJob(job.getId());
         } catch (Exception e) {
             handleActionException(e, params);
         }
