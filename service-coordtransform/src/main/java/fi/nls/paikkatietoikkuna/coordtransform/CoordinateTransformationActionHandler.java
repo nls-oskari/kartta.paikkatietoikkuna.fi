@@ -38,7 +38,7 @@ import java.util.concurrent.RejectedExecutionException;
 @OskariActionRoute("CoordinateTransformation")
 public class CoordinateTransformationActionHandler extends RestActionHandler {
 
-    protected static final String PROP_END_POINT = "coordtransform.endpoint";
+    private static final String PROP_END_POINT = "coordtransform.endpoint";
     private static final String PROP_MAX_COORDS_FILE_TO_ARRAY = "coordtransform.max.coordinates.array";
 
     protected static final String KEY_FOR_ERRORS = "errorKey";
