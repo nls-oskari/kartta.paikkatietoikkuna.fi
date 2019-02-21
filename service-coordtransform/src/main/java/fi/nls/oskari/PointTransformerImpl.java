@@ -22,6 +22,8 @@ public class PointTransformerImpl extends NLSFIPointTransformer {
     private static final String EPSG_ETRS89_GEOGRAPHIC = "EPSG:4258";
     private static final double GK_ZONE_OFF_MINUTUES = 30;
     private static final int EPSG_CODE_GK19FIN = 3873;
+    private static final int GKFIN_ZONE_START = 19;
+    private static final int GKFIN_ZONE_END = 31;
     private static final String PREFIX_EPSG = "EPSG:";
     private static final String NLSFI_GKn = "NLSFI:etrs_gk";
     private static final Map<String, String> EPSG_CODE_MAP = initEpsgCodeMap();
@@ -48,26 +50,22 @@ public class PointTransformerImpl extends NLSFIPointTransformer {
             return null;
         }
         try {
-            if (sourceSRS.equals(NLSFI_GKn)) {
-                int zone = (int)(point.getLon() / 1E6);
-                sourceSRS = getEPSGForGKnFIN(getGKnFINZone(zone));
-            }
             String sourceEPSG = getEpsgCode(sourceSRS);
-
-            if (targetSRS.equals(NLSFI_GKn)) {
-                targetSRS = getEPSGForGKnFIN(getGKnFINZone(point, sourceEPSG));
-            }
             String targetEPSG = getEpsgCode(targetSRS);
 
+            if (sourceSRS.equals(NLSFI_GKn)) {
+                int zone = (int)(point.getLon() / 1E6);
+                sourceEPSG = getEPSGForGKnFIN(getGKnFINZone(zone));
+            }
+            if (targetSRS.equals(NLSFI_GKn)) {
+                targetEPSG = getEPSGForGKnFIN(getGKnFINZone(point, sourceEPSG));
+            }
+
             if (isSupported(sourceEPSG, targetEPSG)) {
-                try {
-                    CoordTransQueryBuilder queryBuilder = getQueryBuilder(sourceEPSG, targetEPSG);
-                    Coordinate coord = getCoordinate(point, isNorthAxisFirst(sourceEPSG));
-                    worker.transform(queryBuilder, Arrays.asList(coord));
-                    return getPoint(coord, isNorthAxisFirst(targetEPSG));
-                } catch (Exception e) {
-                    log.debug("Reprojecting point", point, "from", sourceSRS, "to", targetSRS, "failed", e);
-                }
+                CoordTransQueryBuilder queryBuilder = getQueryBuilder(sourceEPSG, targetEPSG);
+                Coordinate coord = getCoordinate(point, isNorthAxisFirst(sourceEPSG));
+                getWorker().transform(queryBuilder, Arrays.asList(coord));
+                return getPoint(coord, isNorthAxisFirst(targetEPSG));
             }
         } catch (Exception e) {
             log.debug("Reprojecting point", point, "from", sourceSRS, "to", targetSRS, "failed", e);
@@ -88,19 +86,16 @@ public class PointTransformerImpl extends NLSFIPointTransformer {
         int degrees = (int)etrs89Lon;
         double minutes = (etrs89Lon - (double)degrees) * 60.0;
         int zone = degrees;
-        if (zone < 19) {
-            return 19;
-        }
-        if (zone > 31) {
-            return 31;
-        }
         if (minutes >= GK_ZONE_OFF_MINUTUES) {
             zone++;
         }
         return zone;
     }
     private String getEPSGForGKnFIN(int gkZone) {
-        return PREFIX_EPSG + (EPSG_CODE_GK19FIN + gkZone - 19);
+        if (gkZone < GKFIN_ZONE_START || gkZone > GKFIN_ZONE_END) {
+            return null;
+        }
+        return PREFIX_EPSG + (EPSG_CODE_GK19FIN + gkZone - GKFIN_ZONE_START);
     }
 
     private String getEpsgCode(String srsCode) {
@@ -136,13 +131,17 @@ public class PointTransformerImpl extends NLSFIPointTransformer {
     }
 
     private CoordTransQueryBuilder getQueryBuilder(String sourceCrs, String targetCrs) {
-        if (worker == null) {
-            worker = OskariComponentManager.getComponentOfType(CoordTransWorker.class);
-        }
         if (endPoint == null) {
             endPoint = PropertyUtil.getNecessary(PROP_END_POINT);
         }
         return new CoordTransQueryBuilder(endPoint, sourceCrs, targetCrs);
+    }
+
+    private CoordTransWorker getWorker() {
+        if (worker == null) {
+            worker = OskariComponentManager.getComponentOfType(CoordTransWorker.class);
+        }
+        return worker;
     }
 
     private boolean isNorthAxisFirst(String epsgCode) {
