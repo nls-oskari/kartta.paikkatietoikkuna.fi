@@ -20,9 +20,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class V1_12__add_wfs_plugin implements JdbcMigration {
+public class V1_14__add_wfs_plugin implements JdbcMigration {
 
-    private static final Logger LOG = LogFactory.getLogger(V1_12__add_wfs_plugin.class);
+    private static final Logger LOG = LogFactory.getLogger(V1_14__add_wfs_plugin.class);
     private static final String CESIUM_VIEW_NAME = "Geoportal Ol Cesium";
     private static final String MAP_BUNDLE_NAME = "mapfull";
     private static final String WFS_PLUGIN_ID = "Oskari.wfsvector.WfsVectorLayerPlugin";
