@@ -1,7 +1,6 @@
 package flyway.paikkis;
 
 import fi.nls.oskari.util.FlywayHelper;
-import fi.nls.oskari.util.PropertyUtil;
 import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
 
 import java.sql.Connection;

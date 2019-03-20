@@ -14,7 +14,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * As Tilastokeskus PXWeb config is changed to parse a PX-table variables into indicators -> any saved indicator refs

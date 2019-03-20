@@ -6,8 +6,8 @@ import fi.nls.oskari.domain.map.view.View;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.map.layer.formatters.LayerJSONFormatterWMTS;
+import fi.nls.oskari.map.view.AppSetupServiceMybatisImpl;
 import fi.nls.oskari.map.view.ViewService;
-import fi.nls.oskari.map.view.ViewServiceIbatisImpl;
 import fi.nls.oskari.service.OskariComponentManager;
 import fi.nls.oskari.service.capabilities.CapabilitiesCacheService;
 import fi.nls.oskari.service.capabilities.OskariLayerCapabilities;
@@ -40,7 +40,7 @@ public class V1_1__set_layers implements JdbcMigration {
     private CapabilitiesCacheService capabilitiesService = null;
 
     public void migrate(Connection connection) throws SQLException {
-        viewService =  new ViewServiceIbatisImpl();
+        viewService =  new AppSetupServiceMybatisImpl();
         capabilitiesService = OskariComponentManager.getComponentOfType(CapabilitiesCacheService.class);
         List<OskariLayer> layers = getNlsBaseLayers(connection);
         LOG.info("Start populating matrixies for Oskari WMTS layers - count:", layers.size());

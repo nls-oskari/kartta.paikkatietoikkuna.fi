@@ -5,8 +5,8 @@ import fi.nls.oskari.domain.map.view.Bundle;
 import fi.nls.oskari.domain.map.view.View;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
+import fi.nls.oskari.map.view.AppSetupServiceMybatisImpl;
 import fi.nls.oskari.map.view.ViewService;
-import fi.nls.oskari.map.view.ViewServiceIbatisImpl;
 import fi.nls.oskari.util.PropertyUtil;
 import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
 import org.json.JSONObject;
@@ -19,7 +19,7 @@ public class V2_9__add_development_ol3_view implements JdbcMigration {
     private ViewService service = null;
 
     public void migrate(Connection connection) throws Exception {
-        service = new ViewServiceIbatisImpl();
+        service = new AppSetupServiceMybatisImpl();
 
         final String file = PropertyUtil.get("flyway.paikkis.2_9.file", "paikkis-ol3-dev.json");
         // configure the view that should be used as default options

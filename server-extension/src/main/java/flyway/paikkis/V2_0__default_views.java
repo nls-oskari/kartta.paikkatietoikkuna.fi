@@ -2,15 +2,10 @@ package flyway.paikkis;
 
 import fi.nls.oskari.db.DBHandler;
 import fi.nls.oskari.db.LayerHelper;
-import fi.nls.oskari.db.ViewHelper;
-import fi.nls.oskari.domain.map.view.View;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
-import fi.nls.oskari.map.view.ViewService;
-import fi.nls.oskari.map.view.ViewServiceIbatisImpl;
 import fi.nls.oskari.util.PropertyUtil;
 import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
-import org.json.JSONObject;
 
 import java.sql.Connection;
 
