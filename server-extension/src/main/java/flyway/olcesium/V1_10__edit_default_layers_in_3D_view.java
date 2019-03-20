@@ -5,8 +5,8 @@ import fi.nls.oskari.domain.map.view.Bundle;
 import fi.nls.oskari.domain.map.view.View;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
+import fi.nls.oskari.map.view.AppSetupServiceMybatisImpl;
 import fi.nls.oskari.map.view.ViewService;
-import fi.nls.oskari.map.view.ViewServiceIbatisImpl;
 import fi.nls.oskari.util.JSONHelper;
 import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
 import org.json.JSONArray;
@@ -31,7 +31,7 @@ public class V1_10__edit_default_layers_in_3D_view implements JdbcMigration {
     private ViewService viewService = null;
 
     public void migrate(Connection connection) throws SQLException {
-        viewService =  new ViewServiceIbatisImpl();
+        viewService =  new AppSetupServiceMybatisImpl();
         updateCesiumViews(connection);
     }
 
