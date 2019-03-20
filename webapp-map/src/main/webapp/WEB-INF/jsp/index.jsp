@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" isELIgnored="false" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+<jsp:useBean id="props" class="fi.nls.oskari.util.PropertyUtil"/>
 
 <!DOCTYPE html>
 <html>
@@ -138,14 +139,16 @@
                 </c:if>
             </div>
             <div id="pti-feedback">
+
+                <c:set var="feedbackURL" scope="page" value="${props.getWithOptionalModifier('pti.feedback.url', language)}" />
                 <c:if test="${language == 'fi'}">
-                    <a target="_blank" href="https://www.maanmittauslaitos.fi/lomakkeet/karttoihin_liittyva_palaute">Palaute</a>
+                    <a target="_blank" href="${feedbackURL}">Palaute</a>
                 </c:if>
                 <c:if test="${language == 'sv'}">
-                    <a target="_blank" href="https://www.maanmittauslaitos.fi/sv/lomakkeet/karttoihin_liittyva_palaute">Respons</a>
+                    <a target="_blank" href="${feedbackURL}">Respons</a>
                 </c:if>
                 <c:if test="${language == 'en'}">
-                    <a target="_blank" href="https://www.maanmittauslaitos.fi/en/lomakkeet/karttoihin_liittyva_palaute">Feedback</a>
+                    <a target="_blank" href="${feedbackURL}">Feedback</a>
                 </c:if>
             </div>
             <div id="toolbar">
@@ -194,8 +197,8 @@
 
 
 <!-- ############# /Javascript ################# -->
-<jsp:useBean id="props" class="fi.nls.oskari.util.PropertyUtil"/>
 <c:set var="ribbon" scope="page" value="${props.getOptional('page.ribbon')}" />
+
 <c:if test="${!empty ribbon}">
     <style type="text/css">
 
