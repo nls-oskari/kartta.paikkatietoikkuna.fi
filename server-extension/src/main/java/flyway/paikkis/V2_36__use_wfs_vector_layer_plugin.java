@@ -27,7 +27,7 @@ public class V2_36__use_wfs_vector_layer_plugin implements JdbcMigration {
 
     public void migrate(Connection connection) throws Exception {
         viewService = new AppSetupServiceMybatisImpl();
-        List<Long> viewIds = FlywayHelper.getViewIdsForTypes(connection, "DEFAULT", "USER", "PUBLISHED");
+        List<Long> viewIds = FlywayHelper.getViewIdsForTypes(connection);
         for (long id : viewIds) {
             updateView(connection, id);
         }
