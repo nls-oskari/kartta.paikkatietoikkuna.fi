@@ -26,15 +26,24 @@ public class V2_36__use_wfs_vector_layer_plugin implements JdbcMigration {
     private ViewService viewService;
 
     public void migrate(Connection connection) throws Exception {
-        viewService = new AppSetupServiceMybatisImpl();
-        List<Long> viewIds = FlywayHelper.getViewIdsForTypes(connection);
-        for (long id : viewIds) {
-            updateView(connection, id);
+        try {
+            viewService = new AppSetupServiceMybatisImpl();
+            List<Long> viewIds = FlywayHelper.getViewIdsForTypes(connection);
+            for (long id : viewIds) {
+                updateView(connection, id);
+            }
+        }
+        catch (Exception ex) {
+            LOG.error("Migration failed", ex);
+            throw ex;
         }
     }
 
     private void updateView (Connection connection, long viewId) throws Exception {
         Bundle mapfull = FlywayHelper.getBundleFromView(connection, BUNDLE_NAME, viewId);
+        if (mapfull == null) {
+            return;
+        }
         JSONObject config = mapfull.getConfigJSON();
         if (config == null) {
             return;
