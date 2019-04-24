@@ -6,6 +6,7 @@ import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.map.view.AppSetupServiceMybatisImpl;
 import fi.nls.oskari.map.view.ViewService;
 import fi.nls.oskari.util.FlywayHelper;
+import fi.nls.oskari.util.PropertyUtil;
 import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -22,10 +23,17 @@ public class V2_36__use_wfs_vector_layer_plugin implements JdbcMigration {
     private static final String BUNDLE_NAME = "mapfull";
     private static final String WFS_TRANSPORT_PLUGIN_ID = "Oskari.mapframework.bundle.mapwfs2.plugin.WfsLayerPlugin";
     private static final String WFS_VECTOR_PLUGIN_ID = "Oskari.wfsvector.WfsVectorLayerPlugin";
+    private static final String PLUGIN_CONFIG = "config";
+    private static final String MIGRATION_PROP_NAME = "flyway.paikkis.useWfsVector";
 
     private ViewService viewService;
 
     public void migrate(Connection connection) throws Exception {
+        final boolean proceed = PropertyUtil.getOptional(MIGRATION_PROP_NAME, false);
+        if (!proceed) {
+            LOG.info("Skipping migration to wfs vector plugin");
+            return;
+        }
         try {
             viewService = new AppSetupServiceMybatisImpl();
             List<Long> viewIds = FlywayHelper.getViewIdsForTypes(connection);
@@ -57,6 +65,9 @@ public class V2_36__use_wfs_vector_layer_plugin implements JdbcMigration {
             String id = plugin.optString("id");
             if (id == null || !id.equals(WFS_TRANSPORT_PLUGIN_ID)) {
                 continue;
+            }
+            if (plugin.has(PLUGIN_CONFIG)) {
+                plugin.remove(PLUGIN_CONFIG);
             }
             plugin.put("id", WFS_VECTOR_PLUGIN_ID);
         }
