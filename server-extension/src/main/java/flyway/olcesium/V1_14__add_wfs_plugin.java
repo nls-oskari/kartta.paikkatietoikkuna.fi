@@ -53,6 +53,11 @@ public class V1_14__add_wfs_plugin implements JdbcMigration {
         Bundle mapfull = view.getBundleByName(MAP_BUNDLE_NAME);
         JSONObject config = mapfull.getConfigJSON();
         JSONArray plugins = config.getJSONArray("plugins");
+        for (int i = 0; i < plugins.length(); i++) {
+            if (plugins.getJSONObject(i).get("id").equals(WFS_PLUGIN_ID)) {
+                return;
+            }
+        }
         JSONObject plugin = JSONHelper.createJSONObject("id", WFS_PLUGIN_ID);
         plugins.put(plugin);
         mapfull.setConfig(config.toString());
