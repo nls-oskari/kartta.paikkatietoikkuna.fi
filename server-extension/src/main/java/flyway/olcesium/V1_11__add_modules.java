@@ -43,7 +43,6 @@ public class V1_11__add_modules implements JdbcMigration {
             "maplegend",
             "statsgrid",
             "metadataflyout",
-            "routesearch",
             "userguide",
             "personaldata",
             "myplaces3",
@@ -90,6 +89,11 @@ public class V1_11__add_modules implements JdbcMigration {
         JSONArray plugins = config.getJSONArray("plugins");
         Arrays.stream(MAP_PLUGIN_IDS).forEach(pluginId -> {
             try {
+                for (int i = 0; i < plugins.length(); i++) {
+                    if (plugins.getJSONObject(i).get("id").equals(pluginId)) {
+                        return;
+                    }
+                }
                 JSONObject plugin = JSONHelper.createJSONObject("id", pluginId);
                 if (pluginId.equals("Oskari.mapframework.mapmodule.GetInfoPlugin")) {
                     JSONArray ignored = new JSONArray();
