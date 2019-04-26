@@ -26,6 +26,10 @@ public class AuthHandler {
     @RequestMapping
     public ModelAndView index(@OskariParam ActionParameters params) throws Exception {
         LOG.info("User logged in:", params.getRequest().getHeader("auth-email"));
+        if(params.getResponse().isCommitted()) {
+            // to prevent errors in log -> request has already been handled
+            return null;
+        }
         return new ModelAndView("redirect:/");
     }
 
