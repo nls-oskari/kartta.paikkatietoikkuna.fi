@@ -149,16 +149,6 @@
 
 
 <!-- ############# Javascript ################# -->
-
-<!-- OLCESIUM -->
-<!-- Cesium is not compatible with Oskari's build methods so include it as is -->
-
-<script type="text/javascript"
-        src="/Oskari/libraries/ol-cesium/Cesium/Cesium.js">
-</script>
-
-<!--  OSKARI -->
-
 <script type="text/javascript">
     var ajaxUrl = '${ajaxUrl}';
     var controlParams = ${controlParams};
