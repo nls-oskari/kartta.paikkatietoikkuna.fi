@@ -18,10 +18,6 @@
         "forceProxy": true,
         "mapOptions": {
           "resolutions": [
-            156543.03392804062,
-            78271.51696402031,
-            39135.758482010155,
-            19567.879241005077,
             9783.939620502539,
             4891.969810251269,
             2445.9849051256347,
@@ -37,8 +33,8 @@
             2.3886571339117526,
             1.1943285669558763,
             0.5971642834779382,
-            0.5971642834779382,
-            0.2985821417389691
+            0.2985821417389691,
+            0.05
           ],
           "srsName": "EPSG:3857",
           "terrain": { "providerUrl":"https://beta-karttakuva.maanmittauslaitos.fi/hmap/" }
@@ -47,17 +43,6 @@
           { "id": "Oskari.mapframework.bundle.mapmodule.plugin.LayersPlugin" },
           { "id": "Oskari.mapframework.mapmodule.WmsLayerPlugin" },
           { "id": "Oskari.mapframework.mapmodule.ControlsPlugin" },
-          { "id": "Oskari.mapframework.wmts.mapmodule.plugin.WmtsLayerPlugin" },
-          { "id": "Oskari.mapframework.bundle.mapmodule.plugin.Portti2Zoombar" },
-          { "id": "Oskari.mapframework.bundle.mapmodule.plugin.PanButtons" },
-          { "id": "Oskari.mapframework.bundle.mapmodule.plugin.FullScreenPlugin" },
-          {
-            "id": "Oskari.mapframework.bundle.mapmodule.plugin.BackgroundLayerSelectionPlugin",
-            "config": { "showAsDropdown": false }
-          },
-          { "id": "Oskari.mapframework.mapmodule.VectorLayerPlugin" },
-          { "id": "Oskari.map3dtiles.bundle.tiles3d.plugin.Tiles3DLayerPlugin" },
-          { "id": "Oskari.mapframework.bundle.mapmodule.plugin.GeoLocationPlugin" },
           { "id": "Oskari.mapframework.mapmodule.MarkersPlugin" },
           {
             "id": "Oskari.mapframework.mapmodule.GetInfoPlugin",
@@ -66,14 +51,27 @@
               "infoBox": false
             }
           },
-          { "id": "Oskari.mapframework.bundle.mapmodule.plugin.RealtimePlugin" },
+          { "id": "Oskari.mapframework.wmts.mapmodule.plugin.WmtsLayerPlugin" },
+          { "id": "Oskari.mapframework.bundle.mapmodule.plugin.Portti2Zoombar" },
+          { "id": "Oskari.mapframework.bundle.mapmodule.plugin.PanButtons" },
+          { "id": "Oskari.mapframework.mapmodule.VectorLayerPlugin" },
           { "id": "Oskari.mapframework.bundle.myplacesimport.plugin.UserLayersLayerPlugin" },
-          { "id": "Oskari.mapframework.bundle.mapmodule.plugin.LogoPlugin" },
-          { "id": "Oskari.arcgis.bundle.maparcgis.plugin.ArcGisLayerPlugin" },
           { "id": "Oskari.mapframework.bundle.mapmyplaces.plugin.MyPlacesLayerPlugin" },
-          { "id": "Oskari.mapframework.bundle.mapmodule.plugin.MyLocationPlugin" },
+          { "id": "Oskari.mapframework.bundle.mapmyplaces.plugin.AnalysisLayerPlugin" },
+          { "id": "Oskari.mapframework.mapmodule.VectorTileLayerPlugin" },
           { "id": "Oskari.wfsvector.WfsVectorLayerPlugin" },
-          { "id": "Oskari.wfsvector.WfsVectorLayerPlugin" }
+          { "id": "Oskari.map3dtiles.bundle.tiles3d.plugin.Tiles3DLayerPlugin" },
+          { "id": "Oskari.mapframework.mapmodule.BingMapsLayerPlugin" },
+          { "id": "Oskari.arcgis.bundle.maparcgis.plugin.ArcGisLayerPlugin" },
+          { "id": "Oskari.mapframework.bundle.mapmodule.plugin.GeoLocationPlugin" },
+          { "id": "Oskari.mapframework.bundle.mapmodule.plugin.MyLocationPlugin" },
+          { "id": "Oskari.mapframework.bundle.mapmodule.plugin.RealtimePlugin" },
+          { "id": "Oskari.mapframework.bundle.mapmodule.plugin.FullScreenPlugin" },
+          {
+            "id": "Oskari.mapframework.bundle.mapmodule.plugin.BackgroundLayerSelectionPlugin",
+            "config": { "showAsDropdown": false }
+          },
+          { "id": "Oskari.mapframework.bundle.mapmodule.plugin.LogoPlugin" }
         ]
       },
       "state" : {
@@ -220,6 +218,6 @@
     { "id" : "terrain-profile" },
     { "id" : "telemetry" },
     { "id" : "coordinatetransformation" },
-    { "id" : "demo-link" }
+    { "id" : "dimension-change" }
   ]
 }

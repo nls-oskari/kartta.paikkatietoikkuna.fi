@@ -1,0 +1,10 @@
+{
+  "bundles": {
+    "dimension-change": [
+      "create.sql"
+    ]
+  },
+  "views": [
+    "paikkis-3D.json"
+  ]
+}

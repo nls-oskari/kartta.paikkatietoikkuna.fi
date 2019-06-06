@@ -5,11 +5,19 @@ import fi.nls.oskari.domain.map.view.Bundle;
 import fi.nls.oskari.domain.map.view.View;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
+import fi.nls.oskari.map.layer.formatters.LayerJSONFormatterWMTS;
 import fi.nls.oskari.map.view.AppSetupServiceMybatisImpl;
 import fi.nls.oskari.map.view.ViewService;
+import fi.nls.oskari.service.OskariComponentManager;
+import fi.nls.oskari.service.capabilities.CapabilitiesCacheService;
+import fi.nls.oskari.service.capabilities.OskariLayerCapabilities;
 import fi.nls.oskari.util.JSONHelper;
+import fi.nls.oskari.wmts.WMTSCapabilitiesParser;
+import fi.nls.oskari.wmts.domain.WMTSCapabilities;
+import fi.nls.oskari.wmts.domain.WMTSCapabilitiesLayer;
 import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.sql.Connection;
@@ -18,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class V1_1__set_layers implements JdbcMigration {
@@ -30,13 +39,59 @@ public class V1_1__set_layers implements JdbcMigration {
     private static final String TERRAIN_LAYER_NAME = "maastokartta";
 
     private ViewService viewService = null;
+    private CapabilitiesCacheService capabilitiesService = null;
 
     public void migrate(Connection connection) throws SQLException {
         viewService =  new AppSetupServiceMybatisImpl();
+        capabilitiesService = OskariComponentManager.getComponentOfType(CapabilitiesCacheService.class);
         List<OskariLayer> layers = getNlsBaseLayers(connection);
         LOG.info("Start populating matrixies for Oskari WMTS layers - count:", layers.size());
+        for (OskariLayer layer : layers) {
+            updateNlsBaseLayer(connection, layer);
+        }
         if (!layers.isEmpty()) {
             updateLayerSelections(connection, layers);
+        }
+    }
+
+    private void updateNlsBaseLayer(Connection connection, OskariLayer layer) {
+        try {
+            // update capabilities in cache
+            String data = CapabilitiesCacheService.getFromService(layer);
+            OskariLayerCapabilities caps = new OskariLayerCapabilities(
+                    layer.getSimplifiedUrl(true),
+                    layer.getType(),
+                    layer.getVersion(),
+                    data);
+
+            WMTSCapabilities parsed = WMTSCapabilitiesParser.parseCapabilities(caps.getData());
+            WMTSCapabilitiesLayer capsLayer = parsed.getLayer(layer.getName());
+
+            JSONObject jscaps = null;
+            if (capsLayer != null) {
+                jscaps = LayerJSONFormatterWMTS.createCapabilitiesJSON(capsLayer, (Set)null);
+            } else {
+                LOG.info("WMTSCapabilities / layer parse failed - layer: ", layer.getName());
+                return;
+            }
+
+            updateCapabilities(layer.getId(), jscaps, connection);
+            capabilitiesService.save(caps);
+
+        } catch (Exception e) {
+            LOG.error(e, "Error getting capabilities for layer", layer);
+        }
+    }
+
+    private void updateCapabilities(int layerId, JSONObject capabilities, Connection conn) throws SQLException {
+        final String sql = "UPDATE oskari_maplayer SET capabilities=? where id=?";
+        try(PreparedStatement statement = conn.prepareStatement(sql)) {
+            statement.setString(1, capabilities.toString(2));
+            statement.setInt(2, layerId);
+            statement.execute();
+        }
+        catch (JSONException ignored) {
+            LOG.error("Error updating oskari_maplayer.capabilities", layerId);
         }
     }
 

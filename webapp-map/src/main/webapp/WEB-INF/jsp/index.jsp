@@ -126,16 +126,16 @@
             </div>
             <div id="language">
                 <c:if test="${language == 'fi'}">
-                    <a href="./?lang=sv">På svenska</a> -
-                    <a href="./?lang=en">In English</a>
+                    <a href="javascript:void(0)" onclick="ptiUtil.changeLang('sv')">På svenska</a> -
+                    <a href="javascript:void(0)" onclick="ptiUtil.changeLang('en')">In English</a>
                 </c:if>
                 <c:if test="${language == 'sv'}">
-                    <a href="./?lang=fi">Suomeksi</a> -
-                    <a href="./?lang=en">In English</a>
+                    <a href="javascript:void(0)" onclick="ptiUtil.changeLang('fi')">Suomeksi</a> -
+                    <a href="javascript:void(0)" onclick="ptiUtil.changeLang('en')">In English</a>
                 </c:if>
                 <c:if test="${language == 'en'}">
-                    <a href="./?lang=fi">Suomeksi</a> -
-                    <a href="./?lang=sv">På svenska</a>
+                    <a href="javascript:void(0)" onclick="ptiUtil.changeLang('fi')">Suomeksi</a> -
+                    <a href="javascript:void(0)" onclick="ptiUtil.changeLang('sv')">På svenska</a>
                 </c:if>
             </div>
             <div id="pti-feedback">
@@ -178,6 +178,27 @@
 <script type="text/javascript">
     var ajaxUrl = '${ajaxUrl}';
     var controlParams = ${controlParams};
+
+    var ptiUtil = (function (){
+        function changeLang (langCode) {
+            var oldSearch = window.location.search;
+            var newLang = 'lang=' + langCode;
+            if (oldSearch === '') {
+                return redirect('?' + newLang);
+            }
+            if (oldSearch.indexOf('lang=') > -1) {
+                return redirect(oldSearch.replace(/lang=[^&]+/, newLang));
+            }
+            return redirect(oldSearch + '&' + newLang);
+        };
+        function redirect(search) {
+            var hash = window.location.hash || '';
+            window.location.href = (window.location.pathname + search + window.location.hash);
+        };
+        return {
+            changeLang: changeLang
+        }
+    }());
 </script>
 
 <c:if test="${preloaded}">
@@ -190,11 +211,6 @@
             src="/Oskari${path}/oskari_lang_${language}.js">
     </script>
 </c:if>
-
-<script type="text/javascript"
-        src="/Oskari${path}/index.js">
-</script>
-
 
 <!-- ############# /Javascript ################# -->
 <c:set var="ribbon" scope="page" value="${props.getOptional('page.ribbon')}" />
