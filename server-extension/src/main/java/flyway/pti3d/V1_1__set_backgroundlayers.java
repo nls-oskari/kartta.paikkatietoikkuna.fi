@@ -56,7 +56,7 @@ public class V1_1__set_backgroundlayers implements JdbcMigration {
 
     private void updateNlsBaseLayer(Connection connection, OskariLayer layer) {
         try {
-            // update capabilities in cache
+            // update capabilities in cache to get epsg:3587 support
             String data = CapabilitiesCacheService.getFromService(layer);
             OskariLayerCapabilities caps = new OskariLayerCapabilities(
                     layer.getSimplifiedUrl(true),
