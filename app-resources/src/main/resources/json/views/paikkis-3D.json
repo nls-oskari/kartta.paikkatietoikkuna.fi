@@ -60,7 +60,7 @@
           { "id": "Oskari.mapframework.bundle.mapmyplaces.plugin.AnalysisLayerPlugin" },
           { "id": "Oskari.mapframework.mapmodule.VectorTileLayerPlugin" },
           { "id": "Oskari.wfsvector.WfsVectorLayerPlugin" },
-          { "id": "Oskari.map3dtiles.bundle.tiles3d.plugin.Tiles3DLayerPlugin" },
+          { "id": "Oskari.mapframework.mapmodule.Tiles3DLayerPlugin" },
           { "id": "Oskari.mapframework.mapmodule.BingMapsLayerPlugin" },
           { "id": "Oskari.arcgis.bundle.maparcgis.plugin.ArcGisLayerPlugin" },
           { "id": "Oskari.mapframework.bundle.mapmodule.plugin.GeoLocationPlugin" },
@@ -164,6 +164,7 @@
       "id" : "coordinatetool",
       "config": {
         "isReverseGeocode": true,
+        "reverseGeocodingIds": "WHAT3WORDS_CHANNEL",
         "supportedProjections": [
           "EPSG:3067",
           "NLSFI:etrs_gk",

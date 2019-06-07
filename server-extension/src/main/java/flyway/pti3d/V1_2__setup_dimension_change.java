@@ -15,7 +15,7 @@ import java.util.List;
 
 public class V1_2__setup_dimension_change implements JdbcMigration {
 
-    private static final Logger LOG = LogFactory.getLogger(V1_1__set_layers.class);
+    private static final Logger LOG = LogFactory.getLogger(V1_1__set_backgroundlayers.class);
     private static final String APPLICATION_3D_NAME = "full-map-3D";
     private static final String DEFAULT_VIEW_TYPE = "DEFAULT";
     private static final String BUNDLE_NAME = "dimension-change";

@@ -29,9 +29,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class V1_1__set_layers implements JdbcMigration {
+public class V1_1__set_backgroundlayers implements JdbcMigration {
 
-    private static final Logger LOG = LogFactory.getLogger(V1_1__set_layers.class);
+    private static final Logger LOG = LogFactory.getLogger(V1_1__set_backgroundlayers.class);
     private static final String APPLICATION_3D_NAME = "full-map-3D";
     private static final String MAP_BUNDLE_NAME = "mapfull";
     private static final String BASELAYER_PLUGIN_NAME = "BackgroundLayerSelectionPlugin";
