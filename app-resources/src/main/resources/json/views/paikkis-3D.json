@@ -46,10 +46,7 @@
           { "id": "Oskari.mapframework.mapmodule.MarkersPlugin" },
           {
             "id": "Oskari.mapframework.mapmodule.GetInfoPlugin",
-            "config": {
-              "ignoredLayerTypes": ["WFS","MYPLACES","USERLAYER"],
-              "infoBox": false
-            }
+            "config": { "infoBox": false }
           },
           { "id": "Oskari.mapframework.wmts.mapmodule.plugin.WmtsLayerPlugin" },
           { "id": "Oskari.mapframework.bundle.mapmodule.plugin.Portti2Zoombar" },
@@ -95,16 +92,12 @@
     { "id" : "statehandler" },
     {
       "id": "infobox",
-      "config": {
-        "adaptable": true
-      }
+      "config": { "adaptable": true }
     },
     { "id" : "search" },
     {
       "id" : "layerselector2",
-      "config": {
-        "showSearchSuggestions": true
-      }
+      "config": { "showSearchSuggestions": true }
     },
     { "id" : "layerselection2" },
     { "id" : "maplegend" },
