@@ -1,0 +1,207 @@
+{
+  "name": "Paikkatietoikkuna",
+  "type": "DEFAULT",
+  "default": true,
+  "public": true,
+  "onlyUuid": true,
+  "oskari": {
+    "application": "full-map-3D",
+    "page": "index",
+    "development_prefix": "/applications/paikkatietoikkuna.fi"
+  },
+  "bundles": [
+    { "id" : "lang-overrides" },
+    {
+      "id": "mapfull",
+      "config" : {
+        "layers": [],
+        "forceProxy": true,
+        "mapOptions": {
+          "resolutions": [
+            9783.939620502539,
+            4891.969810251269,
+            2445.9849051256347,
+            1222.9924525628173,
+            611.4962262814087,
+            305.74811314070433,
+            152.87405657035217,
+            76.43702828517608,
+            38.21851414258804,
+            19.10925707129402,
+            9.55462853564701,
+            4.777314267823505,
+            2.3886571339117526,
+            1.1943285669558763,
+            0.5971642834779382,
+            0.2985821417389691,
+            0.05
+          ],
+          "srsName": "EPSG:3857",
+          "terrain": { "providerUrl":"https://beta-karttakuva.maanmittauslaitos.fi/hmap/" }
+        },
+        "plugins": [
+          { "id": "Oskari.mapframework.bundle.mapmodule.plugin.LayersPlugin" },
+          { "id": "Oskari.mapframework.mapmodule.WmsLayerPlugin" },
+          { "id": "Oskari.mapframework.mapmodule.ControlsPlugin" },
+          { "id": "Oskari.mapframework.mapmodule.MarkersPlugin" },
+          { "id": "Oskari.mapframework.mapmodule.GetInfoPlugin" },
+          { "id": "Oskari.mapframework.wmts.mapmodule.plugin.WmtsLayerPlugin" },
+          { "id": "Oskari.mapframework.bundle.mapmodule.plugin.Portti2Zoombar" },
+          { "id": "Oskari.mapframework.bundle.mapmodule.plugin.PanButtons" },
+          { "id": "Oskari.mapframework.mapmodule.VectorLayerPlugin" },
+          { "id": "Oskari.mapframework.bundle.myplacesimport.plugin.UserLayersLayerPlugin" },
+          { "id": "Oskari.mapframework.bundle.mapmyplaces.plugin.MyPlacesLayerPlugin" },
+          { "id": "Oskari.mapframework.bundle.mapmyplaces.plugin.AnalysisLayerPlugin" },
+          { "id": "Oskari.mapframework.mapmodule.VectorTileLayerPlugin" },
+          { "id": "Oskari.wfsvector.WfsVectorLayerPlugin" },
+          { "id": "Oskari.mapframework.mapmodule.Tiles3DLayerPlugin" },
+          { "id": "Oskari.mapframework.mapmodule.BingMapsLayerPlugin" },
+          { "id": "Oskari.arcgis.bundle.maparcgis.plugin.ArcGisLayerPlugin" },
+          { "id": "Oskari.mapframework.bundle.mapmodule.plugin.GeoLocationPlugin" },
+          { "id": "Oskari.mapframework.bundle.mapmodule.plugin.MyLocationPlugin" },
+          { "id": "Oskari.mapframework.bundle.mapmodule.plugin.RealtimePlugin" },
+          { "id": "Oskari.mapframework.bundle.mapmodule.plugin.FullScreenPlugin" },
+          {
+            "id": "Oskari.mapframework.bundle.mapmodule.plugin.BackgroundLayerSelectionPlugin",
+            "config": { "showAsDropdown": false }
+          },
+          { "id": "Oskari.mapframework.bundle.mapmodule.plugin.LogoPlugin" }
+        ]
+      },
+      "state" : {
+        "camera": {
+          "location": {
+            "x": 2762500,
+            "y": 7835000,
+            "altitude": 1500000
+          },
+          "orientation": {
+            "heading": 0.0,
+            "pitch": -65,
+            "roll": 0.0
+          }
+        }
+      }
+    },
+    { "id": "drawtools" },
+    { "id" : "divmanazer" },
+    { "id": "toolbar" },
+    { "id" : "statehandler" },
+    {
+      "id": "infobox",
+      "config": { "adaptable": true }
+    },
+    { "id" : "search" },
+    {
+      "id" : "layerselector2",
+      "config": { "showSearchSuggestions": true }
+    },
+    { "id" : "layerselection2" },
+    { "id" : "maplegend" },
+    { "id" : "publisher2" },
+    { "id" : "statsgrid" },
+    { "id" : "analyse" },
+    { "id" : "metadataflyout" },
+    {
+      "id" : "userguide",
+      "config": {
+        "tabs": [
+          {
+            "title": "Karttaikkuna",
+            "tags": "ohje_karttaikkuna"
+          },
+          {
+            "title": "Kartan julkaisu",
+            "tags": "ohje_karttajulkaisu"
+          },
+          {
+            "title": "Teemakartat",
+            "tags": "ohje_teemakartat"
+          },
+          {
+            "title": "Analyysi",
+            "tags": "ohje_analyysi"
+          }
+        ]
+      }
+    },
+    {
+      "id" : "personaldata",
+      "config": {
+        "publishedMapUrl": {
+          "en": "/published/en/",
+          "fi": "/published/fi/",
+          "sv": "/published/sv/"
+        }
+      }
+    },
+    { "id" : "myplaces3" },
+    { "id" : "guidedtour" },
+    { "id" : "backendstatus" },
+    { "id" : "printout" },
+    {
+      "id" : "featuredata2",
+      "config": {
+        "selectionTools": true,
+        "singleSelection" : true
+      }
+    },
+    { "id" : "metadatacatalogue" },
+    { "id" : "myplacesimport" },
+    { "id" : "findbycoordinates" },
+    { "id" : "heatmap" },
+    {
+      "id" : "coordinatetool",
+      "config": {
+        "isReverseGeocode": true,
+        "reverseGeocodingIds": "WHAT3WORDS_CHANNEL",
+        "supportedProjections": [
+          "EPSG:3067",
+          "NLSFI:etrs_gk",
+          "NLSFI:ykj",
+          "EPSG:4258",
+          "LATLON:kkj",
+          "EPSG:3046",
+          "EPSG:3048",
+          "EPSG:3873",
+          "EPSG:3874",
+          "EPSG:3875",
+          "EPSG:3876",
+          "EPSG:3877",
+          "EPSG:3878",
+          "EPSG:3879",
+          "EPSG:3880",
+          "EPSG:3881",
+          "EPSG:3882",
+          "EPSG:3883",
+          "EPSG:3884",
+          "EPSG:3885"
+        ],
+        "showEmergencyCallMessage": true,
+        "projectionShowFormat": {
+          "decimals": 3,
+          "format": "metric",
+          "EPSG:4258": {
+            "decimals": 3,
+            "format": "degrees"
+          },
+          "LATLON:kkj": {
+            "decimals": 3,
+            "format": "degrees"
+          },
+          "EPSG:3067": {
+            "decimals": 0
+          }
+        }
+      }
+    },
+    { "id" : "timeseries" },
+    { "id" : "feedbackService" },
+    { "id" : "maprotator" },
+    { "id" : "register" },
+    { "id" : "terrain-profile" },
+    { "id" : "telemetry" },
+    { "id" : "coordinatetransformation" },
+    { "id" : "dimension-change" }
+  ]
+}
