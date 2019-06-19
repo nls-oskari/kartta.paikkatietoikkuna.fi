@@ -1,7 +1,6 @@
 package flyway.paikkis;
 
 import fi.nls.oskari.util.JSONHelper;
-import flyway.ptimigration.ConfigMigration;
 import org.json.JSONObject;
 
 
