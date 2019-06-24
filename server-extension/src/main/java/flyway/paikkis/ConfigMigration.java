@@ -1,4 +1,4 @@
-package flyway.ptimigration;
+package flyway.paikkis;
 
 import fi.nls.oskari.domain.map.view.Bundle;
 import fi.nls.oskari.view.modifier.ViewModifier;
