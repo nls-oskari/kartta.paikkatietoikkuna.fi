@@ -1,0 +1,105 @@
+{
+  "name": "Publisher template for 3D",
+  "type": "PUBLISH",
+  "default": false,
+  "public": false,
+  "creator" : 10110,
+  "oskari": {
+    "application": "published-map-3D",
+    "page": "published",
+    "development_prefix": "/applications/paikkatietoikkuna.fi"
+  },
+  "bundles": [
+    {
+      "id": "mapfull",
+      "config" : {
+        "layers": [],
+        "forceProxy": true,
+        "mapOptions": {
+          "resolutions": [
+            9783.939620502539,
+            4891.969810251269,
+            2445.9849051256347,
+            1222.9924525628173,
+            611.4962262814087,
+            305.74811314070433,
+            152.87405657035217,
+            76.43702828517608,
+            38.21851414258804,
+            19.10925707129402,
+            9.55462853564701,
+            4.777314267823505,
+            2.3886571339117526,
+            1.1943285669558763,
+            0.5971642834779382,
+            0.2985821417389691,
+            0.05
+          ],
+          "srsName": "EPSG:3857",
+          "terrain": { "providerUrl":"https://beta-karttakuva.maanmittauslaitos.fi/hmap/" }
+        },
+        "plugins": [
+          { "id": "Oskari.mapframework.bundle.mapmodule.plugin.LayersPlugin" },
+          { "id": "Oskari.mapframework.mapmodule.WmsLayerPlugin" },
+          { "id": "Oskari.wfsvector.WfsVectorLayerPlugin" },
+          { "id": "Oskari.mapframework.wmts.mapmodule.plugin.WmtsLayerPlugin" },
+          { "id": "Oskari.mapframework.bundle.mapmodule.plugin.RealtimePlugin" },
+          { "id": "Oskari.mapframework.bundle.mapmodule.plugin.LogoPlugin" },
+          { "id": "Oskari.mapframework.bundle.myplacesimport.plugin.UserLayersLayerPlugin" },
+          { "id": "Oskari.mapframework.bundle.mapanalysis.plugin.AnalysisLayerPlugin" },
+          { "id": "Oskari.arcgis.bundle.maparcgis.plugin.ArcGisLayerPlugin" },
+          { "id": "Oskari.mapframework.mapmodule.Tiles3DLayerPlugin" },
+          {
+            "id": "Oskari.mapframework.mapmodule.MarkersPlugin",
+            "config": {
+              "markerButton": false
+            }
+          },
+          { "id": "Oskari.mapframework.mapmodule.VectorLayerPlugin" }
+        ]
+      },
+      "state" : {
+        "camera": {
+          "location": {
+            "x": 2762500,
+            "y": 7835000,
+            "altitude": 1500000
+          },
+          "orientation": {
+            "heading": 0.0,
+            "pitch": -65,
+            "roll": 0.0
+          }
+        }
+      }
+    },
+    {
+      "id": "infobox",
+      "config": { "adaptable": true }
+    },
+    {
+      "id": "toolbar",
+      "config": {
+        "basictools": {
+          "measurearea": false,
+          "measureline": false,
+          "select": false,
+          "zoombox": false
+        },
+        "history": {
+          "history_back": false,
+          "history_forward": false,
+          "reset": false
+        },
+        "viewtools": {"link": false},
+        "toolbarId": "PublisherToolbar",
+        "defaultToolbarContainer": ".publishedToolbarContent",
+        "hasContentContainer": true
+      }
+    },
+    { "id" : "publishedstatehandler" },
+    { "id": "drawtools" },
+    { "id" : "routingService" },
+    { "id" : "rpc" }
+  ]
+}
