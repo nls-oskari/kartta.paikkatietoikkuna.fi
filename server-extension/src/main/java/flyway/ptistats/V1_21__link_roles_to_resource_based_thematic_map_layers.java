@@ -16,9 +16,9 @@ import fi.nls.oskari.domain.User;
 import fi.nls.oskari.domain.map.OskariLayer;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
-import fi.nls.oskari.map.data.domain.OskariLayerResource;
-import fi.nls.oskari.permission.domain.Permission;
-import fi.nls.oskari.permission.domain.Resource;
+import org.oskari.permissions.model.OskariLayerResource;
+import org.oskari.permissions.model.Permission;
+import org.oskari.permissions.model.Resource;
 import fi.nls.oskari.service.ServiceException;
 import fi.nls.oskari.service.UserService;
 
