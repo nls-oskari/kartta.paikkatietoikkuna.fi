@@ -1,8 +1,6 @@
 package flyway.ptistats;
 
 import fi.mml.portti.domain.permissions.Permissions;
-import fi.mml.portti.service.db.permissions.PermissionsService;
-import fi.mml.portti.service.db.permissions.PermissionsServiceIbatisImpl;
 import fi.nls.oskari.domain.Role;
 import fi.nls.oskari.domain.User;
 import fi.nls.oskari.domain.map.OskariLayer;
@@ -11,14 +9,15 @@ import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.service.ServiceException;
 import fi.nls.oskari.service.UserService;
 import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
-import org.oskari.permissions.model.OskariLayerResource;
-import org.oskari.permissions.model.Permission;
-import org.oskari.permissions.model.Resource;
+import org.oskari.permissions.PermissionService;
+import org.oskari.permissions.PermissionServiceMybatisImpl;
+import org.oskari.permissions.model.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Inserts viewlayer permission for the kunta & seutukunta layers used as regionsets for the new thematic maps
@@ -28,24 +27,23 @@ public class V1_8__link_roles_to_hki_layers implements JdbcMigration {
 
     public void migrate(Connection connection)
             throws SQLException {
-        PermissionsService service = new PermissionsServiceIbatisImpl();
+        PermissionService service = new PermissionServiceMybatisImpl();
         for(Resource resToUpdate : getResources()) {
-            Resource dbRes = service.findResource(resToUpdate);
-            if(dbRes != null) {
-                resToUpdate = dbRes;
+            Optional<Resource> dbRes = service.findResource(ResourceType.maplayer, resToUpdate.getMapping());
+            if(dbRes.isPresent()) {
+                resToUpdate = dbRes.get();
             }
             for(Role role : getRoles()) {
-                if(resToUpdate.hasPermission(role, Permissions.PERMISSION_TYPE_VIEW_LAYER)) {
+                if(resToUpdate.hasPermission(role, PermissionType.VIEW_LAYER)) {
                     // already had the permission
                     continue;
                 }
                 final Permission permission = new Permission();
-                permission.setExternalType(Permissions.EXTERNAL_TYPE_ROLE);
-                permission.setType(Permissions.PERMISSION_TYPE_VIEW_LAYER);
-                permission.setExternalId(Long.toString(role.getId()));
+                permission.setType(PermissionType.VIEW_LAYER);
+                permission.setRoleId((int) role.getId());
                 resToUpdate.addPermission(permission);
             }
-            service.saveResourcePermissions(resToUpdate);
+            service.saveResource(resToUpdate);
         }
     }
 

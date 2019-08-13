@@ -8,17 +8,14 @@ import java.util.List;
 
 import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
 
-import fi.mml.portti.domain.permissions.Permissions;
-import fi.mml.portti.service.db.permissions.PermissionsService;
-import fi.mml.portti.service.db.permissions.PermissionsServiceIbatisImpl;
 import fi.nls.oskari.domain.Role;
 import fi.nls.oskari.domain.User;
 import fi.nls.oskari.domain.map.OskariLayer;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
-import org.oskari.permissions.model.OskariLayerResource;
-import org.oskari.permissions.model.Permission;
-import org.oskari.permissions.model.Resource;
+import org.oskari.permissions.PermissionService;
+import org.oskari.permissions.PermissionServiceMybatisImpl;
+import org.oskari.permissions.model.*;
 import fi.nls.oskari.service.ServiceException;
 import fi.nls.oskari.service.UserService;
 
@@ -79,20 +76,20 @@ public class V1_21__link_roles_to_resource_based_thematic_map_layers implements 
     }
 
     private void updatePermissions(Connection connection, ResourceStatLayer[] layers) {
-        PermissionsService service = new PermissionsServiceIbatisImpl();
+        PermissionService service = new PermissionServiceMybatisImpl();
         List<Role> roles = getRoles();
         for (ResourceStatLayer layer : layers) {
             Resource resource = layer.getResourceTemplate();
             for (Role role : roles) {
-                if (!resource.hasPermission(role, Permissions.PERMISSION_TYPE_EDIT_LAYER)) {
+                if (!resource.hasPermission(role, PermissionType.EDIT_LAYER)) {
                     Permission permission = getPermission(role);
                     resource.addPermission(permission);
                 }
             }
-            Resource saved = service.saveResourcePermissions(resource);
-            LOG.debug("Saved resource, id:", saved.getId(),
-                    "type:", saved.getType(),
-                    "mapping:", saved.getMapping());
+            service.saveResource(resource);
+            LOG.debug("Saved resource, id:", resource.getId(),
+                    "type:", resource.getType(),
+                    "mapping:", resource.getMapping());
         }
     }
 
@@ -112,9 +109,8 @@ public class V1_21__link_roles_to_resource_based_thematic_map_layers implements 
 
     private Permission getPermission(Role role) {
         Permission permission = new Permission();
-        permission.setExternalType(Permissions.EXTERNAL_TYPE_ROLE);
-        permission.setType(Permissions.PERMISSION_TYPE_VIEW_LAYER);
-        permission.setExternalId(Long.toString(role.getId()));
+        permission.setType(PermissionType.VIEW_LAYER);
+        permission.setRoleId((int)role.getId());
         return permission;
     }
 
