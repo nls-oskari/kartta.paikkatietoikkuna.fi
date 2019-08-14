@@ -1,6 +1,5 @@
 package flyway.ptistats;
 
-import fi.mml.portti.domain.permissions.Permissions;
 import fi.nls.oskari.domain.Role;
 import fi.nls.oskari.domain.User;
 import fi.nls.oskari.domain.map.OskariLayer;
