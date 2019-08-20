@@ -36,6 +36,7 @@
             0.05
           ],
           "srsName": "EPSG:3857",
+          "maxExtent": [-20026376.39, -20048966.10, 20026376.39, 20048966.10],
           "terrain": { "providerUrl":"https://beta-karttakuva.maanmittauslaitos.fi/hmap/" }
         },
         "plugins": [
