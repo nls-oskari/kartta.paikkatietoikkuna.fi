@@ -11,24 +11,23 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.ModelAndView;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.Locale;
 
 /**
  * Created by SMAKINEN on 2.6.2017.
  */
 @Controller
-public class EmbeddedHandler {
+public class MapViewUrlHandler {
 
-    private final static Logger LOG = LogFactory.getLogger(EmbeddedHandler.class);
+    private final static Logger LOG = LogFactory.getLogger(MapViewUrlHandler.class);
 
     @Autowired
     private MapController controller;
 
-    @RequestMapping("/published/{lang}/{mapId}")
-    public String embeddedMaps(@PathVariable("lang") String lang, @PathVariable("mapId") String mapId, Model model, @OskariParam ActionParameters params) throws Exception {
+    @RequestMapping(value={"/view/{lang}/{mapId}", "/published/{lang}/{mapId}"})
+    public String redirectToMapView(@PathVariable("lang") String lang,
+                                    @PathVariable("mapId") String mapId,
+                                    Model model,
+                                    @OskariParam ActionParameters params) throws Exception {
         if(!isSupported(lang)) {
             lang = PropertyUtil.getDefaultLanguage();
         }
