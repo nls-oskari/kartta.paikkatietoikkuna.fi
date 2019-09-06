@@ -28,6 +28,7 @@ public class V1_21__link_roles_to_resource_based_thematic_map_layers implements 
 
     private static final String RESOURCES_URL_PREFIX = "resources://";
     private static final String DIR = "stats-regionsets/";
+    private static final int DUMMY_ID = -1;
 
     private enum ResourceStatLayer {
 
@@ -48,12 +49,16 @@ public class V1_21__link_roles_to_resource_based_thematic_map_layers implements 
         }
 
         private Resource getResourceTemplate() {
-            return new OskariLayerResource(OskariLayer.TYPE_STATS, getUrl(), name);
+            return new OskariLayerResource(DUMMY_ID);
         }
 
     }
 
     public void migrate(Connection connection) throws SQLException {
+        if (true) {
+            // Can't be run to an empty database. Permission handling changed.
+            return;
+        }
         ResourceStatLayer[] layers = ResourceStatLayer.values();
         updateLayerUrls(connection, layers);
         updatePermissions(connection, layers);

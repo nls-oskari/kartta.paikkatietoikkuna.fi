@@ -23,9 +23,14 @@ import java.util.Optional;
  */
 public class V1_8__link_roles_to_hki_layers implements JdbcMigration {
     private static final Logger LOG = LogFactory.getLogger(V1_8__link_roles_to_hki_layers.class);
+    private static final int DUMMY_ID = -1;
 
     public void migrate(Connection connection)
             throws SQLException {
+        if (true) {
+            // Can't be run to an empty database. Permission handling changed.
+            return;
+        }
         PermissionService service = new PermissionServiceMybatisImpl();
         for(Resource resToUpdate : getResources()) {
             Optional<Resource> dbRes = service.findResource(ResourceType.maplayer, resToUpdate.getMapping());
@@ -49,8 +54,8 @@ public class V1_8__link_roles_to_hki_layers implements JdbcMigration {
     // statslayers described as layer resources for permissions handling
     private List<Resource> getResources() {
         List<Resource> list = new ArrayList<>();
-        list.add(new OskariLayerResource(OskariLayer.TYPE_STATS, "http://geoserver.hel.fi/geoserver/wms", "seutukartta:Seutu_suuralueet"));
-        list.add(new OskariLayerResource(OskariLayer.TYPE_STATS, "http://geoserver.hel.fi/geoserver/wms", "seutukartta:Seutu_pienalueet"));
+        list.add(new OskariLayerResource(DUMMY_ID));
+        list.add(new OskariLayerResource(DUMMY_ID));
         return list;
     }
 
