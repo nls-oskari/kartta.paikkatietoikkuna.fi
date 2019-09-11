@@ -120,7 +120,7 @@ public class CoordinateTransformationAsyncController {
         }
         try (OutputStream out = response.getOutputStream()) {
             if (transformParams.type.isFileOutput()) {
-                fileHelper.writeFileResponse(out, coords.getCoords(), targetDimension, coords.getExportSettings(), targetCrs);
+                fileHelper.writeFileResponse(out, coords, targetDimension, targetCrs);
             } else {
                 response.setContentType("application/json;charset=utf-8");
                 writeJsonResponse(out, coords.getCoords(), targetDimension, coords.hasMore());

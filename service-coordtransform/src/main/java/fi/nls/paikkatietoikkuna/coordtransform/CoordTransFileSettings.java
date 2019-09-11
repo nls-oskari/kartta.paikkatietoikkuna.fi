@@ -17,11 +17,6 @@ public class CoordTransFileSettings {
     private boolean writeLineEndings;
     private boolean writeCardinals;
 
-    private boolean hasMoreCoordinates = false;
-    private List<String> headerRows = new ArrayList<>();
-    private List<String> ids = new ArrayList<>();
-    private List<String> lineEnds = new ArrayList<>();
-
     public String getFileName() {
         return fileName;
     }
@@ -70,30 +65,6 @@ public class CoordTransFileSettings {
         this.unit = unit;
     }
 
-    public List<String> getHeaderRows() {
-        return headerRows;
-    }
-
-    public void setHeaderRows(List<String> headerRows) {
-        this.headerRows = headerRows;
-    }
-
-    public void addHeaderRow(String row) {
-        this.headerRows.add(row);
-    }
-
-    public List<String> getIds() {
-        return ids;
-    }
-
-    public void setIds(List<String> ids) {
-        this.ids = ids;
-    }
-
-    public void addId(String id) {
-        this.ids.add(id);
-    }
-
     public String getLineSeparator() {
         return lineSeparator;
     }
@@ -126,18 +97,6 @@ public class CoordTransFileSettings {
         this.writeLineEndings = writeLineEndings;
     }
 
-    public List<String> getLineEnds() {
-        return lineEnds;
-    }
-
-    public void setLineEnds(List<String> lineEnds) {
-        this.lineEnds = lineEnds;
-    }
-
-    public void addLineEnd(String lineEnd) {
-        this.lineEnds.add(lineEnd);
-    }
-
     public boolean isWriteCardinals() {
         return writeCardinals;
     }
@@ -152,20 +111,6 @@ public class CoordTransFileSettings {
 
     public void setDecimalCount(int decimalCount) {
         this.decimalCount = decimalCount;
-    }
-
-    public void copyArrays(CoordTransFileSettings from) {
-        headerRows = from.getHeaderRows();
-        ids = from.getIds();
-        lineEnds = from.getLineEnds();
-    }
-
-    public boolean isHasMoreCoordinates() {
-        return hasMoreCoordinates;
-    }
-
-    public void setHasMoreCoordinates(boolean hasMoreCoordinates) {
-        this.hasMoreCoordinates = hasMoreCoordinates;
     }
 }
     
