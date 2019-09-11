@@ -33,12 +33,9 @@ public class OskariPreAuthenticationSecurityConfig extends WebSecurityConfigurer
         // Disable HSTS header, we don't want to force HTTPS for ALL requests
         http.headers().httpStrictTransportSecurity().disable();
 
-        // Enable cookie based CRSF tokens (requires frontend to send them back)
-        http.csrf()
-            // ignoring logout here doesn't help for some reason. It's ignored in OskariCommonSecurityConfig
-            // if not ignored, logout fails even if everything else works
-            //.ignoringAntMatchers("/logout")
-            .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
+        // 3rd party cookie blockers don't really work with cookie based CSRF protection on embedded maps.
+        // Configure nginx to attach SameSite-flag to cookies instead.
+        http.csrf().disable();
 
         OskariRequestHeaderAuthenticationFilter filter = new OskariRequestHeaderAuthenticationFilter();
         filter.setAuthenticationSuccessHandler(new OskariPreAuthenticationSuccessHandler());
