@@ -30,7 +30,7 @@ public class CoordinateTransformationActionHandlerTest {
         List<Coordinate> expected = getRandomCoordinates(n, 0.0, 1000.0);
         byte[] jsonBytes = createJsonArrayOfArrays(expected, dimension);
         CoordinateTransformationActionHandler handler = new CoordinateTransformationActionHandler();
-        List<Coordinate> actual = handler.parseInputCoordinates(new ByteArrayInputStream(jsonBytes), dimension, false);
+        List<Coordinate> actual = handler.parseInputCoordinates(new ByteArrayInputStream(jsonBytes), dimension);
         for (int i = 0; i < n; i++) {
             Coordinate e = expected.get(i);
             Coordinate a = actual.get(i);

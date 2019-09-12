@@ -50,9 +50,22 @@ public class CoordFileHelper {
         return lineSeparators.get(key);
     }
 
-    public List<Coordinate> getCoordsFromFile(CoordTransFileSettings sourceOptions, FileItem file,
-                                                 int dimension, boolean addZeroes, boolean storeLineEnds, int limit) throws ActionException {
-        List<Coordinate> coordinates = new ArrayList<>();
+    public CoordinatesPayload getCoordsFromFile(TransformParams params, int limit)
+            throws ActionException {
+        CoordinatesPayload cp = new CoordinatesPayload();
+        CoordTransFileSettings sourceOptions = params.importSettings;
+        boolean storeHeaders = false;
+        boolean storeLineEnds = false;
+        boolean storeIds = false;
+        if(params.type.isFileOutput()) {
+            cp.setExportSettings(params.exportSettings);
+            // Store only if file output and included/requested
+            storeLineEnds = params.exportSettings.isWriteLineEndings();
+            storeHeaders = params.exportSettings.isWriteHeader();
+            storeIds = sourceOptions.isPrefixId();
+        }
+
+        int dimension = params.inputDimensions;
         String line = "";
         String[] coords;
         int xIndex = 0;
@@ -88,10 +101,10 @@ public class CoordFileHelper {
         double x, y, z;
         int lineIndex = 1;
         boolean firstCoord = true; // same as "firstLine" in readFileToJsonResonse()
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(params.file.getInputStream()))) {
             //skip row and store row as header row
             for (int i = 0; i < headerLineCount && (line = br.readLine()) != null; i++) {
-                sourceOptions.addHeaderRow(line);
+                cp.addHeaderRow(line);
                 lineIndex++;
             }
             while ((line = br.readLine()) != null) {
@@ -129,14 +142,12 @@ public class CoordFileHelper {
                 }
                 if (dimension == 3) {
                     z = Double.valueOf(coords[zIndex]);
-                    coordinates.add(new Coordinate(x, y, z));
-                } else if (addZeroes == true) {
-                    coordinates.add(new Coordinate(x, y, 0));
+                    cp.addCoordinate(new Coordinate(x, y, z));
                 } else {
-                    coordinates.add(new Coordinate(x, y));
+                    cp.addCoordinate(new Coordinate(x, y));
                 }
-                if (sourceOptions.isPrefixId()) {
-                    sourceOptions.addId(coords[0]);
+                if (storeIds) {
+                    cp.addId(coords[0]);
                 }
                 if (storeLineEnds == true) {
                     String lineEnd = "";
@@ -148,11 +159,11 @@ public class CoordFileHelper {
                             lineEnd += coordSeparator + coords[i];
                         }
                     }
-                    sourceOptions.addLineEnd(lineEnd);
+                    cp.addLineEnd(lineEnd);
                 }
-                if (coordinates.size() == limit) {
-                    sourceOptions.setHasMoreCoordinates(true);
-                    break;
+                if (cp.size() == limit) {
+                    cp.setPartialParse(true);
+                    return cp;
                 }
                 firstCoord = false;
                 lineIndex++;
@@ -164,11 +175,25 @@ public class CoordFileHelper {
         } catch (IndexOutOfBoundsException e) {
             throw new ActionParamsException("Index out of bounds", createErrorInLineResponse(lineIndex, line, e));
         }
-        return coordinates;
+        return cp;
     }
 
-    public void writeFileResponse(OutputStream out, List<Coordinate> coords, final int dimension, CoordTransFileSettings opts, String crs)
+    public void writeFileResponse(OutputStream out, CoordinatesPayload cp, final int dimension, String crs)
             throws ActionException {
+        CoordTransFileSettings opts = cp.getExportSettings();
+        List<Coordinate> coords = cp.getCoords();
+        List<String> ids = cp.getIds();
+        List<String> lineEndings = cp.getLineEnds();
+        boolean writeEndings = opts.isWriteLineEndings() && lineEndings.size() == coords.size();
+        boolean prefixWithIndex = false;
+        boolean prefixId = false;
+        if (opts.isPrefixId()) {
+            if (ids.size() == coords.size()){
+                prefixId = true;
+            } else {
+                prefixWithIndex = true;
+            }
+        }
         try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out))) {
             String xCoord;
             String yCoord;
@@ -177,29 +202,19 @@ public class CoordFileHelper {
             String coordSeparator = coordinateSeparators.get(opts.getCoordinateSeparator());
             int decimals = opts.getDecimalCount();
             boolean replaceCommas = opts.getDecimalSeparator() == ',';
-            boolean prefixId = opts.isPrefixId();
             boolean flipAxis = opts.isAxisFlip();
-            boolean prefixWithIndex = false;
             boolean writeCardinals = opts.isWriteCardinals();
-            List<String> ids = opts.getIds();
-            List<String> lineEndings = opts.getLineEnds();
-            boolean writeEndings = opts.isWriteLineEndings() && !lineEndings.isEmpty();
             String unit = opts.getUnit();
             boolean transformUnit = false;
             if (unit != null && !unit.equals(DEGREE) && !unit.equals(METRIC)) {
                 transformUnit = true;
-            }
-            if (opts.isPrefixId()) {
-                if (ids.isEmpty()) {
-                    prefixWithIndex = true;
-                }
             }
             // TODO: should we add only: Coordinate Reference System: KKJ
             // if we want localized header then frontend should send header String instead of boolean
             if (opts.isWriteHeader()) {
                 bw.write("Coordinate Reference System:" + crs);
                 bw.write(lineSeparator);
-                for (String headerRow : opts.getHeaderRows()) {
+                for (String headerRow : cp.getHeaderRows()) {
                     bw.write(headerRow);
                     bw.write(lineSeparator);
                 }
@@ -229,10 +244,10 @@ public class CoordFileHelper {
                         yCoord += "N";
                     }
                 }
-                if (prefixId && prefixWithIndex) {
-                    bw.write((i + 1) + coordSeparator);
-                } else if (prefixId) {
+                if (prefixId) {
                     bw.write(ids.get(i) + coordSeparator);
+                } else if (prefixWithIndex) {
+                    bw.write((i + 1) + coordSeparator);
                 }
                 if (flipAxis) {
                     bw.write(yCoord);

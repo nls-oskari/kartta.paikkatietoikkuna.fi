@@ -89,12 +89,13 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
             // also then dimensions must not be sent by frontend
             sourceCrs = sourceCrs + ",EPSG:3900";
         }
-        CoordinatesPayload coords = getCoordinatesFromPayload(transformParams, addZeroes);
-        if (coords.getCoords().isEmpty()) {
+        CoordinatesPayload coords = getCoordinatesFromPayload(transformParams);
+        if (coords.isEmpty()) {
             throw new ActionParamsException("No coordinates", TransformParams.createErrorResponse("no_coordinates"));
         }
-        // TODO: move addZeroes handling here from getCoordinatesFromPayload()
-        // if (addZeroes) {coords.getCoords().forEach(c => c.setOrdinate(Coordinate.Z, 0)) }
+        if (addZeroes) {
+            coords.getCoords().forEach(c -> c.setOrdinate(Coordinate.Z, 0));
+        }
 
         CoordTransQueryBuilder queryBuilder = new CoordTransQueryBuilder(endPoint, sourceCrs, targetCrs);
         try {
@@ -107,53 +108,33 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
         }
     }
 
-    public CoordinatesPayload getCoordinatesFromPayload(TransformParams params, boolean addZeroes) throws ActionException {
-        int dimensionCount = params.inputDimensions;
-        CoordinatesPayload payload = new CoordinatesPayload();
+    public CoordinatesPayload getCoordinatesFromPayload(TransformParams params) throws ActionException {
         if (!params.type.isFileInput()) {
             // payload is json
-            List<Coordinate> coord = getCoordsFromJsonArray(params.actionParameters, dimensionCount, addZeroes);
-            payload.addCoordinates(coord);
-            if (params.type.isFileOutput()){
-                payload.setExportSettings(params.exportSettings);
-            }
-            return payload;
+            return getCoordsFromJsonArray(params);
         }
 
         // There's a file to be parsed
         int resultCount = maxCoordsF2A;
-        boolean fileEndings = false;
         if (params.type.isFileOutput()) {
             resultCount = Integer.MAX_VALUE;
-            fileEndings = params.exportSettings.isWriteLineEndings();
         }
-        List<Coordinate> coord = fileHelper.getCoordsFromFile(
-                params.importSettings,
-                params.file,
-                dimensionCount,
-                addZeroes,
-                fileEndings,
-                resultCount);
-        payload.addCoordinates(coord);
-        // FIXME: settings is modified for the value in getCoordinatesFromPayload() :scream:
-        // have getCoordsFromFile to return payload instead and setup setPartialParse()
-        payload.setPartialParse(params.importSettings.isHasMoreCoordinates());
-        if(params.type.isFileOutput()) {
-            // FIXME: add "input headers" or similar to payload instead of modifying importSettings/exportSettings WHILE reading from payload.
-            params.exportSettings.copyArrays(params.importSettings);
-            payload.setExportSettings(params.exportSettings);
-        }
-        return payload;
+        return fileHelper.getCoordsFromFile(params, resultCount);
     }
 
-    private List<Coordinate> getCoordsFromJsonArray(ActionParameters params, int dimension, boolean addZeroes) throws ActionException {
-        try (InputStream in = params.getRequest().getInputStream()) {
-            return parseInputCoordinates(in, dimension, addZeroes);
+    private CoordinatesPayload getCoordsFromJsonArray(TransformParams params) throws ActionException {
+        CoordinatesPayload cp = new CoordinatesPayload();
+        if (params.type.isFileOutput()) {
+            cp.setExportSettings(params.exportSettings);
+        }
+        try (InputStream in = params.actionParameters.getRequest().getInputStream()) {
+            cp.addCoordinates(parseInputCoordinates(in, params.inputDimensions));
         } catch (IOException e) {
             throw new ActionException("Failed to parse input JSON!", e);
         } catch (ActionParamsException e) {
             throw new ActionParamsException(e.getMessage(), TransformParams.createErrorResponse("invalid_coord_in_array", e));
         }
+        return cp;
     }
 
     /**
@@ -161,12 +142,11 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
      *
      * @param in        array of array of numbers [[1,2,3], [4,5,6]]
      * @param dimension if not 2, tries to read third oordinate as z
-     * @param addZeroes if dimension 2, sets z as 0 for true or leaves null for false
      * @return list of coordinates parsed from inputstream
      * @throws IOException
      * @throws ActionParamsException
      */
-    protected List<Coordinate> parseInputCoordinates(final InputStream in, final int dimension, final boolean addZeroes)
+    protected List<Coordinate> parseInputCoordinates(final InputStream in, final int dimension)
             throws IOException, ActionParamsException {
         try (JsonParser parser = jf.createParser(in)) {
             if (parser.nextToken() != JsonToken.START_ARRAY) {
@@ -189,8 +169,6 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                     assertNumber(parser.nextToken(), "Expected a number");
                     double z = parser.getDoubleValue();
                     parsed.setOrdinate(Coordinate.Z, z);
-                } else if (addZeroes) {
-                    parsed.setOrdinate(Coordinate.Z, 0);
                 }
                 coordinates.add(parsed);
 
@@ -198,7 +176,6 @@ public class CoordinateTransformationActionHandler extends RestActionHandler {
                     throw new ActionParamsException("Expected array closing");
                 }
             }
-
             return coordinates;
         }
     }
