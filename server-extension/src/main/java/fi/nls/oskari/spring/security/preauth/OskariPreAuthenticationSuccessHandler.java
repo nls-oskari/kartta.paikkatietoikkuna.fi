@@ -1,11 +1,13 @@
 package fi.nls.oskari.spring.security.preauth;
 
+import fi.nls.oskari.control.ActionParameters;
 import fi.nls.oskari.domain.Role;
 import fi.nls.oskari.domain.User;
 import fi.nls.oskari.service.ServiceException;
 import fi.nls.oskari.service.UserService;
 import fi.nls.oskari.user.DatabaseUserService;
 import fi.nls.oskari.util.JSONHelper;
+import org.oskari.log.AuditLog;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -85,6 +87,9 @@ public class OskariPreAuthenticationSuccessHandler extends SimpleUrlAuthenticati
         synchronized (session) {
             session.setAttribute(User.class.getName(), authenticatedUser);
         }
+        AuditLog.user(ActionParameters.getClientIp(request), authenticatedUser.getEmail())
+                .withMsg("Login")
+                .updated(AuditLog.ResourceType.USER);
     }
 
     protected DatabaseUserService getUserService() {
