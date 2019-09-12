@@ -159,7 +159,6 @@ public class CoordFileHelper {
                             lineEnd += coordSeparator + coords[i];
                         }
                     }
-                    System.out.println(lineEnd);
                     cp.addLineEnd(lineEnd);
                 }
                 if (cp.size() == limit) {
