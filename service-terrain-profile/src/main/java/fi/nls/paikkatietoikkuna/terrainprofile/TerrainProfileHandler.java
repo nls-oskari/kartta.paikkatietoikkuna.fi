@@ -114,7 +114,7 @@ public class TerrainProfileHandler extends ActionHandler {
         Geometry geom = getGeometry(route);
         try {
             CoordinateReferenceSystem dataCRS = CRS.decode("EPSG:3857");
-            CoordinateReferenceSystem serviceCRS = CRS.decode("EPSG:3067", true);
+            CoordinateReferenceSystem serviceCRS = CRS.decode("EPSG:3067");
             boolean lenient = true; // allow for some error due to different datums
             MathTransform transform = CRS.findMathTransform(dataCRS, serviceCRS, lenient);
             geom = JTS.transform(geom, transform);
@@ -130,7 +130,7 @@ public class TerrainProfileHandler extends ActionHandler {
         JSONObject properties = route.optJSONObject(JSON_PROPERTY_PROPERTIES);
         int numPoints = Math.min(getNumPoints(properties), NUM_POINTS_MAX);
         double scaleFactor = getScaleFactor(properties);
-        double[] points = new double[numPoints];
+        double[] points = new double[geom.getNumPoints() * 2];
         int ptIndex = -1;
         for (Coordinate coord : geom.getCoordinates()) {
             points[++ptIndex] = coord.x;
