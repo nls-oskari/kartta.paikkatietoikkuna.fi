@@ -179,8 +179,8 @@ public class TerrainProfileHandlerTest {
         params.setRequest(request);
         params.setResponse(response);
 
-        String endPoint = "http://avoindata.maanmittauslaitos.fi/geoserver/wcs";
-        String coverageId = "korkeusmalli_10m__korkeusmalli_10m";
+        String endPoint = "https://beta-karttakuva.maanmittauslaitos.fi/wcs/service/ows";
+        String coverageId = "korkeusmalli__korkeusmalli";
         TerrainProfileService tps = new TerrainProfileService(endPoint, coverageId);
         new TerrainProfileHandler(om, tps).handleAction(params);
     }
