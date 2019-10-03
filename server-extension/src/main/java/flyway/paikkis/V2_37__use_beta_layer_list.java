@@ -27,7 +27,7 @@ public class V2_37__use_beta_layer_list implements JdbcMigration {
     private ViewService viewService = null;
 
     public void migrate(Connection connection) throws SQLException, ViewException {
-        final boolean proceed = PropertyUtil.getOptional(MIGRATION_PROP_NAME, true);
+        final boolean proceed = PropertyUtil.getOptional(MIGRATION_PROP_NAME, false);
         if (!proceed) {
             LOG.info("Skipping migration to react ui");
             return;
