@@ -1,11 +1,11 @@
 {
-  "name" : "Publisher template for OL3",
+  "name" : "Publisher template for OL",
   "type" : "PUBLISH",
   "default" : false,
   "public" : false,
   "creator" : 10110,
   "oskari" : {
-    "application" : "published-map_ol3",
+    "application" : "published-map",
     "page" : "published",
     "development_prefix": "/applications/paikkatietoikkuna.fi"
   },
