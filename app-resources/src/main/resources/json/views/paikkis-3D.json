@@ -5,9 +5,9 @@
   "public": true,
   "onlyUuid": true,
   "oskari": {
-    "application": "full-map-3D",
+    "application": "geoportal-3D",
     "page": "index",
-    "development_prefix": "/applications/paikkatietoikkuna.fi"
+    "development_prefix": "/applications"
   },
   "bundles": [
     { "id" : "lang-overrides" },
