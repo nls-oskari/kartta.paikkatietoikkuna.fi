@@ -10,13 +10,12 @@ import java.sql.ResultSet;
 public class FlywayHelper3D {
 
     private static final Logger LOG = LogFactory.getLogger(FlywayHelper3D.class);
-    private static final String APPLICATION_3D_NAME = "full-map-3D";
     private static final String DEFAULT_VIEW_TYPE = "DEFAULT";
 
-    public static String get3DViewUuid(Connection conn) {
+    public static String get3DViewUuid(Connection conn, String applicationName) {
         final String sql = "SELECT uuid FROM portti_view WHERE application=? and type=? limit 1";
         try (PreparedStatement statement = conn.prepareStatement(sql)) {
-            statement.setString(1, APPLICATION_3D_NAME);
+            statement.setString(1, applicationName);
             statement.setString(2, DEFAULT_VIEW_TYPE);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {

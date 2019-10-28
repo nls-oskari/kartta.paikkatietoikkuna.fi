@@ -15,7 +15,8 @@ public class V1_4__setup_3D_publishing implements JdbcMigration {
 
     private static final String TEMPLATE_JSON = "paikkis-3D-publish-template.json";
     private static final String METADATA_TEMPLATE_KEY = "publishTemplateUuid";
-
+    private static final String APPLICATION_3D_NAME = "full-map-3D";
+    
     private ViewService viewService;
 
     public void migrate(Connection connection) throws Exception {
@@ -27,7 +28,7 @@ public class V1_4__setup_3D_publishing implements JdbcMigration {
         View templateView = viewService.getViewWithConf(templateViewId);
 
         // Set it as the publication template for the default 3D view.
-        View geoportalView = viewService.getViewWithConfByUuId(FlywayHelper3D.get3DViewUuid(connection));
+        View geoportalView = viewService.getViewWithConfByUuId(FlywayHelper3D.get3DViewUuid(connection, APPLICATION_3D_NAME));
         geoportalView.getMetadata().put(METADATA_TEMPLATE_KEY, templateView.getUuid());
         viewService.updateView(geoportalView);
     }
