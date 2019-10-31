@@ -5,9 +5,9 @@
   "public": true,
   "onlyUuid": false,
   "oskari": {
-    "application": "full-map",
+    "application": "geoportal",
     "page": "index",
-    "development_prefix": "/applications/paikkatietoikkuna.fi"
+    "development_prefix": "/applications"
   },
   "selectedLayers": [
     "taustakartta.json"

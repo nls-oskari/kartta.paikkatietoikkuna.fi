@@ -12,9 +12,11 @@ import java.util.List;
 public class V1_2__setup_dimension_change implements JdbcMigration {
 
     private static final String BUNDLE_NAME = "dimension-change";
+    private static final String APPLICATION_3D_NAME = "full-map-3D";
+
 
     public void migrate(Connection connection) throws SQLException {
-        String uuid = FlywayHelper3D.get3DViewUuid(connection);
+        String uuid = FlywayHelper3D.get3DViewUuid(connection, APPLICATION_3D_NAME);
         List<Long> viewIds = FlywayHelper.getUserAndDefaultViewIds(connection);
 
         for (Long id : viewIds) {

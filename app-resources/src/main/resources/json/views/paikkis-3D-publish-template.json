@@ -5,9 +5,9 @@
   "public": false,
   "creator" : 10110,
   "oskari": {
-    "application": "published-map-3D",
+    "application": "embedded-3D",
     "page": "published",
-    "development_prefix": "/applications/paikkatietoikkuna.fi"
+    "development_prefix": "/applications"
   },
   "bundles": [
     {
