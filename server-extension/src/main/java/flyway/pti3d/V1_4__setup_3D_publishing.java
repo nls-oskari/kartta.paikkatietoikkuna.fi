@@ -15,7 +15,7 @@ public class V1_4__setup_3D_publishing implements JdbcMigration {
 
     private static final String TEMPLATE_JSON = "paikkis-3D-publish-template.json";
     private static final String METADATA_TEMPLATE_KEY = "publishTemplateUuid";
-    private static final String APPLICATION_3D_NAME = "full-map-3D";
+    private static final String APPLICATION_3D_NAME = "geoportal-3D";
     
     private ViewService viewService;
 

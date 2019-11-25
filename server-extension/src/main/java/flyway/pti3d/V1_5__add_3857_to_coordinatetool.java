@@ -25,8 +25,8 @@ public class V1_5__add_3857_to_coordinatetool implements JdbcMigration {
 
     private static final Logger LOG = LogFactory.getLogger(V1_5__add_3857_to_coordinatetool.class);
     private static final String BUNDLE_NAME = "coordinatetool";
-    private static final String APPLICATION_3D_FULL = "full-map-3D";
-    private static final String APPLICATION_3D_PUBLISHED = "published-map-3D";
+    private static final String APPLICATION_3D_FULL = "geoportal-3D";
+    private static final String APPLICATION_3D_PUBLISHED = "embedded-3D";
     private static final String SUPPORTED_PROJECTIONS = "supportedProjections";
     private static final String EPSG_3857 = "EPSG:3857";
     private ViewService viewService = null;
