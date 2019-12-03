@@ -4,9 +4,7 @@ import fi.nls.oskari.db.BundleHelper;
 import fi.nls.oskari.domain.map.view.Bundle;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
-import fi.nls.oskari.map.view.AppSetupServiceMybatisImpl;
 import fi.nls.oskari.map.view.ViewException;
-import fi.nls.oskari.map.view.ViewService;
 import fi.nls.oskari.util.FlywayHelper;
 import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
 
@@ -22,10 +20,7 @@ public class V2_40__migrate_layer_list implements JdbcMigration {
     private static final String LAYERLIST_BUNDLE_NAME = "layerlist";
     private static final String LAYER_EDITOR_BUNDLE_NAME = "admin-layereditor";
 
-    private ViewService viewService = null;
-
     public void migrate(Connection connection) throws SQLException, ViewException {
-        viewService =  new AppSetupServiceMybatisImpl();
         createBundles(connection);
         updateDefaultAndUserViews(connection);
     }
