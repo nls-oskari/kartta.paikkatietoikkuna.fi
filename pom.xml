@@ -76,7 +76,6 @@
         <module>server-extension</module>
         <module>webapp-map</module>
         <module>webapp-landing</module>
-        <module>webapp-transport</module>
         <module>service-spatineo-serval</module>
         <module>service-coordtransform</module>
         <module>service-terrain-profile</module>
