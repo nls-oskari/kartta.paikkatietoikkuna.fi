@@ -2,7 +2,6 @@ package flyway.paikkis;
 
 import fi.nls.oskari.db.BundleHelper;
 import fi.nls.oskari.domain.map.view.Bundle;
-import fi.nls.oskari.domain.map.view.View;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.map.view.AppSetupServiceMybatisImpl;
