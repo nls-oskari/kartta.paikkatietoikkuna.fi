@@ -5,7 +5,7 @@ INSERT INTO oskari_maplayer(type, url,
                     attributes, opacity, srs_name, version)
 VALUES(
     'statslayer', 'http://geoserver.hel.fi/geoserver/wms',
-    'seutukartta:Seutu_tilastoalueet', (select id from oskari_maplayer_group where locale LIKE '%Yhteistyöaineistot%'),
+    'seutukartta:Seutu_tilastoalueet', (select id from oskari_maplayer_group where locale LIKE '%Helsingin kaupunki%'),
     '{ "en" : {
          "name":"Pääkaupunkiseudun tilastoaluejako"
        },"fi" : {
@@ -19,7 +19,7 @@ INSERT INTO oskari_maplayer(type, url,
                     attributes, opacity, srs_name, version)
 VALUES(
     'statslayer', 'http://geoserver.hel.fi/geoserver/wms',
-    'seutukartta:Helsinki_osa-alueet', (select id from oskari_maplayer_group where locale LIKE '%Yhteistyöaineistot%'),
+    'seutukartta:Helsinki_osa-alueet', (select id from oskari_maplayer_group where locale LIKE '%Helsingin kaupunki%'),
     '{ "en" : {
          "name":"Helsingin osa-alueet"
        },"fi" : {
@@ -34,7 +34,7 @@ INSERT INTO oskari_maplayer(type, url,
                     attributes, opacity, srs_name, version)
 VALUES(
     'statslayer', 'http://geoserver.hel.fi/geoserver/wms',
-    'hel:Helsinki_peruspiirit', (select id from oskari_maplayer_group where locale LIKE '%Yhteistyöaineistot%'),
+    'hel:Helsinki_peruspiirit', (select id from oskari_maplayer_group where locale LIKE '%Helsingin kaupunki%'),
     '{ "en" : {
          "name":"Helsingin peruspiirit"
        },"fi" : {
@@ -49,7 +49,7 @@ INSERT INTO oskari_maplayer(type, url,
                     attributes, opacity, srs_name, version)
 VALUES(
     'statslayer', 'http://geoserver.hel.fi/geoserver/wms',
-    'hel:Helsinki_suurpiirit', (select id from oskari_maplayer_group where locale LIKE '%Yhteistyöaineistot%'),
+    'hel:Helsinki_suurpiirit', (select id from oskari_maplayer_group where locale LIKE '%Helsingin kaupunki%'),
     '{ "en" : {
          "name":"Helsingin suurpiirit"
        },"fi" : {
