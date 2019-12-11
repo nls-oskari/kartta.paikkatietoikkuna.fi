@@ -4,10 +4,22 @@
 <jsp:useBean id="props" class="fi.nls.oskari.util.PropertyUtil"/>
 
 <!DOCTYPE html>
-<html>
+<html lang="${language}">
 <head>
     <title>${viewName}</title>
     <link rel="shortcut icon" href="/static/img/pti_icon.png" type="image/png" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <c:if test="${language == 'fi'}">
+        <meta name="Description" CONTENT="Paikkatietoikkuna on kansallinen paikkatietoportaali, joka esittelee paikkatietoaineistoja ja -palveluja sekä niiden hyödyntämismahdollisuuksia." />
+    </c:if>
+    <c:if test="${language == 'sv'}">
+        <meta name="Description" CONTENT="Paikkatietoikkuna är vår nationella geodataportal som presenterar geodatamaterial och relaterade tjänster samt hur man kan utnyttja dem." />
+    </c:if>
+    <c:if test="${language == 'en'}">
+        <meta name="Description" CONTENT="Paikkatietoikkuna is the national geoportal presenting spatial data and related services and the ways these can be used." />
+    </c:if>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="keywords" content="Paikkatieto, kartat, maps, GIS, geoportal, Oskari" />
 
     <!-- ############# css ################# -->
     <link
