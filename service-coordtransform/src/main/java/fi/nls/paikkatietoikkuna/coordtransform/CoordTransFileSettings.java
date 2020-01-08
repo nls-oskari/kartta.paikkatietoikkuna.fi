@@ -1,8 +1,5 @@
 package fi.nls.paikkatietoikkuna.coordtransform;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class CoordTransFileSettings {
     private String fileName;
     private String unit;
