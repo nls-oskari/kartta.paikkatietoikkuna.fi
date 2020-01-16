@@ -12,7 +12,7 @@ import java.util.List;
 public class V1_2__setup_dimension_change implements JdbcMigration {
 
     private static final String BUNDLE_NAME = "dimension-change";
-    private static final String APPLICATION_3D_NAME = "full-map-3D";
+    private static final String APPLICATION_3D_NAME = "geoportal-3D";
 
 
     public void migrate(Connection connection) throws SQLException {
