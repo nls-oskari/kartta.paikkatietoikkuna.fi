@@ -5,8 +5,8 @@ import java.util.List;
 import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
 import fi.nls.oskari.util.FlywayHelper;
 
-public class V1_9__add_shadow_bundle_to_3D_views implements JdbcMigration{
-	private static final String BUNDLE_ID = "shadow-plugin-3d";
+public class V1_9__add_time_control_bundle_to_3D_views implements JdbcMigration{
+	private static final String BUNDLE_ID = "time-control-3d";
 	private static final String APPLICATION_NAME = "geoportal-3D";
 	
 	@Override
