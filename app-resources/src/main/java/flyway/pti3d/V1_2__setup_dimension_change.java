@@ -16,7 +16,7 @@ public class V1_2__setup_dimension_change implements JdbcMigration {
 
 
     public void migrate(Connection connection) throws SQLException {
-        String uuid = FlywayHelper3D.get3DViewUuid(connection, APPLICATION_3D_NAME);
+        String uuid = FlywayHelper.getDefaultViewUuid(connection, APPLICATION_3D_NAME);
         List<Long> viewIds = FlywayHelper.getUserAndDefaultViewIds(connection);
 
         for (Long id : viewIds) {

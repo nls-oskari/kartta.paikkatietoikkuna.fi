@@ -16,8 +16,7 @@ public class V1_8__setup_dimension_change_to_2d implements JdbcMigration {
     private static final String APPLICATION_3D_NAME = "geoportal-3D";
 
     public void migrate(Connection connection) throws SQLException {
-        // with 2D application name gets default view's uuid if there is only on default view
-        String uuid = FlywayHelper3D.get3DViewUuid(connection, APPLICATION_2D_NAME);
+        String uuid = FlywayHelper.getDefaultViewUuid(connection, APPLICATION_2D_NAME);
         final List<Long> viewIds = FlywayHelper.getUserAndDefaultViewIds(connection, APPLICATION_3D_NAME);
 
         for (Long id : viewIds) {

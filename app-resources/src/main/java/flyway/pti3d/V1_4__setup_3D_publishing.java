@@ -28,7 +28,7 @@ public class V1_4__setup_3D_publishing implements JdbcMigration {
         View templateView = viewService.getViewWithConf(templateViewId);
 
         // Set it as the publication template for the default 3D view.
-        View geoportalView = viewService.getViewWithConfByUuId(FlywayHelper3D.get3DViewUuid(connection, APPLICATION_3D_NAME));
+        View geoportalView = viewService.getViewWithConfByUuId(FlywayHelper.getDefaultViewUuid(connection, APPLICATION_3D_NAME));
         geoportalView.getMetadata().put(METADATA_TEMPLATE_KEY, templateView.getUuid());
         viewService.updateView(geoportalView);
     }
