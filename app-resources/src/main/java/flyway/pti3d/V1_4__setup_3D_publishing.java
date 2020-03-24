@@ -4,6 +4,7 @@ import fi.nls.oskari.db.ViewHelper;
 import fi.nls.oskari.domain.map.view.View;
 import fi.nls.oskari.map.view.AppSetupServiceMybatisImpl;
 import fi.nls.oskari.map.view.ViewService;
+import fi.nls.oskari.util.FlywayHelper;
 import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
 
 import java.sql.Connection;
