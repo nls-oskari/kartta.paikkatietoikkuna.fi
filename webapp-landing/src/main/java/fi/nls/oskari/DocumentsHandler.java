@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,19 +33,19 @@ public class DocumentsHandler {
     /documents/108478/f22964f8-cc49-421e-bf2e-084d54be6a04
      */
     @RequestMapping("/documents/108478/{uuid}")
-    public void documentsPath(@PathVariable("uuid") String uuid, HttpServletResponse response) throws Exception {
-        writeDocument(uuid, response);
+    public void documentsPath(@PathVariable("uuid") String uuid, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        writeDocument(uuid, request, response);
     }
 
     /*
     /c/document_library/get_file?uuid=2c4a9801-b9e6-473f-aebe-58b9ab3d7935&groupId=108478
      */
     @RequestMapping("/c/document_library/get_file")
-    public void documentsParam(@RequestParam("uuid") String uuid, HttpServletResponse response) throws Exception {
-        writeDocument(uuid, response);
+    public void documentsParam(@RequestParam("uuid") String uuid, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        writeDocument(uuid, request, response);
     }
 
-    protected void writeDocument(String uuid, HttpServletResponse response) throws Exception {
+    protected void writeDocument(String uuid, HttpServletRequest request, HttpServletResponse response) throws Exception {
         LegacyDocument doc = docs.get(uuid);
         if (doc == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -62,7 +63,7 @@ public class DocumentsHandler {
             response.setHeader("Content-Disposition", "attachment; filename=\"" + doc.filename + "\"");
             response.setContentLength(is.available());
             FileCopyUtils.copy(is, response.getOutputStream());
-            LOG.info(doc.uuid);
+            LOG.info(doc.uuid + " referer: " + request.getHeader("referer"));
         }
     }
 
