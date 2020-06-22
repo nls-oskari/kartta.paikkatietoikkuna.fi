@@ -75,7 +75,7 @@ public class LegacyMapLinksHandler {
                                       HttpServletRequest request) throws Exception {
         String liferayMapId = liferay5MapLinks.get(mapId);
         if (liferayMapId == null) {
-            LOG.info(mapId + " referer: " + request.getHeader("referer"));
+            LOG.warn("Liferay 5 mapId not found " + mapId + " referer: " + request.getHeader("referer"));
             // not found -> go to landing page
             return new ModelAndView("redirect:/");
         }
