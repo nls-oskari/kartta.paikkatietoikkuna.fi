@@ -1,13 +1,14 @@
 package fi.nls.oskari;
 
 import fi.nls.oskari.domain.LegacyDocument;
-import org.springframework.http.HttpStatus;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.client.HttpClientErrorException;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
@@ -22,6 +23,8 @@ import static fi.nls.oskari.Helper.*;
  */
 @Controller
 public class DocumentsHandler {
+
+    private static final Logger LOG = LogManager.getLogger("Documents");
 
     private Map<String, LegacyDocument> docs = new HashMap<>();
 
@@ -42,23 +45,25 @@ public class DocumentsHandler {
     }
 
     protected void writeDocument(String uuid, HttpServletResponse response) throws Exception {
-        LegacyDocument doc = findDocument(uuid);
-        if(doc.mimeType != null) {
-            response.setContentType(doc.mimeType);
-        }
-        response.setHeader("Content-Disposition", "attachment; filename=\"" + doc.filename + "\"");
-        try (InputStream is = getClass().getResourceAsStream(doc.path)) {
-            response.setContentLength(is.available());
-            FileCopyUtils.copy(is, response.getOutputStream());
-        }
-    }
-
-    protected LegacyDocument findDocument(String uuid) throws Exception {
         LegacyDocument doc = docs.get(uuid);
         if (doc == null) {
-            throw new HttpClientErrorException(HttpStatus.NOT_FOUND);
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return;
         }
-        return doc;
+        try (InputStream is = getClass().getResourceAsStream(doc.path)) {
+            if (is == null) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                LOG.warn("Resource not found", doc.uuid);
+                return;
+            }
+            if (doc.mimeType != null) {
+                response.setContentType(doc.mimeType);
+            }
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + doc.filename + "\"");
+            response.setContentLength(is.available());
+            FileCopyUtils.copy(is, response.getOutputStream());
+            LOG.info(doc.uuid);
+        }
     }
 
     @PostConstruct
