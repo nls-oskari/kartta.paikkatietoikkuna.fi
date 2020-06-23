@@ -1,15 +1,17 @@
 package fi.nls.oskari;
 
 import fi.nls.oskari.domain.LegacyDocument;
-import org.springframework.http.HttpStatus;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.client.HttpClientErrorException;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,42 +25,46 @@ import static fi.nls.oskari.Helper.*;
 @Controller
 public class DocumentsHandler {
 
+    private static final Logger LOG = LogManager.getLogger("Documents");
+
     private Map<String, LegacyDocument> docs = new HashMap<>();
 
     /*
     /documents/108478/f22964f8-cc49-421e-bf2e-084d54be6a04
      */
     @RequestMapping("/documents/108478/{uuid}")
-    public void documentsPath(@PathVariable("uuid") String uuid, HttpServletResponse response) throws Exception {
-        writeDocument(uuid, response);
+    public void documentsPath(@PathVariable("uuid") String uuid, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        writeDocument(uuid, request, response);
     }
 
     /*
     /c/document_library/get_file?uuid=2c4a9801-b9e6-473f-aebe-58b9ab3d7935&groupId=108478
      */
     @RequestMapping("/c/document_library/get_file")
-    public void documentsParam(@RequestParam("uuid") String uuid, HttpServletResponse response) throws Exception {
-        writeDocument(uuid, response);
+    public void documentsParam(@RequestParam("uuid") String uuid, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        writeDocument(uuid, request, response);
     }
 
-    protected void writeDocument(String uuid, HttpServletResponse response) throws Exception {
-        LegacyDocument doc = findDocument(uuid);
-        if(doc.mimeType != null) {
-            response.setContentType(doc.mimeType);
-        }
-        response.setHeader("Content-Disposition", "attachment; filename=\"" + doc.filename + "\"");
-        try (InputStream is = getClass().getResourceAsStream(doc.path)) {
-            response.setContentLength(is.available());
-            FileCopyUtils.copy(is, response.getOutputStream());
-        }
-    }
-
-    protected LegacyDocument findDocument(String uuid) throws Exception {
+    protected void writeDocument(String uuid, HttpServletRequest request, HttpServletResponse response) throws Exception {
         LegacyDocument doc = docs.get(uuid);
         if (doc == null) {
-            throw new HttpClientErrorException(HttpStatus.NOT_FOUND);
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return;
         }
-        return doc;
+        try (InputStream is = getClass().getResourceAsStream(doc.path)) {
+            if (is == null) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                LOG.warn(doc.uuid + " resource not found");
+                return;
+            }
+            if (doc.mimeType != null) {
+                response.setContentType(doc.mimeType);
+            }
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + doc.filename + "\"");
+            response.setContentLength(is.available());
+            FileCopyUtils.copy(is, response.getOutputStream());
+            LOG.info(doc.uuid + " referer: " + request.getHeader("referer"));
+        }
     }
 
     @PostConstruct
