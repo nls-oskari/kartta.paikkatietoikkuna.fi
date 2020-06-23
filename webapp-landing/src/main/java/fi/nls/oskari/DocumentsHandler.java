@@ -54,7 +54,7 @@ public class DocumentsHandler {
         try (InputStream is = getClass().getResourceAsStream(doc.path)) {
             if (is == null) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                LOG.warn("Resource not found", doc.uuid);
+                LOG.warn(doc.uuid + " resource not found");
                 return;
             }
             if (doc.mimeType != null) {
