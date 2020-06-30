@@ -57,16 +57,14 @@
         <div class="col-md-5">
             <div class="panel sdi-panel">
                 <div class="panel-body">
-                    <p><a class="btn btn-default paikkislink-btn" href="<spring:message code="landing.cms.current.link"/>" role="button"><spring:message code="landing.cms.current.label"/><span class="arrow">&rsaquo;</span></a></p>
+                    <p><a class="btn btn-default paikkislink-btn" role="button"><spring:message code="landing.cms.current.label"/></a></p>
                     <a class="datalink" href="<spring:message code="landing.cms.inspire.link"/>"><spring:message code="landing.cms.inspire.label"/></a>
-                    <span class="arrow">&rsaquo;</span><br>
-                    <a class="datalink" href="<spring:message code="landing.cms.positio.link"/>"><spring:message code="landing.cms.positio.label"/></a>
-                    <span class="arrow">&rsaquo;</span><br>
-                    <a class="datalink" href="<spring:message code="landing.cms.osallistu.link"/>"><spring:message code="landing.cms.osallistu.label"/></a>
                     <span class="arrow">&rsaquo;</span><br>
                     <a class="datalink" href="<spring:message code="landing.cms.ohjaava.link"/>"><spring:message code="landing.cms.ohjaava.label"/></a>
                     <span class="arrow">&rsaquo;</span><br>
-                    <a class="datalink" href="<spring:message code="landing.cms.contact.link"/>"><spring:message code="landing.cms.contact.label"/></a>
+                    <a class="datalink" href="<spring:message code="landing.cms.osallistu.link"/>"><spring:message code="landing.cms.osallistu.label"/></a>
+                    <span class="arrow">&rsaquo;</span><br>
+                    <a class="datalink" href="<spring:message code="landing.cms.positio.link"/>"><spring:message code="landing.cms.positio.label"/></a>
                     <span class="arrow">&rsaquo;</span>
                 </div>
                 <div class="rss-panel">
