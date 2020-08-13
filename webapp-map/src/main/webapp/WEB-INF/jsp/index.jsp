@@ -4,7 +4,7 @@
 <jsp:useBean id="props" class="fi.nls.oskari.util.PropertyUtil"/>
 
 <!DOCTYPE html>
-<html lang="${language}">
+<html lang="${language}" xmlns:og="http://ogp.me/ns#" >
 <head>
     <title>${viewName}</title>
     <link rel="shortcut icon" href="/static/img/pti_icon.png" type="image/png" />
@@ -20,6 +20,10 @@
     </c:if>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="keywords" content="Paikkatieto, kartat, maps, GIS, geoportal, Oskari" />
+    <meta property="og:image" content="${props.getOptional('oskari.domain')}/static/paikkis.png" />
+    <meta property="og:image:width" content="1140" />
+    <meta property="og:image:height" content="1140" />
+
 
     <!-- ############# css ################# -->
     <link

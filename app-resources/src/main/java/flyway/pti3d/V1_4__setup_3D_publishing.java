@@ -4,6 +4,7 @@ import fi.nls.oskari.db.ViewHelper;
 import fi.nls.oskari.domain.map.view.View;
 import fi.nls.oskari.map.view.AppSetupServiceMybatisImpl;
 import fi.nls.oskari.map.view.ViewService;
+import fi.nls.oskari.util.FlywayHelper;
 import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
 
 import java.sql.Connection;
@@ -28,7 +29,7 @@ public class V1_4__setup_3D_publishing implements JdbcMigration {
         View templateView = viewService.getViewWithConf(templateViewId);
 
         // Set it as the publication template for the default 3D view.
-        View geoportalView = viewService.getViewWithConfByUuId(FlywayHelper3D.get3DViewUuid(connection, APPLICATION_3D_NAME));
+        View geoportalView = viewService.getViewWithConfByUuId(FlywayHelper.getDefaultViewUuid(connection, APPLICATION_3D_NAME));
         geoportalView.getMetadata().put(METADATA_TEMPLATE_KEY, templateView.getUuid());
         viewService.updateView(geoportalView);
     }

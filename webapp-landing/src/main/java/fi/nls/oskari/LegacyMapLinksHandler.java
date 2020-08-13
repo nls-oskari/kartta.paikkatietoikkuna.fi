@@ -1,6 +1,9 @@
 package fi.nls.oskari;
 
 import fi.nls.oskari.domain.LegacyLink;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +23,8 @@ import static fi.nls.oskari.Helper.getMapper;
  */
 @Controller
 public class LegacyMapLinksHandler {
+
+    private static final Logger LOG = LogManager.getLogger("PublishedMaps");
 
     private List<LegacyLink> links = new ArrayList<>();
     private Map<String, String> liferay5MapLinks = new HashMap<>();
@@ -42,16 +47,25 @@ public class LegacyMapLinksHandler {
 
     @RequestMapping("/published/{lang}/{mapId}")
     public ModelAndView embeddedMaps(@PathVariable("lang") String lang, @PathVariable("mapId") String mapId, HttpServletRequest request) throws Exception {
+        LOG.info(mapId + " referer: " + request.getHeader("referer"));
         String url = "https://kartta.paikkatietoikkuna.fi/?lang=" + lang + "&";
-        if(mapId.matches("\\d+")) {
+        if (isInteger(mapId)) {
             // digits -> use viewId
             url = url + "viewId=" + mapId;
         } else {
             // default to uuid
             url = url + "uuid=" + mapId;
         }
-        // not found -> go to landing page
         return new ModelAndView("redirect:" + attachQuery(url, request.getQueryString()));
+    }
+
+    private static boolean isInteger(String str) {
+        try {
+            Long.parseUnsignedLong(str);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     // /widget/web/fi/julkaisijankartta/-/MapPublished_WAR_mapportlet?id=442
@@ -59,7 +73,13 @@ public class LegacyMapLinksHandler {
     public ModelAndView liferay5embeddedMaps(@RequestParam("id") String mapId,
                                       @RequestParam(value = "lang", required = false, defaultValue = "fi") String lang,
                                       HttpServletRequest request) throws Exception {
-        return embeddedMaps(lang, liferay5MapLinks.get(mapId), request);
+        String liferayMapId = liferay5MapLinks.get(mapId);
+        if (liferayMapId == null) {
+            LOG.warn("Liferay 5 mapId not found " + mapId + " referer: " + request.getHeader("referer"));
+            // not found -> go to landing page
+            return new ModelAndView("redirect:/");
+        }
+        return embeddedMaps(lang, liferayMapId, request);
     }
 
     @RequestMapping("/web/**")
