@@ -54,9 +54,7 @@ public class OskariPreAuthenticationSecurityConfig extends WebSecurityConfigurer
         // use authorization for ALL requests
         http.authorizeRequests()
                 // IF accessing /auth -> require authentication (== headers)
-                .antMatchers(authorizeUrl).authenticated()
-                // Requests can be done anonymously
-                .anyRequest().permitAll();
+                .antMatchers(authorizeUrl).authenticated();
 
         // Add the preauth filter listening to /auth paths
         http
