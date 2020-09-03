@@ -8,12 +8,12 @@ import fi.nls.oskari.map.layer.OskariLayerService;
 import fi.nls.oskari.service.OskariComponentManager;
 import fi.nls.oskari.service.ServiceException;
 import fi.nls.oskari.service.UserService;
-import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
+import org.flywaydb.core.api.migration.BaseJavaMigration;
+import org.flywaydb.core.api.migration.Context;
 import org.oskari.permissions.PermissionService;
 import org.oskari.permissions.PermissionServiceMybatisImpl;
 import org.oskari.permissions.model.*;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,11 +21,10 @@ import java.util.stream.Collectors;
 /**
  * Inserts viewlayer permission for the kunta & seutukunta layers used as regionsets for the new thematic maps
  */
-public class V1_36__link_roles_to_hki_layers implements JdbcMigration {
+public class V1_36__link_roles_to_hki_layers extends BaseJavaMigration {
     private static final Logger LOG = LogFactory.getLogger(V1_36__link_roles_to_hki_layers.class);
 
-    public void migrate(Connection connection)
-            throws SQLException {
+    public void migrate(Context context) throws SQLException {
         PermissionService service = new PermissionServiceMybatisImpl();
         for(String layerId : getLayerIds()) {
             Resource resToUpdate;

@@ -1,10 +1,10 @@
 package flyway.ptistats;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
+import org.flywaydb.core.api.migration.BaseJavaMigration;
+import org.flywaydb.core.api.migration.Context;
 import org.json.JSONObject;
 
 import fi.nls.oskari.domain.map.OskariLayer;
@@ -12,7 +12,7 @@ import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.util.JSONHelper;
 
-public class V1_20__use_resources_for_thematic_map_layers implements JdbcMigration {
+public class V1_20__use_resources_for_thematic_map_layers extends BaseJavaMigration {
 
     private static final Logger LOG = LogFactory.getLogger(V1_20__use_resources_for_thematic_map_layers.class);
 
@@ -51,11 +51,11 @@ public class V1_20__use_resources_for_thematic_map_layers implements JdbcMigrati
 
     }
 
-    public void migrate(Connection connection) throws SQLException {
+    public void migrate(Context context) throws SQLException {
         String sql = "UPDATE oskari_maplayer "
                 + "SET attributes = ? "
                 + "WHERE type = ? AND name = ?";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = context.getConnection().prepareStatement(sql)) {
             ps.setString(2, OskariLayer.TYPE_STATS);
             for (ResourceStatLayer layer : ResourceStatLayer.values()) {
                 String attributes = layer.getAttributes().toString();
