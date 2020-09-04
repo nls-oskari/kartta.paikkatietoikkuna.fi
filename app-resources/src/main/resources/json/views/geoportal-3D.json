@@ -84,17 +84,16 @@
       }
     },
     { "id": "drawtools" },
-    { "id" : "divmanazer" },
+    { "id": "divmanazer" },
     { "id": "toolbar" },
-    { "id" : "statehandler" },
+    { "id": "statehandler" },
     {
       "id": "infobox",
       "config": { "adaptable": true }
     },
     { "id" : "search" },
     {
-      "id" : "layerlist",
-      "config": { "showSearchSuggestions": true }
+      "id" : "layerlist"
     },
     { "id" : "maplegend" },
     { "id" : "publisher2" },
@@ -153,7 +152,6 @@
       "id" : "coordinatetool",
       "config": {
         "isReverseGeocode": true,
-        "reverseGeocodingIds": "WHAT3WORDS_CHANNEL",
         "supportedProjections": [
           "EPSG:3067",
           "NLSFI:etrs_gk",
@@ -201,6 +199,8 @@
     { "id" : "terrain-profile" },
     { "id" : "telemetry" },
     { "id" : "coordinatetransformation" },
-    { "id" : "dimension-change" }
+    { "id" : "dimension-change" },
+    { "id" : "camera-controls-3d" },
+    { "id" : "time-control-3d" }
   ]
 }
