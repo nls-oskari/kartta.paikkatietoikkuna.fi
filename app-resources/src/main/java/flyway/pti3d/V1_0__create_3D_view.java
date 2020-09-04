@@ -22,6 +22,6 @@ public class V1_0__create_3D_view extends BaseJavaMigration {
         b.setName("dimension-change");
         BundleHelper.registerBundle(b, connection);
 
-        AppSetupHelper.create(connection, "paikkis-3D.json");
+        AppSetupHelper.create(connection, "geoportal-3D.json");
     }
 }

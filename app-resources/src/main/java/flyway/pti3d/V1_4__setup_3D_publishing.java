@@ -17,7 +17,7 @@ import java.sql.SQLException;
  */
 public class V1_4__setup_3D_publishing extends BaseJavaMigration {
 
-    private static final String TEMPLATE_JSON = "paikkis-3D-publish-template.json";
+    private static final String TEMPLATE_JSON = "publish-template-3D.json";
     private static final String METADATA_TEMPLATE_KEY = "publishTemplateUuid";
     private static final String APPLICATION_3D_NAME = "geoportal-3D";
 

@@ -2,7 +2,8 @@ package flyway.paikkis;
 
 import fi.nls.oskari.domain.map.view.Bundle;
 import fi.nls.oskari.util.JSONHelper;
-import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
+import org.flywaydb.core.api.migration.BaseJavaMigration;
+import org.flywaydb.core.api.migration.Context;
 import org.json.JSONObject;
 
 import java.sql.Connection;
@@ -14,10 +15,10 @@ import java.util.ArrayList;
 /**
  * Created by SMAKINEN on 26.5.2017.
  */
-public class V2_5__Update_promote_bundle_urls implements JdbcMigration {
+public class V2_5__Update_promote_bundle_urls extends BaseJavaMigration {
 
-    public void migrate(Connection connection)
-            throws Exception {
+    public void migrate(Context context) throws Exception {
+        Connection connection = context.getConnection();
         final ArrayList<Bundle> bundles = getBundles(connection, getBundle());
         for (Bundle bundle : bundles) {
             final String config = getModifiedConfig(bundle.getConfig());

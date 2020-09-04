@@ -2,8 +2,10 @@ package flyway.paikkis;
 
 import fi.nls.oskari.domain.map.view.Bundle;
 import fi.nls.oskari.view.modifier.ViewModifier;
-import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
+import org.flywaydb.core.api.migration.BaseJavaMigration;
+import org.flywaydb.core.api.migration.Context;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,10 +15,10 @@ import java.util.ArrayList;
 /**
  * Created by SMAKINEN on 26.5.2017.
  */
-public abstract class ConfigMigration implements JdbcMigration {
+public abstract class ConfigMigration extends BaseJavaMigration {
 
-    public void migrate(Connection connection)
-            throws Exception {
+    public void migrate(Context context) throws Exception {
+        Connection connection = context.getConnection();
         final ArrayList<Bundle> bundles = getBundles(connection, getBundle());
         for (Bundle bundle : bundles) {
             final String config = getModifiedConfig(bundle.getConfig());

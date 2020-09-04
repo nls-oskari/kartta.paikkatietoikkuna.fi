@@ -4,7 +4,8 @@ import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.util.ConversionHelper;
 import fi.nls.oskari.util.JSONHelper;
-import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
+import org.flywaydb.core.api.migration.BaseJavaMigration;
+import org.flywaydb.core.api.migration.Context;
 import org.json.JSONObject;
 
 import java.sql.Connection;
@@ -17,13 +18,14 @@ import java.util.*;
  * Removes config for keys "logInUrl", "loginUrl" and "registerUrl" from bundles "analyse", "personaldata" and "publisher2".
  * Since we don't need to have per appsetup configs, but can use a common login/registration url config
  */
-public class V2_28__remove_login_register_configs_from_appsetups implements JdbcMigration {
+public class V2_28__remove_login_register_configs_from_appsetups extends BaseJavaMigration {
 
     private static final Logger LOG = LogFactory.getLogger(V2_28__remove_login_register_configs_from_appsetups.class);
     private static final Set<String> BUNDLES = ConversionHelper.asSet("analyse", "personaldata", "publisher2");
     private static final Set<String> CONFIG_KEYS = ConversionHelper.asSet("logInUrl", "loginUrl", "registerUrl");
 
-    public void migrate(Connection conn) throws Exception {
+    public void migrate(Context context) throws Exception {
+        Connection conn = context.getConnection();
         for(String bundleName : BUNDLES) {
             Integer id = getBundleId(conn, bundleName);
             if (id == null) {

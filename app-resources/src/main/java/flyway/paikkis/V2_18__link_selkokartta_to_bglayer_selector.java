@@ -2,7 +2,8 @@ package flyway.paikkis;
 
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
-import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
+import org.flywaydb.core.api.migration.BaseJavaMigration;
+import org.flywaydb.core.api.migration.Context;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,19 +16,19 @@ import java.sql.SQLException;
 
 // Note to English speakers: "Selkokartta" is a background layer for cognitively impaired users
 
-public class V2_18__link_selkokartta_to_bglayer_selector implements JdbcMigration {
+public class V2_18__link_selkokartta_to_bglayer_selector extends BaseJavaMigration {
     private final Logger LOG = LogFactory.getLogger(this.getClass());
 
     private static final String PLUGIN_ID = "Oskari.mapframework.bundle.mapmodule.plugin.BackgroundLayerSelectionPlugin";
 
-    public void migrate(Connection connection) throws Exception {
-        Integer selkokarttaId = getSelkoLayer(connection);
+    public void migrate(Context context) throws Exception {
+        Integer selkokarttaId = getSelkoLayer(context.getConnection());
         if (selkokarttaId == null) {
             LOG.warn("No Selkokartta layer found, skipping rest of migration!");
             return;
         }
 
-        updateViewsWithBaselayerSelector(connection, selkokarttaId);
+        updateViewsWithBaselayerSelector(context.getConnection(), selkokarttaId);
     }
 
     private Integer getSelkoLayer(Connection conn) throws SQLException {

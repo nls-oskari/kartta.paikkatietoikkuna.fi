@@ -13,8 +13,6 @@
     "taustakartta.json"
   ],
   "bundles": [{
-    "id": "openlayers-default-theme"
-  }, {
     "id": "mapfull",
     "config": {
 		"mapOptions": {
@@ -87,43 +85,6 @@
       "north": 7250000,
       "selectedLayers": [],
       "zoom": 0
-    },
-    "startup": {
-      "bundlename": "mapfull",
-      "metadata": {
-        "Import-Bundle": {
-          "oskariui": {
-            "bundlePath": "/Oskari/packages/framework/bundle/"
-          },
-          "mapwmts": {
-            "bundlePath": "/Oskari/packages/framework/bundle/"
-          },
-          "mapwfs2": {
-            "bundlePath": "/Oskari/packages/framework/bundle/"
-          },
-          "mapuserlayers": {
-            "bundlePath": "/Oskari/packages/framework/bundle/"
-          },
-          "mapstats": {
-            "bundlePath": "/Oskari/packages/framework/bundle/"
-          },
-          "mapmyplaces": {
-            "bundlePath": "/Oskari/packages/framework/bundle/"
-          },
-          "mapmodule-plugin": {
-            "bundlePath": "/Oskari/packages/framework/bundle/"
-          },
-          "ui-components": {
-            "bundlePath": "/Oskari/packages/framework/bundle/"
-          },
-          "mapanalysis": {
-            "bundlePath": "/Oskari/packages/framework/bundle/"
-          },
-          "mapfull": {
-            "bundlePath": "/Oskari/packages/framework/bundle/"
-          }
-        }
-      }
     }
   }, {
     "id": "divmanazer"
@@ -223,53 +184,7 @@
   }, {
     "id": "backendstatus"
   }, {
-    "id": "printout",
-    "config" : {
-      "legend": {
-        "printAreaDefault": {
-          "fontWeight": "bold",
-          "fontColor": "#000000",
-          "fillColor": "#FFFFFF",
-          "fontFamily": "Liberation Sans",
-          "fontSize": "12px",
-          "strokeColor": "#00FF00",
-          "fillOpacity": 0.2,
-          "strokeWidth": 1,
-          "strokeOpacity": 1
-        },
-        "colorBoxDefault": {
-          "fillColor": "${color}",
-          "labelXOffset": 0,
-          "label": "${name}",
-          "fontFamily": "Liberation Sans",
-          "labelAlign": "l",
-          "fontSize": "10px",
-          "strokeColor": "#000000",
-          "labelYOffset": 5,
-          "fillOpacity": 1,
-          "strokeWidth": 1,
-          "strokeOpacity": 1
-        },
-        "legendBoxDefault": {
-          "fontWeight": "bold",
-          "fontColor": "#000000",
-          "fillColor": "#FFFFFF",
-          "label": "${name}",
-          "fontFamily": "Liberation Sans",
-          "labelAlign": "l",
-          "fontSize": "12px",
-          "strokeColor": "#00FF00",
-          "fillOpacity": 0.7,
-          "strokeWidth": 0,
-          "strokeOpacity": 1
-        },
-        "general": {
-          "legendRowHeight": 0.02,
-          "legendWidth": 0.27,
-          "charsInrow": 32
-        }
-      }
-    }
+    "id": "printout"
   }, {
     "id": "featuredata2",
     "config" : {

@@ -3,7 +3,8 @@ package flyway.paikkis;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.util.JSONHelper;
-import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
+import org.flywaydb.core.api.migration.BaseJavaMigration;
+import org.flywaydb.core.api.migration.Context;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,11 +19,12 @@ import java.util.List;
 /**
  * Removes all references of layers with IDs starting with "base_" as they have been replaced with actual ids in selected layers.
  */
-public class V2_29__external_id_removal_from_configs implements JdbcMigration {
+public class V2_29__external_id_removal_from_configs extends BaseJavaMigration {
 
     private static final Logger LOG = LogFactory.getLogger(V2_29__external_id_removal_from_configs.class);
 
-    public void migrate(Connection conn) throws Exception {
+    public void migrate(Context context) throws Exception {
+        Connection conn = context.getConnection();
         Integer mapfullBundleId = getMapfullBundleId(conn);
         if (mapfullBundleId == null) {
             LOG.info("Mapfull bundle not found");

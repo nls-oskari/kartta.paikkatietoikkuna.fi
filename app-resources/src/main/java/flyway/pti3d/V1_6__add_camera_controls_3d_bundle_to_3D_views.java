@@ -7,22 +7,23 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
+import org.flywaydb.core.api.migration.BaseJavaMigration;
+import org.flywaydb.core.api.migration.Context;
 
-import fi.nls.oskari.util.FlywayHelper;
+import org.oskari.helpers.AppSetupHelper;
 
-public class V1_6__add_camera_controls_3d_bundle_to_3D_views implements JdbcMigration{
+public class V1_6__add_camera_controls_3d_bundle_to_3D_views extends BaseJavaMigration {
 
 	private static final String BUNDLE_ID = "camera-controls-3d";
-	
-	@Override
-	public void migrate(Connection connection) throws Exception {
+
+	public void migrate(Context context) throws SQLException {
+		Connection connection = context.getConnection();
 		final List<Long> views = get3DApplicationViewIds(connection);
 		for (Long viewId : views) {
-			if (FlywayHelper.viewContainsBundle(connection, BUNDLE_ID, viewId)) {
+			if (AppSetupHelper.appContainsBundle(connection, viewId, BUNDLE_ID)) {
 				continue;
 			}
-			FlywayHelper.addBundleWithDefaults(connection, viewId, BUNDLE_ID);
+			AppSetupHelper.addBundleToApp(connection, viewId, BUNDLE_ID);
 		}
 	}
 	
