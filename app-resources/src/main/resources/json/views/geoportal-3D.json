@@ -153,6 +153,7 @@
       "config": {
         "isReverseGeocode": true,
         "supportedProjections": [
+          "EPSG:3857",
           "EPSG:3067",
           "NLSFI:etrs_gk",
           "NLSFI:ykj",
@@ -188,6 +189,9 @@
           },
           "EPSG:3067": {
             "decimals": 0
+          },
+          "EPSG:3857": {
+            "decimals": 0
           }
         }
       }
@@ -199,7 +203,6 @@
     { "id" : "terrain-profile" },
     { "id" : "telemetry" },
     { "id" : "coordinatetransformation" },
-    { "id" : "dimension-change" },
     { "id" : "camera-controls-3d" },
     { "id" : "time-control-3d" }
   ]

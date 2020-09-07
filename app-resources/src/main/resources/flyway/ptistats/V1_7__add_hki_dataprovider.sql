@@ -6,12 +6,12 @@ VALUES ('{"fi":{"name":"Helsingin kaupunki"},"en":{"name":"City of Helsinki"}}"'
 
 -- Add layers
 INSERT INTO oskari_maplayer(type, url,
-                    name, groupId,
+                    name, dataprovider_id,
                     locale,
                     attributes, opacity, srs_name, version)
 VALUES(
     'statslayer', 'http://geoserver.hel.fi/geoserver/wms',
-    'seutukartta:Seutu_suuralueet', (select id from oskari_layergroup where locale LIKE '%Yhteistyöaineistot%'),
+    'seutukartta:Seutu_suuralueet', (select id from oskari_dataprovider where locale LIKE '%Yhteistyöaineistot%'),
     '{ "en" : {
          "name":"Pääkaupunkiseudun suuraluejako"
        },"fi" : {
@@ -21,12 +21,12 @@ VALUES(
 
 
 INSERT INTO oskari_maplayer(type, url,
-                    name, groupId,
+                    name, dataprovider_id,
                     locale,
                     attributes, opacity, srs_name, version)
 VALUES(
     'statslayer', 'http://geoserver.hel.fi/geoserver/wms',
-    'seutukartta:Seutu_pienalueet', (select id from oskari_layergroup where locale LIKE '%Yhteistyöaineistot%'),
+    'seutukartta:Seutu_pienalueet', (select id from oskari_dataprovider where locale LIKE '%Yhteistyöaineistot%'),
     '{ "en" : {
          "name":"Pääkaupunkiseudun pienaluejako"
        },"fi" : {
@@ -36,14 +36,14 @@ VALUES(
 
 -- Link layers to datasource
 INSERT INTO
-    oskari_statistical_layer(datasource_id, layer_id)
+    oskari_statistical_datasource_regionsets(datasource_id, layer_id)
 VALUES(
     (SELECT id FROM oskari_statistical_datasource
         WHERE locale like '%Helsingin kaupunki%'),
     (SELECT id FROM oskari_maplayer WHERE type='statslayer' AND name = 'seutukartta:Seutu_suuralueet'));
 
 INSERT INTO
-    oskari_statistical_layer(datasource_id, layer_id)
+    oskari_statistical_datasource_regionsets(datasource_id, layer_id)
 VALUES(
     (SELECT id FROM oskari_statistical_datasource
         WHERE locale like '%Helsingin kaupunki%'),

@@ -1,7 +1,7 @@
 {
 	"srs_name": "EPSG:3067",
 	"type":"wmtslayer",
-    "url":"http://karttamoottori.maanmittauslaitos.fi/maasto/wmts",
+    "url":"https://karttamoottori.maanmittauslaitos.fi/maasto/wmts/1.0.0/WMTSCapabilities.xml",
     "name":"ortokuva",
     "organization": "Maanmittauslaitos",
     "inspiretheme": "Ortoilmakuvat",

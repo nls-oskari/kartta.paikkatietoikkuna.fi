@@ -53,14 +53,15 @@ public class V1_20__use_resources_for_thematic_map_layers extends BaseJavaMigrat
 
     public void migrate(Context context) throws SQLException {
         String sql = "UPDATE oskari_maplayer "
-                + "SET attributes = ? "
+                + "SET attributes = ?, url = ? "
                 + "WHERE type = ? AND name = ?";
         try (PreparedStatement ps = context.getConnection().prepareStatement(sql)) {
-            ps.setString(2, OskariLayer.TYPE_STATS);
+            ps.setString(3, OskariLayer.TYPE_STATS);
             for (ResourceStatLayer layer : ResourceStatLayer.values()) {
                 String attributes = layer.getAttributes().toString();
                 ps.setString(1, attributes);
-                ps.setString(3, layer.layerName);
+                ps.setString(2, layer.getFeaturesUrl());
+                ps.setString(4, layer.layerName);
                 LOG.debug("Executing:", ps.toString());
                 int i = ps.executeUpdate();
                 LOG.debug("Update result:", i);
