@@ -1,6 +1,5 @@
 package flyway.pti;
 
-import fi.nls.oskari.domain.Role;
 import fi.nls.oskari.domain.map.view.Bundle;
 import fi.nls.oskari.domain.map.view.ViewTypes;
 import fi.nls.oskari.util.PropertyUtil;
