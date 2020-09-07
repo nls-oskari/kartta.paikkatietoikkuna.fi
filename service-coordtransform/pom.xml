@@ -11,21 +11,21 @@
     <name>CoordTransform Service</name>
     <dependencies>
         <dependency>
-            <groupId>fi.nls.oskari.service</groupId>
-            <artifactId>oskari-map</artifactId>
+            <groupId>org.oskari</groupId>
+            <artifactId>service-map</artifactId>
         </dependency>
         <dependency>
-            <groupId>fi.nls.oskari.service</groupId>
-            <artifactId>oskari-control</artifactId>
+            <groupId>org.oskari</groupId>
+            <artifactId>service-control</artifactId>
         </dependency>
         <dependency>
-            <groupId>fi.nls.oskari</groupId>
+            <groupId>org.oskari</groupId>
             <artifactId>servlet-map</artifactId>
         </dependency>
         <dependency>
             <groupId>fi.nls.oskari.extras</groupId>
             <artifactId>nlsfi-projections</artifactId>
-            <version>1.1</version>
+            <version>1.2-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

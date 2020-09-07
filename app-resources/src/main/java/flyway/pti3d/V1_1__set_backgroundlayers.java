@@ -15,7 +15,8 @@ import fi.nls.oskari.util.JSONHelper;
 import fi.nls.oskari.wmts.WMTSCapabilitiesParser;
 import fi.nls.oskari.wmts.domain.WMTSCapabilities;
 import fi.nls.oskari.wmts.domain.WMTSCapabilitiesLayer;
-import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
+import org.flywaydb.core.api.migration.BaseJavaMigration;
+import org.flywaydb.core.api.migration.Context;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,7 +30,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class V1_1__set_backgroundlayers implements JdbcMigration {
+public class V1_1__set_backgroundlayers extends BaseJavaMigration {
 
     private static final Logger LOG = LogFactory.getLogger(V1_1__set_backgroundlayers.class);
     private static final String APPLICATION_3D_NAME = "geoportal-3D";
@@ -41,7 +42,8 @@ public class V1_1__set_backgroundlayers implements JdbcMigration {
     private ViewService viewService = null;
     private CapabilitiesCacheService capabilitiesService = null;
 
-    public void migrate(Connection connection) throws SQLException {
+    public void migrate(Context context) throws SQLException {
+        Connection connection = context.getConnection();
         viewService =  new AppSetupServiceMybatisImpl();
         capabilitiesService = OskariComponentManager.getComponentOfType(CapabilitiesCacheService.class);
         List<OskariLayer> layers = getNlsBaseLayers(connection);

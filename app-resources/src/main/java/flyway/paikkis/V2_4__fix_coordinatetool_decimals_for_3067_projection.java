@@ -6,7 +6,8 @@ import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.map.view.AppSetupServiceMybatisImpl;
 import fi.nls.oskari.map.view.ViewService;
-import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
+import org.flywaydb.core.api.migration.BaseJavaMigration;
+import org.flywaydb.core.api.migration.Context;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -20,7 +21,7 @@ import java.util.List;
 /**
  * Created by MKUOSMANEN on 14.6.2017.
  */
-public class V2_4__fix_coordinatetool_decimals_for_3067_projection implements JdbcMigration {
+public class V2_4__fix_coordinatetool_decimals_for_3067_projection extends BaseJavaMigration {
     private static final Logger LOG = LogFactory.getLogger(V2_4__fix_coordinatetool_decimals_for_3067_projection.class);
     private static final String BUNDLE_COORDINATETOOL = "coordinatetool";
     private static final String PROJECTION_SHOW_FORMAT = "projectionShowFormat";
@@ -31,10 +32,10 @@ public class V2_4__fix_coordinatetool_decimals_for_3067_projection implements Jd
     private ViewService service = null;
     private int updatedViewCount = 0;
 
-    public void migrate(Connection connection) throws Exception{
+    public void migrate(Context context) throws Exception {
         service =  new AppSetupServiceMybatisImpl();
         try {
-            updateViews(connection);
+            updateViews(context.getConnection());
         }
         finally {
             LOG.info("Updated views:", updatedViewCount);

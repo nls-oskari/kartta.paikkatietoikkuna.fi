@@ -3,7 +3,8 @@ package flyway.ptistats;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.util.JSONHelper;
-import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
+import org.flywaydb.core.api.migration.BaseJavaMigration;
+import org.flywaydb.core.api.migration.Context;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,11 +20,12 @@ import java.util.List;
  * As Tilastokeskus PXWeb config is changed to parse a PX-table variables into indicators -> any saved indicator refs
  * need to be migrated to match the config.
  */
-public class V1_23__update_tk_selected_indicators implements JdbcMigration {
+public class V1_23__update_tk_selected_indicators extends BaseJavaMigration {
 
     private static final Logger LOG = LogFactory.getLogger(V1_23__update_tk_selected_indicators.class);
 
-    public void migrate(Connection conn) throws SQLException {
+    public void migrate(Context context) throws SQLException {
+        Connection conn = context.getConnection();
         Integer statsgridBundleId = getStatsgridBundleId(conn);
         if (statsgridBundleId == null) {
             LOG.info("Statsgrid bundle not found");

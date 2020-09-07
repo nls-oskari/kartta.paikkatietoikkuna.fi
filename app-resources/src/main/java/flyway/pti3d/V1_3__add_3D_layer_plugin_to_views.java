@@ -7,17 +7,18 @@ import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.map.view.AppSetupServiceMybatisImpl;
 import fi.nls.oskari.map.view.ViewException;
 import fi.nls.oskari.map.view.ViewService;
-import fi.nls.oskari.util.FlywayHelper;
 import fi.nls.oskari.util.JSONHelper;
-import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
+import org.flywaydb.core.api.migration.BaseJavaMigration;
+import org.flywaydb.core.api.migration.Context;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.oskari.helpers.AppSetupHelper;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-public class V1_3__add_3D_layer_plugin_to_views implements JdbcMigration {
+public class V1_3__add_3D_layer_plugin_to_views extends BaseJavaMigration {
 
     private static final Logger LOG = LogFactory.getLogger(V1_1__set_backgroundlayers.class);
     private static final String MAP_BUNDLE_NAME = "mapfull";
@@ -25,13 +26,13 @@ public class V1_3__add_3D_layer_plugin_to_views implements JdbcMigration {
 
     private ViewService viewService = null;
 
-    public void migrate(Connection connection) throws SQLException, ViewException {
+    public void migrate(Context context) throws SQLException, ViewException {
         viewService =  new AppSetupServiceMybatisImpl();
-        updateDefaultAndUserViews(connection);
+        updateDefaultAndUserViews(context.getConnection());
     }
 
     private void updateDefaultAndUserViews(Connection connection) throws SQLException, ViewException {
-        List<Long> viewIds = FlywayHelper.getUserAndDefaultViewIds(connection);
+        List<Long> viewIds = AppSetupHelper.getSetupsForUserAndDefaultType(connection);
         for(Long viewId : viewIds) {
             View modifyView = viewService.getViewWithConf(viewId);
             Bundle mapBundle = modifyView.getBundleByName(MAP_BUNDLE_NAME);

@@ -6,7 +6,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
+import org.flywaydb.core.api.migration.BaseJavaMigration;
+import org.flywaydb.core.api.migration.Context;
 
 import fi.nls.oskari.domain.Role;
 import fi.nls.oskari.domain.User;
@@ -22,7 +23,7 @@ import fi.nls.oskari.service.UserService;
 /**
  * @see V1_20__use_resources_for_thematic_map_layers
  */
-public class V1_21__link_roles_to_resource_based_thematic_map_layers implements JdbcMigration {
+public class V1_21__link_roles_to_resource_based_thematic_map_layers extends BaseJavaMigration {
 
     private static final Logger LOG = LogFactory.getLogger(V1_21__link_roles_to_resource_based_thematic_map_layers.class);
 
@@ -53,7 +54,8 @@ public class V1_21__link_roles_to_resource_based_thematic_map_layers implements 
 
     }
 
-    public void migrate(Connection connection) throws SQLException {
+    public void migrate(Context context) throws SQLException {
+        Connection connection = context.getConnection();
         ResourceStatLayer[] layers = ResourceStatLayer.values();
         updateLayerUrls(connection, layers);
         updatePermissions(connection, layers);

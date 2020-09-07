@@ -9,6 +9,8 @@ import fi.nls.oskari.map.view.ViewException;
 import fi.nls.oskari.map.view.ViewService;
 import fi.nls.oskari.util.JSONHelper;
 
+import org.flywaydb.core.api.migration.BaseJavaMigration;
+import org.flywaydb.core.api.migration.Context;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
@@ -19,9 +21,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.ArrayList;
-import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
 
-public class V1_5__add_3857_to_coordinatetool implements JdbcMigration {
+public class V1_5__add_3857_to_coordinatetool extends BaseJavaMigration {
 
     private static final Logger LOG = LogFactory.getLogger(V1_5__add_3857_to_coordinatetool.class);
     private static final String BUNDLE_NAME = "coordinatetool";
@@ -31,9 +32,9 @@ public class V1_5__add_3857_to_coordinatetool implements JdbcMigration {
     private static final String EPSG_3857 = "EPSG:3857";
     private ViewService viewService = null;
 
-    public void migrate(Connection connection) throws SQLException, ViewException, JSONException {
+    public void migrate(Context context) throws SQLException, ViewException, JSONException {
         viewService =  new AppSetupServiceMybatisImpl();
-        updateDefaultAndUserViews(connection);
+        updateDefaultAndUserViews(context.getConnection());
     }
 
     private void updateDefaultAndUserViews(Connection connection) throws SQLException, ViewException, JSONException {

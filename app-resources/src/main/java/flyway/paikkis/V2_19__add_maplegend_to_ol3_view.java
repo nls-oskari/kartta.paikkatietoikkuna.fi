@@ -1,7 +1,8 @@
 package flyway.paikkis;
 
-import fi.nls.oskari.util.FlywayHelper;
-import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
+import org.flywaydb.core.api.migration.BaseJavaMigration;
+import org.flywaydb.core.api.migration.Context;
+import org.oskari.helpers.AppSetupHelper;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,18 +14,19 @@ import java.util.List;
 /**
  * Created by Marko Kuosmanen on 28.11.2017.
  */
-public class V2_19__add_maplegend_to_ol3_view implements JdbcMigration {
+public class V2_19__add_maplegend_to_ol3_view extends BaseJavaMigration {
 
     private static final String BUNDLE_ID = "maplegend";
 
-    public void migrate(Connection connection) throws Exception {
+    public void migrate(Context context) throws Exception {
 
+        Connection connection = context.getConnection();
         final List<Long> views = getOl3Views(connection);
         for(Long viewId : views){
-            if (FlywayHelper.viewContainsBundle(connection, BUNDLE_ID, viewId)) {
+            if (AppSetupHelper.appContainsBundle(connection, viewId, BUNDLE_ID)) {
                 continue;
             }
-            FlywayHelper.addBundleWithDefaults(connection, viewId, BUNDLE_ID);
+            AppSetupHelper.addBundleToApp(connection, viewId, BUNDLE_ID);
         }
     }
 

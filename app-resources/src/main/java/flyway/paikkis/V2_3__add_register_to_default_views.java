@@ -1,7 +1,8 @@
 package flyway.paikkis;
 
-import fi.nls.oskari.util.FlywayHelper;
-import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
+import org.flywaydb.core.api.migration.BaseJavaMigration;
+import org.flywaydb.core.api.migration.Context;
+import org.oskari.helpers.AppSetupHelper;
 
 import java.sql.Connection;
 import java.util.List;
@@ -9,17 +10,18 @@ import java.util.List;
 /**
  * Adds register bundle to default and user views.
  */
-public class V2_3__add_register_to_default_views implements JdbcMigration {
+public class V2_3__add_register_to_default_views extends BaseJavaMigration {
     private static final String BUNDLE_ID = "register";
 
-    public void migrate(Connection connection) throws Exception {
+    public void migrate(Context context) throws Exception {
+        Connection connection = context.getConnection();
 
-        final List<Long> views = FlywayHelper.getUserAndDefaultViewIds(connection);
+        final List<Long> views = AppSetupHelper.getSetupsForUserAndDefaultType(connection);
         for(Long viewId : views){
-            if (FlywayHelper.viewContainsBundle(connection, BUNDLE_ID, viewId)) {
+            if (AppSetupHelper.appContainsBundle(connection, viewId, BUNDLE_ID)) {
                 continue;
             }
-            FlywayHelper.addBundleWithDefaults(connection, viewId, BUNDLE_ID);
+            AppSetupHelper.addBundleToApp(connection, viewId, BUNDLE_ID);
         }
     }
 }

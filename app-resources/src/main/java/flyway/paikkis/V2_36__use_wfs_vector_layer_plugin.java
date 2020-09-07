@@ -5,11 +5,12 @@ import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.map.view.AppSetupServiceMybatisImpl;
 import fi.nls.oskari.map.view.ViewService;
-import fi.nls.oskari.util.FlywayHelper;
 import fi.nls.oskari.util.PropertyUtil;
-import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
+import org.flywaydb.core.api.migration.BaseJavaMigration;
+import org.flywaydb.core.api.migration.Context;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.oskari.helpers.AppSetupHelper;
 
 import java.sql.Connection;
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.List;
 /**
  * Replaces transport based wfs plugin with vector implementation
  */
-public class V2_36__use_wfs_vector_layer_plugin implements JdbcMigration {
+public class V2_36__use_wfs_vector_layer_plugin extends BaseJavaMigration {
 
     private static final Logger LOG = LogFactory.getLogger(V2_36__use_wfs_vector_layer_plugin.class);
     private static final String BUNDLE_NAME = "mapfull";
@@ -28,7 +29,8 @@ public class V2_36__use_wfs_vector_layer_plugin implements JdbcMigration {
 
     private ViewService viewService;
 
-    public void migrate(Connection connection) throws Exception {
+    public void migrate(Context context) throws Exception {
+        Connection connection = context.getConnection();
         final boolean proceed = PropertyUtil.getOptional(MIGRATION_PROP_NAME, false);
         if (!proceed) {
             LOG.info("Skipping migration to wfs vector plugin");
@@ -36,7 +38,7 @@ public class V2_36__use_wfs_vector_layer_plugin implements JdbcMigration {
         }
         try {
             viewService = new AppSetupServiceMybatisImpl();
-            List<Long> viewIds = FlywayHelper.getViewIdsForTypes(connection);
+            List<Long> viewIds = AppSetupHelper.getSetupsForType(connection);
             for (long id : viewIds) {
                 updateView(connection, id);
             }
@@ -48,7 +50,7 @@ public class V2_36__use_wfs_vector_layer_plugin implements JdbcMigration {
     }
 
     private void updateView (Connection connection, long viewId) throws Exception {
-        Bundle mapfull = FlywayHelper.getBundleFromView(connection, BUNDLE_NAME, viewId);
+        Bundle mapfull = AppSetupHelper.getAppBundle(connection, viewId, BUNDLE_NAME);
         if (mapfull == null) {
             return;
         }

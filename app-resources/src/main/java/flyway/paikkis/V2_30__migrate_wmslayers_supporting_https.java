@@ -10,7 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
+import org.flywaydb.core.api.migration.BaseJavaMigration;
+import org.flywaydb.core.api.migration.Context;
 
 import fi.nls.oskari.domain.map.OskariLayer;
 import fi.nls.oskari.log.LogFactory;
@@ -21,13 +22,14 @@ import fi.nls.oskari.util.IOHelper;
  * Change oskari_maplayer.url for WMS layers with http:// urls to https:// if they support it
  * Also update oskari_resources accordingly
  */
-public class V2_30__migrate_wmslayers_supporting_https implements JdbcMigration {
+public class V2_30__migrate_wmslayers_supporting_https extends BaseJavaMigration {
 
     private static final Logger LOG = LogFactory.getLogger(V2_30__migrate_wmslayers_supporting_https.class);
     private static final int TIMEOUT_MS_CONNECT = 1000;
     private static final int TIMEOUT_MS_READ = 5000;
 
-    public void migrate(Connection conn) throws Exception {
+    public void migrate(Context context) throws Exception {
+        Connection conn = context.getConnection();
         List<WMSLayer> httpWMSLayers = getHTTPWMSLayers(conn);
         Map<String, List<WMSLayer>> layersByURL = httpWMSLayers.stream()
                 .filter(layer -> !isMultipleURL(layer))
