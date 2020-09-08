@@ -1,83 +1,74 @@
 {
-  "name": "Paikkatietoikkuna.fi",
+  "name": "Paikkatietoikkuna",
   "type": "DEFAULT",
   "default": true,
   "public": true,
   "onlyUuid": false,
   "oskari": {
     "application": "geoportal",
-    "page": "index",
-    "development_prefix": "/applications"
+    "page": "index"
   },
   "selectedLayers": [
     "taustakartta.json"
   ],
   "bundles": [{
+    "id": "lang-overrides"
+  },{
     "id": "mapfull",
     "config": {
-		"mapOptions": {
-			"srsName": "EPSG:3067",
-			"maxExtent": {
-				"bottom": 6291456,
-				"left": -548576,
-				"right": 1548576,
-				"top": 8388608
-			},
-			"resolutions": [2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5, 0.25]
-		},
-      "globalMapAjaxUrl": "[REPLACED BY HANDLER]",
-      "projectionDefs": {
-        "EPSG:4326": "+title=WGS 84 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+      "plugins": [
+        { "id": "Oskari.mapframework.bundle.mapmodule.plugin.LayersPlugin" },
+        { "id": "Oskari.mapframework.mapmodule.WmsLayerPlugin" },
+        { "id": "Oskari.mapframework.mapmodule.MarkersPlugin" },
+        { "id": "Oskari.mapframework.mapmodule.ControlsPlugin" },
+        { "id": "Oskari.mapframework.mapmodule.GetInfoPlugin",
+          "config": {
+            "ignoredLayerTypes": [
+              "WFS",
+              "MYPLACES",
+              "USERLAYER"
+            ],
+            "infoBox": false
+          }
+        },
+        { "id": "Oskari.wfsvector.WfsVectorLayerPlugin" },
+        { "id": "Oskari.mapframework.wmts.mapmodule.plugin.WmtsLayerPlugin" },
+        { "id": "Oskari.mapframework.bundle.mapmodule.plugin.ScaleBarPlugin" },
+        { "id": "Oskari.mapframework.bundle.mapmodule.plugin.Portti2Zoombar" },
+        { "id": "Oskari.mapframework.bundle.mapmodule.plugin.PanButtons" },
+        { "id": "Oskari.mapframework.bundle.mapmyplaces.plugin.MyPlacesLayerPlugin" },
+        { "id": "Oskari.mapframework.bundle.mapanalysis.plugin.AnalysisLayerPlugin" },
+        { "id": "Oskari.mapframework.bundle.mapmodule.plugin.GeoLocationPlugin" },
+        { "id": "Oskari.mapframework.bundle.mapmodule.plugin.RealtimePlugin" },
+        { "id": "Oskari.mapframework.bundle.mapmodule.plugin.FullScreenPlugin" },
+        { "id": "Oskari.mapframework.bundle.mapmodule.plugin.BackgroundLayerSelectionPlugin",
+          "config": {
+            "baseLayers": [
+              "802",
+              "24",
+              "801",
+              1877
+            ],
+            "showAsDropdown": false
+          }
+        },
+        { "id": "Oskari.mapframework.bundle.mapmodule.plugin.LogoPlugin" },
+        { "id": "Oskari.mapframework.bundle.myplacesimport.plugin.UserLayersLayerPlugin" },
+        { "id": "Oskari.arcgis.bundle.maparcgis.plugin.ArcGisLayerPlugin" },
+        { "id": "Oskari.mapframework.mapmodule.VectorLayerPlugin" },
+        { "id": "Oskari.mapframework.bundle.mapmodule.plugin.MyLocationPlugin" },
+        { "id": "Oskari.mapframework.mapmodule.Tiles3DLayerPlugin" }
+      ],
+      "mapOptions": {
+        "srsName": "EPSG:3067",
+        "resolutions": [2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5, 0.25],
+        "maxExtent": {
+          "top": 8388608,
+          "left": -548576,
+          "bottom": 6291456,
+          "right": 1548576
+        }
       },
-      "plugins": [{
-        "id": "Oskari.mapframework.bundle.mapmodule.plugin.LayersPlugin"
-      }, {
-        "id": "Oskari.mapframework.mapmodule.WmsLayerPlugin"
-      }, {
-        "id": "Oskari.mapframework.mapmodule.MarkersPlugin"
-      }, {
-        "id": "Oskari.mapframework.mapmodule.ControlsPlugin"
-      }, {
-        "id": "Oskari.mapframework.mapmodule.GetInfoPlugin",
-        "config": {
-          "ignoredLayerTypes": ["WFS", "MYPLACES", "USERLAYER"]
-        }
-      }, {
-        "id": "Oskari.mapframework.bundle.mapwfs2.plugin.WfsLayerPlugin"
-      }, {
-        "id": "Oskari.mapframework.wmts.mapmodule.plugin.WmtsLayerPlugin"
-      }, {
-        "id": "Oskari.mapframework.bundle.mapmodule.plugin.ScaleBarPlugin"
-      }, {
-        "id": "Oskari.mapframework.bundle.mapmodule.plugin.Portti2Zoombar"
-      }, {
-        "id": "Oskari.mapframework.bundle.mapmodule.plugin.PanButtons"
-      }, {
-        "id": "Oskari.mapframework.bundle.mapmyplaces.plugin.MyPlacesLayerPlugin"
-      }, {
-        "id": "Oskari.mapframework.bundle.mapanalysis.plugin.AnalysisLayerPlugin"
-      }, {
-		"id": "Oskari.mapframework.bundle.mapmodule.plugin.GeoLocationPlugin"
-	  }, {
-        "id": "Oskari.mapframework.bundle.mapmodule.plugin.RealtimePlugin"
-      }, {
-        "id": "Oskari.mapframework.bundle.mapmodule.plugin.FullScreenPlugin"
-      }, {
-        "id": "Oskari.mapframework.bundle.mapmodule.plugin.BackgroundLayerSelectionPlugin",
-        "config" : {
-          "baseLayers": ["3", "2", "1"]
-        }
-      }, {
-        "id": "Oskari.mapframework.bundle.mapmodule.plugin.LogoPlugin"
-      }, {
-        "id": "Oskari.mapframework.bundle.myplacesimport.plugin.UserLayersLayerPlugin"
-      }, {
-		"id": "Oskari.arcgis.bundle.maparcgis.plugin.ArcGisLayerPlugin"
-      }, {
-        "id": "Oskari.mapframework.mapmodule.VectorLayerPlugin"
-  	  }, {
-		"id": "Oskari.mapframework.bundle.mapmodule.plugin.MyLocationPlugin"
-      }],
       "layers": []
     },
     "state": {
@@ -87,66 +78,32 @@
       "zoom": 0
     }
   }, {
+    "id": "drawtools"
+  }, {
     "id": "divmanazer"
   }, {
-    "id": "toolbar",
-    "config" : {
-      "basictools": {
-        "measurearea": false,
-        "measureline": false
-      }
-    }
+    "id": "toolbar"
   }, {
     "id": "statehandler"
   }, {
-    "id": "infobox"
+    "id": "infobox",
+    "config" : {
+      "adaptable": true
+    }
   }, {
     "id": "search"
   }, {
-    "id": "layerselector2",
-    "config" : {
-      "showSearchSuggestions": true
-    }
-  }, {
-    "id": "layerselection2"
+    "id": "layerlist"
   }, {
     "id": "maplegend"
   }, {
     "id": "publisher2"
   }, {
-    "id": "statsgrid",
-    "startup" : {
-      "bundlename": "statsgrid",
-      "metadata": {
-        "Import-Bundle": {
-          "geostats": {
-            "bundlePath": "/Oskari/packages/libraries/bundle/"
-          },
-          "statsgrid": {
-            "bundlePath": "/Oskari/packages/statistics/bundle/"
-          }
-        }
-      }
-    }
+    "id": "statsgrid"
   }, {
     "id": "analyse"
   }, {
     "id": "metadataflyout"
-  }, {
-    "id": "routesearch",
-    "config" : {
-      "flyoutClazz": "Oskari.mapframework.bundle.routesearch.Flyout"
-    },
-    "startup" : {
-      "bundlename": "routesearch",
-      "metadata": {
-        "Import-Bundle": {
-          "routesearch": {
-            "bundlePath": "/Oskari/packages/paikkatietoikkuna/bundle/"
-          }
-        }
-      }
-    }
   }, {
     "id": "userguide",
     "config" : {
@@ -171,14 +128,10 @@
         "fi": "/published/fi/",
         "sv": "/published/sv/",
         "en": "/published/en/"
-      },
-      "changeInfoUrl": "/user"
+      }
     }
   }, {
-    "id": "myplaces2",
-    "config" : {
-      "measureTools": true
-    }
+    "id": "myplaces3"
   }, {
     "id": "guidedtour"
   }, {
@@ -194,13 +147,7 @@
   }, {
     "id": "metadatacatalogue"
   }, {
-    "id": "myplacesimport",
-    "config" : {
-      "__test__maxFileSizeMb": "10",
-      "__test__sandbox": "sandbox",
-      "__test__name": "MyPlacesImport",
-      "__test__flyoutClazz": "Oskari.mapframework.bundle.myplacesimport.Flyout"
-    }
+    "id": "myplacesimport"
   }, {
     "id": "findbycoordinates"
   }, {
@@ -208,9 +155,33 @@
   }, {
     "id": "coordinatetool",
     "config": {
+      "isReverseGeocode": true,
+      "supportedProjections": [
+        "EPSG:3067",
+        "NLSFI:etrs_gk",
+        "NLSFI:ykj",
+        "EPSG:4258",
+        "LATLON:kkj",
+        "EPSG:3046",
+        "EPSG:3048",
+        "EPSG:3873",
+        "EPSG:3874",
+        "EPSG:3875",
+        "EPSG:3876",
+        "EPSG:3877",
+        "EPSG:3878",
+        "EPSG:3879",
+        "EPSG:3880",
+        "EPSG:3881",
+        "EPSG:3882",
+        "EPSG:3883",
+        "EPSG:3884",
+        "EPSG:3885"
+      ],
       "showEmergencyCallMessage": true,
       "projectionShowFormat": {
         "decimals": 3,
+        "format": "metric",
         "EPSG:4258": {
           "decimals": 3,
           "format": "degrees"
@@ -219,11 +190,10 @@
           "decimals": 3,
           "format": "degrees"
         },
-        "format": "metric"
-      },
-      "supportedProjections": ["EPSG:3067", "NLSFI:etrs_gk", "NLSFI:ykj", "EPSG:4258", "LATLON:kkj", "EPSG:3046", "EPSG:3048", "EPSG:3873", "EPSG:3874", "EPSG:3875", "EPSG:3876", "EPSG:3877", "EPSG:3878", "EPSG:3879", "EPSG:3880", "EPSG:3881", "EPSG:3882", "EPSG:3883", "EPSG:3884", "EPSG:3885"],
-      "isReverseGeocode": true,
-      "reverseGeocodingIds": "WHAT3WORDS_CHANNEL"
+        "EPSG:3067": {
+          "decimals": 0
+        }
+      }
     }
   }, {
     "id": "timeseries"
@@ -232,6 +202,12 @@
   }, {
     "id": "maprotator"
   }, {
-    "id": "system-message"
+    "id": "register"
+  }, {
+    "id": "terrain-profile"
+  }, {
+    "id": "telemetry"
+  }, {
+    "id": "coordinatetransformation"
   }]
 }

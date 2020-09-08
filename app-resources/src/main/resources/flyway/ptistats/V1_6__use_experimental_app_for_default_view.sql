@@ -1,2 +1,3 @@
 
-UPDATE portti_view set application='full-map_experimental' where id = 1;
+-- Removed unnecessary migration for pti 3.0+
+select now();

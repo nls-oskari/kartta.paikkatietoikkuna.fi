@@ -1,10 +1,10 @@
 INSERT INTO oskari_maplayer(type, url,
-                    name, groupId,
+                    name, dataprovider_id,
                     locale,
                     attributes, opacity, srs_name, version)
 VALUES(
     'statslayer', 'http://geo.stat.fi/geoserver/wms',
-    'tilastointialueet:kunta4500k_2017', (select id from oskari_layergroup where locale LIKE '%Yhteistyöaineistot%'),
+    'tilastointialueet:kunta4500k_2017', (select id from oskari_dataprovider where locale LIKE '%Yhteistyöaineistot%'),
     '{ "en" : {
          "name":"Municipalities"
        },"fi" : {
@@ -14,12 +14,12 @@ VALUES(
 
 
 INSERT INTO oskari_maplayer(type, url,
-                    name, groupId,
+                    name, dataprovider_id,
                     locale,
                     attributes, opacity, srs_name, version)
 VALUES(
     'statslayer', 'http://geo.stat.fi/geoserver/wms',
-    'tilastointialueet:seutukunta1000k', (select id from oskari_layergroup where locale LIKE '%Yhteistyöaineistot%'),
+    'tilastointialueet:seutukunta1000k', (select id from oskari_dataprovider where locale LIKE '%Yhteistyöaineistot%'),
     '{ "en" : {
          "name":"Seutukunnat"
        },"fi" : {
