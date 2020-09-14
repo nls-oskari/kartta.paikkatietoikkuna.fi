@@ -6,9 +6,11 @@
   "onlyUuid": true,
   "oskari": {
     "application": "geoportal-3D",
-    "page": "index",
-    "development_prefix": "/applications"
+    "page": "index"
   },
+  "selectedLayers": [
+    "/json/layers/taustakartta.json"
+  ],
   "bundles": [
     { "id" : "lang-overrides" },
     {
