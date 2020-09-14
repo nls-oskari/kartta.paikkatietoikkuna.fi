@@ -36,11 +36,11 @@ public class V3_0_2__create_appsetups extends BaseJavaMigration {
         // insert layers before appsetups to ensure supported projections is updated for 3D
         List<Integer> layerIds = new ArrayList<>();
         for(String file : layerFiles) {
-            layerIds.add(LayerHelper.setupLayer(file));
+            layerIds.add(LayerHelper.setupLayer("/json/layers/" + file));
         }
 
         for(String file : appSetupFiles) {
-            AppSetupHelper.create(connection, file);
+            AppSetupHelper.create(connection, "/json/views/" + file);
         }
 
         addDimensionChangeTo2D(connection);

@@ -1,6 +1,5 @@
 package flyway.pti;
 
-import fi.nls.oskari.domain.map.view.Bundle;
 import fi.nls.oskari.domain.map.view.ViewTypes;
 import fi.nls.oskari.util.PropertyUtil;
 import org.flywaydb.core.api.migration.BaseJavaMigration;
@@ -29,7 +28,7 @@ public class V3_0_1__register_bundles_and_providers extends BaseJavaMigration {
         }
         String[] bundles = {"lang-overrides", "register", "terrain-profile", "telemetry", "coordinatetransformation"};
         for(String name : bundles) {
-            BundleHelper.registerBundle(createBundle(name), connection);
+            BundleHelper.registerBundle(connection, name);
         }
 
         String[] dataProviders = {"Maanmittauslaitos", "Yhteistyöaineistot", "Helsingin kaupunki"};
@@ -42,13 +41,6 @@ public class V3_0_1__register_bundles_and_providers extends BaseJavaMigration {
             insertGroup(connection, createLocale(name));
         }
         insertRoles(connection);
-
-    }
-
-    protected Bundle createBundle(String name) {
-        Bundle b = new Bundle();
-        b.setName(name);
-        return b;
     }
 
     protected static JSONObject createLocale(String name)

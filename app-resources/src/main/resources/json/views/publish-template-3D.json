@@ -6,8 +6,7 @@
   "creator" : 10110,
   "oskari": {
     "application": "embedded-3D",
-    "page": "published",
-    "development_prefix": "/applications"
+    "page": "published"
   },
   "bundles": [
     {

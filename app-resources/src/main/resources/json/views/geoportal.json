@@ -9,7 +9,7 @@
     "page": "index"
   },
   "selectedLayers": [
-    "taustakartta.json"
+    "/json/layers/taustakartta.json"
   ],
   "bundles": [{
     "id": "lang-overrides"
