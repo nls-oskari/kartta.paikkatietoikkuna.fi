@@ -21,11 +21,11 @@ public class LandingHandler {
     private RssFeedService rssService;
 
     @RequestMapping
-    public ModelAndView index(HttpServletRequest request) throws Exception {
+    public String index(HttpServletRequest request) throws Exception {
         // request.setAttribute("notifications", rssService.getNotifications());
         // request.setAttribute("news", rssService.getNews());
         logger404.info("LANDINGPAGE referer: " + request.getHeader("referer"));
-        // return "landingpage";
+        return "landingpage";
     }
 
     @RequestMapping("**")
