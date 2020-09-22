@@ -1,6 +1,6 @@
 package fi.nls.paikkatietoikkuna.coordtransform;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 import fi.nls.oskari.control.ActionException;
 
 import java.math.BigDecimal;

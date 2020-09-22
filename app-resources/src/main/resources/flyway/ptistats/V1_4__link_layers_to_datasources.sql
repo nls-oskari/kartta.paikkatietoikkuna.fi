@@ -1,6 +1,6 @@
 -- SotkaNet
 INSERT INTO
-    oskari_statistical_layer(datasource_id, layer_id, config)
+    oskari_statistical_datasource_regionsets(datasource_id, layer_id, config)
 VALUES(
     (SELECT id FROM oskari_statistical_datasource
         WHERE locale like '%SotkaNET%'),
@@ -8,7 +8,7 @@ VALUES(
     '{"regionType":"kunta"}');
 
 INSERT INTO
-    oskari_statistical_layer(datasource_id, layer_id, config)
+    oskari_statistical_datasource_regionsets(datasource_id, layer_id, config)
 VALUES(
     (SELECT id FROM oskari_statistical_datasource
         WHERE locale like '%SotkaNET%'),
@@ -17,7 +17,7 @@ VALUES(
 
 -- KHR
 INSERT INTO
-    oskari_statistical_layer(datasource_id, layer_id, config)
+    oskari_statistical_datasource_regionsets(datasource_id, layer_id, config)
 VALUES(
     (SELECT id FROM oskari_statistical_datasource
         WHERE locale like '%KHR%'),
@@ -25,7 +25,7 @@ VALUES(
     '{"regionType":"kunta"}');
 
 INSERT INTO
-    oskari_statistical_layer(datasource_id, layer_id, config)
+    oskari_statistical_datasource_regionsets(datasource_id, layer_id, config)
 VALUES(
     (SELECT id FROM oskari_statistical_datasource
         WHERE locale like '%KHR%'),
@@ -34,7 +34,7 @@ VALUES(
 
 -- Tilastokeskus
 INSERT INTO
-    oskari_statistical_layer(datasource_id, layer_id, config)
+    oskari_statistical_datasource_regionsets(datasource_id, layer_id, config)
 VALUES(
     (SELECT id FROM oskari_statistical_datasource
         WHERE locale like '%Tilastokeskus%'),
@@ -42,7 +42,7 @@ VALUES(
     '{"regionType":"kunta"}');
 
 INSERT INTO
-    oskari_statistical_layer(datasource_id, layer_id, config)
+    oskari_statistical_datasource_regionsets(datasource_id, layer_id, config)
 VALUES(
     (SELECT id FROM oskari_statistical_datasource
         WHERE locale like '%Tilastokeskus%'),
@@ -52,7 +52,7 @@ VALUES(
 
 -- Omat indikaattorit
 INSERT INTO
-    oskari_statistical_layer(datasource_id, layer_id, config)
+    oskari_statistical_datasource_regionsets(datasource_id, layer_id, config)
 VALUES(
     (SELECT id FROM oskari_statistical_datasource
         WHERE locale like '%Omat indikaattorit%'),
@@ -60,7 +60,7 @@ VALUES(
     '{"regionType":"kunta"}');
 
 INSERT INTO
-    oskari_statistical_layer(datasource_id, layer_id, config)
+    oskari_statistical_datasource_regionsets(datasource_id, layer_id, config)
 VALUES(
     (SELECT id FROM oskari_statistical_datasource
         WHERE locale like '%Omat indikaattorit%'),

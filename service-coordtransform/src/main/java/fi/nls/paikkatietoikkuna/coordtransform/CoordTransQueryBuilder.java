@@ -1,7 +1,6 @@
 package fi.nls.paikkatietoikkuna.coordtransform;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.impl.PackedCoordinateSequence;
+import org.locationtech.jts.geom.Coordinate;
 
 public class CoordTransQueryBuilder {
 

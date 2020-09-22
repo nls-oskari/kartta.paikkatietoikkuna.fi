@@ -6,47 +6,11 @@
   "creator" : 10110,
   "oskari" : {
     "application" : "embedded",
-    "page" : "published",
-    "development_prefix": "/applications"
+    "page" : "published"
   },
   "bundles" : [
     {
       "id": "mapfull",
-      "startup": {
-        "title": "Map",
-        "bundlename": "mapfull",
-        "metadata": {
-          "Import-Bundle": {
-            "mapwmts": {
-              "bundlePath": "/Oskari/packages/mapping/ol/"
-            },
-            "mapwfs2": {
-              "bundlePath": "/Oskari/packages/mapping/ol/"
-            },
-            "mapanalysis": {
-              "bundlePath": "/Oskari/packages/mapping/ol/"
-            },
-            "mapuserlayers": {
-              "bundlePath": "/Oskari/packages/mapping/ol/"
-            },
-            "maparcgis": {
-              "bundlePath": "/Oskari/packages/mapping/ol/"
-            },
-            "mapmodule": {
-              "bundlePath": "/Oskari/packages/mapping/ol/"
-            },
-            "ui-components": {
-              "bundlePath": "/Oskari/packages/framework/bundle/"
-            },
-            "mapfull": {
-              "bundlePath": "/Oskari/packages/framework/bundle/"
-            },
-            "oskariui": {
-              "bundlePath": "/Oskari/packages/framework/bundle/"
-            }
-          }
-        }
-      },
       "config": {
         "mapOptions": {
           "srsName": "EPSG:3067",
@@ -65,7 +29,7 @@
           }, {
             "id": "Oskari.mapframework.mapmodule.WmsLayerPlugin"
           }, {
-            "id": "Oskari.mapframework.bundle.mapwfs2.plugin.WfsLayerPlugin"
+            "id": "Oskari.wfsvector.WfsVectorLayerPlugin"
           }, {
             "id": "Oskari.mapframework.wmts.mapmodule.plugin.WmtsLayerPlugin"
           }, {
@@ -98,30 +62,10 @@
       }
     },
     {
-      "id" : "infobox",
-      "startup": {
-        "bundlename": "infobox",
-        "metadata": {
-          "Import-Bundle": {
-            "infobox": {
-              "bundlePath": "/Oskari/packages/mapping/ol/"
-            }
-          }
-        }
-      }
+      "id" : "infobox"
     },
     {
       "id" : "toolbar",
-      "startup": {
-        "bundlename": "toolbar",
-        "metadata": {
-          "Import-Bundle": {
-            "toolbar": {
-              "bundlePath": "/Oskari/packages/mapping/ol/"
-            }
-          }
-        }
-      },
       "config" : {
         "basictools": {
           "measurearea": false,
@@ -144,18 +88,7 @@
       }
     },
     { "id" : "publishedstatehandler" },
-    { "id" : "drawtools",
-      "startup": {
-        "bundlename": "drawtools",
-        "metadata": {
-          "Import-Bundle": {
-            "drawtools": {
-              "bundlePath": "/Oskari/packages/mapping/ol/"
-            }
-          }
-        }
-      }
-    },
+    { "id" : "drawtools" },
     { "id" : "routingService" },
     { "id" : "rpc" }
   ]

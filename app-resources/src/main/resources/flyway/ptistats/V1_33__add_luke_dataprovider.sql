@@ -12,7 +12,7 @@ VALUES ('{"fi":{"name":"Luonnonvarakeskus"},"en":{"name":"Natural Resources Inst
 
 -- Link layers to datasource
 INSERT INTO
-    oskari_statistical_layer(datasource_id, layer_id)
+    oskari_statistical_datasource_regionsets(datasource_id, layer_id)
 VALUES(
     (SELECT id FROM oskari_statistical_datasource
         WHERE locale like '%Luonnonvarakeskus%'),

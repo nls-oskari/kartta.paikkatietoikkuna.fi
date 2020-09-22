@@ -1,0 +1,213 @@
+{
+  "name": "Paikkatietoikkuna",
+  "type": "DEFAULT",
+  "default": true,
+  "public": true,
+  "onlyUuid": false,
+  "oskari": {
+    "application": "geoportal",
+    "page": "index"
+  },
+  "selectedLayers": [
+    "/json/layers/taustakartta.json"
+  ],
+  "bundles": [{
+    "id": "lang-overrides"
+  },{
+    "id": "mapfull",
+    "config": {
+      "plugins": [
+        { "id": "Oskari.mapframework.bundle.mapmodule.plugin.LayersPlugin" },
+        { "id": "Oskari.mapframework.mapmodule.WmsLayerPlugin" },
+        { "id": "Oskari.mapframework.mapmodule.MarkersPlugin" },
+        { "id": "Oskari.mapframework.mapmodule.ControlsPlugin" },
+        { "id": "Oskari.mapframework.mapmodule.GetInfoPlugin",
+          "config": {
+            "ignoredLayerTypes": [
+              "WFS",
+              "MYPLACES",
+              "USERLAYER"
+            ],
+            "infoBox": false
+          }
+        },
+        { "id": "Oskari.wfsvector.WfsVectorLayerPlugin" },
+        { "id": "Oskari.mapframework.wmts.mapmodule.plugin.WmtsLayerPlugin" },
+        { "id": "Oskari.mapframework.bundle.mapmodule.plugin.ScaleBarPlugin" },
+        { "id": "Oskari.mapframework.bundle.mapmodule.plugin.Portti2Zoombar" },
+        { "id": "Oskari.mapframework.bundle.mapmodule.plugin.PanButtons" },
+        { "id": "Oskari.mapframework.bundle.mapmyplaces.plugin.MyPlacesLayerPlugin" },
+        { "id": "Oskari.mapframework.bundle.mapanalysis.plugin.AnalysisLayerPlugin" },
+        { "id": "Oskari.mapframework.bundle.mapmodule.plugin.GeoLocationPlugin" },
+        { "id": "Oskari.mapframework.bundle.mapmodule.plugin.RealtimePlugin" },
+        { "id": "Oskari.mapframework.bundle.mapmodule.plugin.FullScreenPlugin" },
+        { "id": "Oskari.mapframework.bundle.mapmodule.plugin.BackgroundLayerSelectionPlugin",
+          "config": {
+            "baseLayers": [
+              "802",
+              "24",
+              "801",
+              1877
+            ],
+            "showAsDropdown": false
+          }
+        },
+        { "id": "Oskari.mapframework.bundle.mapmodule.plugin.LogoPlugin" },
+        { "id": "Oskari.mapframework.bundle.myplacesimport.plugin.UserLayersLayerPlugin" },
+        { "id": "Oskari.arcgis.bundle.maparcgis.plugin.ArcGisLayerPlugin" },
+        { "id": "Oskari.mapframework.mapmodule.VectorLayerPlugin" },
+        { "id": "Oskari.mapframework.bundle.mapmodule.plugin.MyLocationPlugin" },
+        { "id": "Oskari.mapframework.mapmodule.Tiles3DLayerPlugin" }
+      ],
+      "mapOptions": {
+        "srsName": "EPSG:3067",
+        "resolutions": [2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5, 0.25],
+        "maxExtent": {
+          "top": 8388608,
+          "left": -548576,
+          "bottom": 6291456,
+          "right": 1548576
+        }
+      },
+      "layers": []
+    },
+    "state": {
+      "east": 520000,
+      "north": 7250000,
+      "selectedLayers": [],
+      "zoom": 0
+    }
+  }, {
+    "id": "drawtools"
+  }, {
+    "id": "divmanazer"
+  }, {
+    "id": "toolbar"
+  }, {
+    "id": "statehandler"
+  }, {
+    "id": "infobox",
+    "config" : {
+      "adaptable": true
+    }
+  }, {
+    "id": "search"
+  }, {
+    "id": "layerlist"
+  }, {
+    "id": "maplegend"
+  }, {
+    "id": "publisher2"
+  }, {
+    "id": "statsgrid"
+  }, {
+    "id": "analyse"
+  }, {
+    "id": "metadataflyout"
+  }, {
+    "id": "userguide",
+    "config" : {
+      "tabs": [{
+        "tags": "ohje_karttaikkuna",
+        "title": "Karttaikkuna"
+      }, {
+        "tags": "ohje_karttajulkaisu",
+        "title": "Kartan julkaisu"
+      }, {
+        "tags": "ohje_teemakartat",
+        "title": "Teemakartat"
+      }, {
+        "tags": "ohje_analyysi",
+        "title": "Analyysi"
+      }]
+    }
+  }, {
+    "id": "personaldata",
+    "config" : {
+      "publishedMapUrl": {
+        "fi": "/published/fi/",
+        "sv": "/published/sv/",
+        "en": "/published/en/"
+      }
+    }
+  }, {
+    "id": "myplaces3"
+  }, {
+    "id": "guidedtour"
+  }, {
+    "id": "backendstatus"
+  }, {
+    "id": "printout"
+  }, {
+    "id": "featuredata2",
+    "config" : {
+      "singleSelection": true,
+      "selectionTools": true
+    }
+  }, {
+    "id": "metadatacatalogue"
+  }, {
+    "id": "myplacesimport"
+  }, {
+    "id": "findbycoordinates"
+  }, {
+    "id": "heatmap"
+  }, {
+    "id": "coordinatetool",
+    "config": {
+      "isReverseGeocode": true,
+      "supportedProjections": [
+        "EPSG:3067",
+        "NLSFI:etrs_gk",
+        "NLSFI:ykj",
+        "EPSG:4258",
+        "LATLON:kkj",
+        "EPSG:3046",
+        "EPSG:3048",
+        "EPSG:3873",
+        "EPSG:3874",
+        "EPSG:3875",
+        "EPSG:3876",
+        "EPSG:3877",
+        "EPSG:3878",
+        "EPSG:3879",
+        "EPSG:3880",
+        "EPSG:3881",
+        "EPSG:3882",
+        "EPSG:3883",
+        "EPSG:3884",
+        "EPSG:3885"
+      ],
+      "showEmergencyCallMessage": true,
+      "projectionShowFormat": {
+        "decimals": 3,
+        "format": "metric",
+        "EPSG:4258": {
+          "decimals": 3,
+          "format": "degrees"
+        },
+        "LATLON:kkj": {
+          "decimals": 3,
+          "format": "degrees"
+        },
+        "EPSG:3067": {
+          "decimals": 0
+        }
+      }
+    }
+  }, {
+    "id": "timeseries"
+  }, {
+    "id": "feedbackService"
+  }, {
+    "id": "maprotator"
+  }, {
+    "id": "register"
+  }, {
+    "id": "terrain-profile"
+  }, {
+    "id": "telemetry"
+  }, {
+    "id": "coordinatetransformation"
+  }]
+}

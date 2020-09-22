@@ -5,14 +5,14 @@
     <parent>
         <groupId>fi.nls.paikkatietoikkuna</groupId>
         <artifactId>kartta</artifactId>
-        <version>1.13.0</version>
+        <version>1.14.0</version>
     </parent>
     <artifactId>service-terrain-profile</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>fi.nls.oskari.service</groupId>
-            <artifactId>oskari-control</artifactId>
+            <groupId>org.oskari</groupId>
+            <artifactId>service-control</artifactId>
         </dependency>
         <dependency>
             <groupId>org.oskari</groupId>
@@ -29,7 +29,7 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>fi.nls.oskari</groupId>
+            <groupId>org.oskari</groupId>
             <artifactId>shared-test-resources</artifactId>
             <scope>test</scope>
         </dependency>
@@ -39,7 +39,7 @@
         </dependency>
         <dependency>
             <groupId>org.oskari</groupId>
-            <artifactId>oskari-geojson</artifactId>
+            <artifactId>gt-geojson</artifactId>
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>

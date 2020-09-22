@@ -1,6 +1,6 @@
 package fi.nls.paikkatietoikkuna.coordtransform;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 import fi.nls.oskari.annotation.Oskari;
 import fi.nls.oskari.cache.Cache;
 import fi.nls.oskari.cache.CacheManager;
@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RejectedExecutionException;
 

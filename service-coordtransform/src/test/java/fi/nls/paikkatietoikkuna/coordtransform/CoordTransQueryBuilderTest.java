@@ -2,7 +2,7 @@ package fi.nls.paikkatietoikkuna.coordtransform;
 
 import static org.junit.Assert.assertEquals;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 
 import java.util.Arrays;
 import java.util.List;
