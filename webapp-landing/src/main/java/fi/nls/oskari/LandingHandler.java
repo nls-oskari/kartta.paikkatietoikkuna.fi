@@ -21,10 +21,12 @@ public class LandingHandler {
     private RssFeedService rssService;
 
     @RequestMapping
-    public String index(HttpServletRequest request) throws Exception {
-        request.setAttribute("notifications", rssService.getNotifications());
-        request.setAttribute("news", rssService.getNews());
-        return "landingpage";
+    public ModelAndView index(HttpServletRequest request) throws Exception {
+        // request.setAttribute("notifications", rssService.getNotifications());
+        // request.setAttribute("news", rssService.getNews());
+        // return "landingpage";
+        logger404.info("LANDINGPAGE referer: " + request.getHeader("referer"));
+        return new ModelAndView("redirect:https://kartta.paikkatietoikkuna.fi");
     }
 
     @RequestMapping("**")
