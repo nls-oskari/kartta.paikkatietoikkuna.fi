@@ -55,7 +55,7 @@
         <dependency>
             <groupId>fi.nls.oskari.extras</groupId>
             <artifactId>nlsfi-projections</artifactId>
-            <version>1.2-SNAPSHOT</version>
+            <version>1.2</version>
         </dependency>
         <!-- ##### oskari-search-nls 3.x uses 19.2 geotools, requires update if geotools is updated ###### -->
         <!-- ##### oskari-search-nls 3.4-SNAPSHOT uses 23.2 geotools, requires update if geotools is updated ###### -->
