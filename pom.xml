@@ -11,6 +11,8 @@
 
     <properties>
         <oskari.version>2.1.0-SNAPSHOT</oskari.version>
+        <nls.search.version>3.5-SNAPSHOT</nls.search.version>
+        <nls.proj.version>1.2</nls.proj.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
