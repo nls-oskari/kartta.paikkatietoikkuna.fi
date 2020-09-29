@@ -26,16 +26,29 @@ public class CoordFileHelper {
     protected static final String RESPONSE_DIMENSION = "dimension";
 
     private JsonFactory jf;
-    private int maxCoordsF2A;
 
     private final Map<String, String> lineSeparators = new HashMap<>();
     private final Map<String, String> coordinateSeparators = new HashMap<>();
 
     public CoordFileHelper() {
         jf = new JsonFactory();
+        /*
+         On UNIX, text file line-endings are terminated with a newline character
+          (ASCII 0x0a, represented by the \n escape sequence in most languages),
+           also referred to as a linefeed (LF).
+
+         On Windows, line-endings are terminated with a combination of a carriage return
+          (ASCII 0x0d or \r) and a newline(\n), also referred to as CR/LF.
+
+         On the Mac Classic (Mac systems using any system prior to Mac OS X),
+         line-endings are terminated with a single carriage return (\r or CR).
+         (Mac OS X uses the UNIX convention.)
+         */
         lineSeparators.put("win", "\r\n");
+        lineSeparators.put("unix", "\n");
+        // use same as unix as it's a fair assumption no-one is using pre-osx macs anymore
+        // classic with \r -> osx with \n -> macOS \n
         lineSeparators.put("mac", "\n");
-        lineSeparators.put("unix", "\r");
         coordinateSeparators.put("space", " ");
         coordinateSeparators.put("tab", "\t");
         coordinateSeparators.put("comma", ",");
