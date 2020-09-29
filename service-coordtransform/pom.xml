@@ -5,7 +5,7 @@
     <parent>
         <groupId>fi.nls.paikkatietoikkuna</groupId>
         <artifactId>kartta</artifactId>
-        <version>1.14.2</version>
+        <version>1.14.3</version>
     </parent>
     <artifactId>service-coordtransform</artifactId>
     <name>CoordTransform Service</name>
@@ -25,7 +25,7 @@
         <dependency>
             <groupId>fi.nls.oskari.extras</groupId>
             <artifactId>nlsfi-projections</artifactId>
-            <version>1.2</version>
+            <version>${nls.proj.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
