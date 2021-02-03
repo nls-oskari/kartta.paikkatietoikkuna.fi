@@ -45,6 +45,10 @@
 
         <dependency>
             <groupId>org.oskari</groupId>
+            <artifactId>control-announcements</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.oskari</groupId>
             <artifactId>control-userlayer</artifactId>
         </dependency>
         <dependency>
