@@ -10,7 +10,7 @@
     <name>kartta.paikkatietoikkuna.fi</name>
 
     <properties>
-        <oskari.version>2.2.0-SNAPSHOT</oskari.version>
+        <oskari.version>2.2.0</oskari.version>
         <nls.search.version>3.5</nls.search.version>
         <nls.proj.version>1.2</nls.proj.version>
 
@@ -37,12 +37,12 @@
         <repository>
             <id>oskari_org</id>
             <name>Oskari.org release repository</name>
-            <url>https://oskari.org/nexus/content/repositories/releases/</url>
+            <url>https://oskari.org/repository/maven/releases/</url>
         </repository>
         <repository>
             <id>oskari_org_snapshot</id>
             <name>Oskari.org snapshot repository</name>
-            <url>https://oskari.org/nexus/content/repositories/snapshots/</url>
+            <url>https://oskari.org/repository/maven/snapshots/</url>
         </repository>
         <repository>
             <id>osgeo</id>
