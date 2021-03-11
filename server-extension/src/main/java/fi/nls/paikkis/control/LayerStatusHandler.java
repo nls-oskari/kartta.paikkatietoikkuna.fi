@@ -3,6 +3,7 @@ package fi.nls.paikkis.control;
 import fi.nls.oskari.annotation.OskariActionRoute;
 import fi.nls.oskari.cache.Cache;
 import fi.nls.oskari.cache.CacheManager;
+import fi.nls.oskari.control.ActionDeniedException;
 import fi.nls.oskari.control.ActionParameters;
 import fi.nls.oskari.control.ActionParamsException;
 import fi.nls.oskari.control.RestActionHandler;
@@ -51,7 +52,8 @@ public class LayerStatusHandler extends RestActionHandler {
         cache.setExpiration(cache.getExpiration() * 48 * 14);
     }
 
-    public void handleGet(ActionParameters params) {
+    public void handleGet(ActionParameters params) throws ActionDeniedException {
+        params.requireAdminUser();
         int limit = params.getHttpParam("limit", 20);
         final JSONObject response = new JSONObject();
 
