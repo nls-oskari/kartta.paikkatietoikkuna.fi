@@ -158,6 +158,7 @@
           "EPSG:3857",
           "EPSG:3067",
           "NLSFI:etrs_gk",
+          "NLSFI:kkj",
           "NLSFI:ykj",
           "EPSG:4258",
           "LATLON:kkj",
