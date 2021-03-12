@@ -204,7 +204,6 @@
     { "id" : "register" },
     { "id" : "terrain-profile" },
     { "id" : "telemetry" },
-    { "id" : "coordinatetransformation" },
     { "id" : "camera-controls-3d" },
     { "id" : "time-control-3d" }
   ]
