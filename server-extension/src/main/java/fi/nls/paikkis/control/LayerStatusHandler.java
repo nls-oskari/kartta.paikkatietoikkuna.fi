@@ -64,7 +64,7 @@ public class LayerStatusHandler extends RestActionHandler {
         JSONHelper.putValue(response, "layerCount", list.size());
 
         List<JSONObject> mostErrors = list.stream()
-                .sorted(Comparator.comparingLong(Layer::getErrors))
+                .sorted(Comparator.comparingLong(Layer::getErrors).reversed())
                 .limit(limit)
                 .map(layer -> {
                     JSONObject o = new JSONObject();
@@ -77,7 +77,7 @@ public class LayerStatusHandler extends RestActionHandler {
         JSONHelper.putValue(response, "errorsTop", new JSONArray(mostErrors));
 
         List<JSONObject> mostSuccess = list.stream()
-                .sorted(Comparator.comparingLong(Layer::getSuccess))
+                .sorted(Comparator.comparingLong(Layer::getSuccess).reversed())
                 .limit(limit)
                 .map(layer -> {
                     JSONObject o = new JSONObject();
