@@ -99,8 +99,9 @@ public class LayerStatusHandler extends RestActionHandler {
         payload.keys().forEachRemaining(layerId -> {
             String id = (String) layerId;
             JSONObject layerData = payload.optJSONObject(id);
+            layerData.remove("previous");
             // write log to get stacks for error debugging
-            log.info(layerData.toString());
+            log.info(layerId, "-", layerData.toString());
             // write to cache so we can examine combined error counts for all nodes
             JSONObject value = cache.get(id);
             if (value != null) {
