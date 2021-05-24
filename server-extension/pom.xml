@@ -6,7 +6,7 @@
     <parent>
         <groupId>fi.nls.paikkatietoikkuna</groupId>
         <artifactId>kartta</artifactId>
-        <version>1.17.2</version>
+        <version>1.17.3</version>
     </parent>
     <artifactId>server-extension</artifactId>
 
