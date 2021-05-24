@@ -33,7 +33,7 @@ import java.util.Locale;
 @ComponentScan(
         excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = {SpringConfig.class}),
         basePackages = "fi.nls.oskari")
-@PropertySource(value= {"classpath:rssconfig.properties"})
+@PropertySource(value= {"classpath:linkredirect.properties"})
 public class SpringConfig extends WebMvcConfigurerAdapter {
 
     //  --------- locale handling -------------
@@ -92,10 +92,5 @@ public class SpringConfig extends WebMvcConfigurerAdapter {
     @Bean
     public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
         return new PropertySourcesPlaceholderConfigurer();
-    }
-
-    @Bean
-    public TaskScheduler taskScheduler() {
-        return new ConcurrentTaskScheduler();
     }
 }
