@@ -1,5 +1,8 @@
 package fi.nls.layerstatus;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.json.JSONObject;
 
 public class LayerStatus {
@@ -8,7 +11,8 @@ public class LayerStatus {
     private long errors = 0;
     private long success = 0;
 
-    LayerStatus(String id) {
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    LayerStatus(@JsonProperty("id") String id) {
         this.id = id;
     }
 
@@ -37,6 +41,8 @@ public class LayerStatus {
     public long getSuccess() {
         return success;
     }
+    
+    @JsonIgnore
     public long getRequestCount() {
         return success + errors;
     }

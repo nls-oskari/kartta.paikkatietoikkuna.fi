@@ -2,8 +2,7 @@ package fi.nls.layerstatus;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fi.nls.oskari.cache.Cache;
-import fi.nls.oskari.cache.CacheManager;
+import fi.nls.oskari.annotation.Oskari;
 import fi.nls.oskari.cache.JedisManager;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
@@ -17,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Oskari
 public class LayerStatusService extends OskariComponent {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
