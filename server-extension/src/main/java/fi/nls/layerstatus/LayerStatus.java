@@ -8,12 +8,24 @@ public class LayerStatus {
     private long errors = 0;
     private long success = 0;
 
-    LayerStatus(String id, JSONObject data) {
+    LayerStatus(String id) {
         this.id = id;
+    }
+
+    LayerStatus(String id, JSONObject data) {
+        this(id);
         this.errors = data.optLong("errors");
         this.success = data.optLong("success");
     }
-    
+
+    public void addToSuccess(long amount) {
+        success += amount;
+    }
+
+    public void addToErrors(long amount) {
+        errors += amount;
+    }
+
     public String getId() {
         return id;
     }

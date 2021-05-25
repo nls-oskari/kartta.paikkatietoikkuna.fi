@@ -1,34 +1,30 @@
 package fi.nls.layerstatus;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.nls.oskari.cache.Cache;
 import fi.nls.oskari.cache.CacheManager;
+import fi.nls.oskari.cache.JedisManager;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.service.OskariComponent;
+import fi.nls.oskari.service.ServiceRuntimeException;
 import fi.nls.oskari.util.JSONHelper;
 import org.json.JSONObject;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class LayerStatusService extends OskariComponent {
 
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final String REDIS_KEY = "LayerStatus";
     private Logger log = LogFactory.getLogger("STATUS");
-    private Cache<JSONObject> cache;
-
-    public void init() {
-        cache = CacheManager.getCache(LayerStatusService.class.getName());
-        cache.setLimit(10000);
-        // should result in two weeks since the default is 30mins
-        cache.setExpiration(cache.getExpiration() * 48 * 14);
-    }
 
     public List<LayerStatus> getStatuses() {
-        List<LayerStatus> list = cache.getKeys().stream()
-                .map(layerId -> new LayerStatus(layerId, cache.get(layerId)))
-                .collect(Collectors.toList());
-        return list;
+        return listFromRedis();
     }
 
     public List<JSONObject> getMostErrors(int limit) {
@@ -66,18 +62,54 @@ public class LayerStatusService extends OskariComponent {
         payload.keys().forEachRemaining(layerId -> {
             String id = (String) layerId;
             JSONObject layerData = payload.optJSONObject(id);
-            layerData.remove("previous");
+            updateToRedis(
+                    id,
+                    layerData.optLong("success", 0),
+                    layerData.optLong("errors", 0)
+            );
             // write log to get stacks for error debugging
             log.info(layerId, "-", layerData.toString());
-            // write to cache so we can examine combined error counts for all nodes
-            JSONObject value = cache.get(id);
-            if (value != null) {
-                long successCount = value.optLong("success", 0) + layerData.optLong("success", 0);
-                JSONHelper.putValue(layerData, "success", successCount);
-                long errorCount = value.optLong("errors", 0) + layerData.optLong("errors", 0);
-                JSONHelper.putValue(layerData, "errors", errorCount);
-            }
-            cache.put(id, layerData);
         });
+    }
+
+    private List<LayerStatus> listFromRedis() {
+        Set<String> keys = JedisManager.hkeys(REDIS_KEY);
+        return keys.stream()
+                .map(layerId -> getEntry(layerId))
+                .collect(Collectors.toList());
+    }
+
+    private void updateToRedis(String id, long success, long errors) {
+        // TODO: should use https://redis.io/commands/hincrby instead or save to postgres?
+        LayerStatus status = getEntry(id);
+        status.addToErrors(errors);
+        status.addToSuccess(success);
+        JedisManager.hset(REDIS_KEY, id, writeAsJSON(status));
+        // TODO: bake id into key and use date string as field (current id) to get time dimension?
+        // Set<String> keys = JedisManager.hkeys(REDIS_KEY)
+    }
+
+    private LayerStatus getEntry(String id) {
+        String data = JedisManager.hget(REDIS_KEY, id);
+        if (data == null) {
+            return new LayerStatus(id);
+        }
+        return readFromJSON(data);
+    }
+
+    private LayerStatus readFromJSON(String status) {
+        try {
+            return MAPPER.readValue(status, LayerStatus.class);
+        } catch (JsonProcessingException e) {
+            throw new ServiceRuntimeException("Unable to deserialize status", e);
+        }
+    }
+
+    private String writeAsJSON(LayerStatus status) {
+        try {
+            return MAPPER.writeValueAsString(status);
+        } catch (JsonProcessingException e) {
+            throw new ServiceRuntimeException("Unable to serialize status", e);
+        }
     }
 }
