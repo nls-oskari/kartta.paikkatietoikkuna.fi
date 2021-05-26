@@ -3,6 +3,7 @@ package fi.nls.layerstatus;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class LayerStatus {
@@ -45,5 +46,14 @@ public class LayerStatus {
     @JsonIgnore
     public long getRequestCount() {
         return success + errors;
+    }
+
+    @JsonIgnore
+    public JSONObject asJSON() throws JSONException {
+        JSONObject response = new JSONObject();
+        response.put("id", getId());
+        response.put("success", getSuccess());
+        response.put("errors", getErrors());
+        return response;
     }
 }
