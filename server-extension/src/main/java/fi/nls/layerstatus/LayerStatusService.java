@@ -91,7 +91,7 @@ public class LayerStatusService extends OskariComponent {
         try {
             LayerStatus status = getEntry(id);
             JSONObject response = status.asJSON();
-            response.put("stack", new JSONArray(getRawDataFromRedis(id)));
+            response.put("details", new JSONArray(getRawDataFromRedis(id)));
             return response;
         } catch (Exception ignored) {}
         return null;
