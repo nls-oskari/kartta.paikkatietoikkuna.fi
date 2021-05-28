@@ -97,6 +97,15 @@ public class LayerStatusService extends OskariComponent {
         return null;
     }
 
+    public void removeLayerStatus(String id) {
+        JedisManager.hdel(REDIS_KEY, id);
+    }
+
+    public void removeLayerRawData(String id, String dataId) {
+        String redisKey = getRawDataKeyForRedis(id);
+        JedisManager.hdel(redisKey, dataId);
+    }
+
     private List<JSONObject> getRawDataFromRedis(String id) {
         String redisKey = getRawDataKeyForRedis(id);
         Set<String> keys = JedisManager.hkeys(redisKey);

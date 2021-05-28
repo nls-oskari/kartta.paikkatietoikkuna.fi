@@ -2,10 +2,7 @@ package fi.nls.paikkis.control;
 
 import fi.nls.layerstatus.LayerStatusService;
 import fi.nls.oskari.annotation.OskariActionRoute;
-import fi.nls.oskari.control.ActionDeniedException;
-import fi.nls.oskari.control.ActionParameters;
-import fi.nls.oskari.control.ActionParamsException;
-import fi.nls.oskari.control.RestActionHandler;
+import fi.nls.oskari.control.*;
 import fi.nls.oskari.service.OskariComponentManager;
 import fi.nls.oskari.util.JSONHelper;
 import fi.nls.oskari.util.ResponseHelper;
@@ -49,5 +46,18 @@ public class LayerStatusHandler extends RestActionHandler {
         JSONObject payload = params.getPayLoadJSON();
         LayerStatusService service = getService();
         service.saveStatus(payload);
+    }
+
+    @Override
+    public void handleDelete(ActionParameters params) throws ActionException {
+        params.requireAdminUser();
+        String layerId = params.getRequiredParam("id");
+        String dataId = params.getHttpParam("dataId");
+        if (dataId == null) {
+            getService().removeLayerStatus(layerId);
+        } else {
+            getService().removeLayerRawData(layerId, dataId);
+        }
+        ResponseHelper.writeResponse(params, "OK");
     }
 }
