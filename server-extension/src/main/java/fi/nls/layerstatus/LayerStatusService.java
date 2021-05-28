@@ -147,6 +147,9 @@ public class LayerStatusService extends OskariComponent {
         JedisManager.hset(getRawDataKeyForRedis(id), "" + System.currentTimeMillis(), dataFromUser.toString());
         // we could use list but JedisManager only has getters for list that modify it
         // If we don't move this to postgres then we might want to add both the increment method and list getters to JedisManager
+        //  Note! increment added in https://github.com/oskariorg/oskari-server/pull/729
+        //  List handling seems a bit unwieldy via Redis if we would want to remove an item from the list with other than l/rpop()
+        //    so I would rather do it with postgres if we need that
         // JedisManager.pushToList(getRawDataKeyForRedis(id), value.toString());
     }
 
