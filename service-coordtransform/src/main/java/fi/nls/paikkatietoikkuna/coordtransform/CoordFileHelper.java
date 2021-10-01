@@ -216,6 +216,7 @@ public class CoordFileHelper {
             boolean replaceCommas = opts.getDecimalSeparator() == ',';
             boolean flipAxis = opts.isAxisFlip();
             boolean writeCardinals = opts.isWriteCardinals();
+            boolean lonFirst = opts.isLonFirst();
             String unit = opts.getUnit();
             boolean transformUnit = false;
             if (unit != null && !unit.equals(DEGREE) && !unit.equals(METRIC)) {
@@ -246,14 +247,14 @@ public class CoordFileHelper {
                 }
                 if (writeCardinals) {
                     if (xCoord.indexOf('-') == 0) {
-                        xCoord = xCoord.substring(1) + "W";
+                        xCoord = xCoord.substring(1) + (lonFirst ? "W" : "S");
                     } else {
-                        xCoord += "E";
+                        xCoord += (lonFirst ? "E" : "N");
                     }
                     if (yCoord.indexOf('-') == 0) {
-                        yCoord = yCoord.substring(1) + "S";
+                        yCoord = yCoord.substring(1) + (lonFirst ? "S" : "W");
                     } else {
-                        yCoord += "N";
+                        yCoord += (lonFirst ? "N" : "E");
                     }
                 }
                 if (prefixId) {

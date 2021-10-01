@@ -13,6 +13,7 @@ public class CoordTransFileSettings {
     private boolean writeHeader;
     private boolean writeLineEndings;
     private boolean writeCardinals;
+    private boolean lonFirst;
 
     public String getFileName() {
         return fileName;
@@ -108,6 +109,14 @@ public class CoordTransFileSettings {
 
     public void setDecimalCount(int decimalCount) {
         this.decimalCount = decimalCount;
+    }
+
+    public boolean isLonFirst() {
+        return lonFirst;
+    }
+
+    public void setLonFirst(boolean lonFirst) {
+        this.lonFirst = lonFirst;
     }
 }
     
