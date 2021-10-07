@@ -109,6 +109,7 @@ public class CoordTransFileSettings {
     public void setDecimalCount(int decimalCount) {
         this.decimalCount = decimalCount;
     }
+
 }
     
     

@@ -2,6 +2,7 @@ package fi.nls.paikkatietoikkuna.coordtransform;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import org.geotools.referencing.CRS;
 import org.locationtech.jts.geom.Coordinate;
 import fi.nls.oskari.control.ActionException;
 import fi.nls.oskari.control.ActionParamsException;
@@ -190,7 +191,7 @@ public class CoordFileHelper {
         return cp;
     }
 
-    public void writeFileResponse(OutputStream out, CoordinatesPayload cp, final int dimension, String crs)
+    public void writeFileResponse(OutputStream out, CoordinatesPayload cp, final int dimension, String epsgCodes)
             throws ActionException {
         CoordTransFileSettings opts = cp.getExportSettings();
         List<Coordinate> coords = cp.getCoords();
@@ -215,7 +216,7 @@ public class CoordFileHelper {
             int decimals = opts.getDecimalCount();
             boolean replaceCommas = opts.getDecimalSeparator() == ',';
             boolean flipAxis = opts.isAxisFlip();
-            boolean writeCardinals = opts.isWriteCardinals();
+            Cardinals cardinals = getWriteCardinals(opts.isWriteCardinals(), epsgCodes);
             String unit = opts.getUnit();
             boolean transformUnit = false;
             if (unit != null && !unit.equals(DEGREE) && !unit.equals(METRIC)) {
@@ -224,7 +225,7 @@ public class CoordFileHelper {
             // TODO: should we add only: Coordinate Reference System: KKJ
             // if we want localized header then frontend should send header String instead of boolean
             if (opts.isWriteHeader()) {
-                bw.write("Coordinate Reference System:" + crs);
+                bw.write("Coordinate Reference System:" + epsgCodes);
                 bw.write(lineSeparator);
                 for (String headerRow : cp.getHeaderRows()) {
                     bw.write(headerRow);
@@ -244,16 +245,17 @@ public class CoordFileHelper {
                     xCoord = xCoord.replace('.', ',');
                     yCoord = yCoord.replace('.', ',');
                 }
-                if (writeCardinals) {
+                if (cardinals != Cardinals.UNSET) {
+                    boolean lonFirst = cardinals == Cardinals.EN;
                     if (xCoord.indexOf('-') == 0) {
-                        xCoord = xCoord.substring(1) + "W";
+                        xCoord = xCoord.substring(1) + (lonFirst ? "W" : "S");
                     } else {
-                        xCoord += "E";
+                        xCoord += (lonFirst ? "E" : "N");
                     }
                     if (yCoord.indexOf('-') == 0) {
-                        yCoord = yCoord.substring(1) + "S";
+                        yCoord = yCoord.substring(1) + (lonFirst ? "S" : "W");
                     } else {
-                        yCoord += "N";
+                        yCoord += (lonFirst ? "N" : "E");
                     }
                 }
                 if (prefixId) {
@@ -400,6 +402,31 @@ public class CoordFileHelper {
             JSONHelper.putValue(jsonError, "exception", e.getMessage());
         }
         return jsonError;
+    }
+
+    private Cardinals getWriteCardinals (boolean write, String epsgCodes) {
+        if (write == false || epsgCodes == null || epsgCodes.isEmpty()) {
+            return Cardinals.UNSET;
+        }
+        try {
+            //epsgCodes can be 2D + height (2 epsg separated with comma)
+            String epsg = epsgCodes.split(",")[0];
+            // use the URN authority syntax, as it does not suffer from the axis order problem
+            String urn = "urn:x-ogc:def:crs:" + epsg;
+            CRS.AxisOrder order = CRS.getAxisOrder(CRS.decode(urn));
+            if (order == CRS.AxisOrder.EAST_NORTH) {
+                return Cardinals.EN;
+            }
+            if (order == CRS.AxisOrder.NORTH_EAST) {
+                return Cardinals.NE;
+            }
+        } catch (Exception ignored) {}
+        return Cardinals.UNSET; // failed to get or CRS.AxisOrder.INAPPLICABLE
+    }
+    private enum Cardinals {
+        EN,
+        NE,
+        UNSET
     }
 
 }
