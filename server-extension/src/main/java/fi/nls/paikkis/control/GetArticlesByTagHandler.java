@@ -114,12 +114,16 @@ public class GetArticlesByTagHandler extends ActionHandler {
         // Change any dummy article to a localized error message:
         for (int i = 0; i < articles.length(); i++) {
             JSONObject art = articles.optJSONObject(i);
-            if (art == null || !art.optBoolean(KEY_DUMMY)) {
+            if (art == null) {
                 continue;
             }
-            String debugInfo = art.optString(KEY_BODY);
-            JSONHelper.putValue(art, KEY_BODY, errorMsg.getOrDefault(params.getLocale().getLanguage(), ""));
-            JSONHelper.putValue(art, "debugInfo", debugInfo);
+            JSONObject content = art.optJSONObject(KEY_CONTENT);
+            if (content == null || !content.optBoolean(KEY_DUMMY)) {
+                continue;
+            }
+            String debugInfo = content.optString(KEY_BODY);
+            JSONHelper.putValue(content, KEY_BODY, errorMsg.getOrDefault(params.getLocale().getLanguage(), ""));
+            JSONHelper.putValue(content, "debugInfo", debugInfo);
         }
 
         final JSONObject response = new JSONObject();
