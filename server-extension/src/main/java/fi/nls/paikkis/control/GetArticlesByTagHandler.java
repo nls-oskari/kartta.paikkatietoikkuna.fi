@@ -23,6 +23,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 @OskariActionRoute("GetArticlesByTag")
 public class GetArticlesByTagHandler extends ActionHandler {
@@ -49,6 +51,8 @@ public class GetArticlesByTagHandler extends ActionHandler {
     private int timeout = 6000;
     private int cacheTimeout = JedisManager.EXPIRY_TIME_DAY;
 
+    private Map<String, String> errorMsg = new HashMap<>();
+
     @Override
     public void init() {
         super.init();
@@ -60,6 +64,9 @@ public class GetArticlesByTagHandler extends ActionHandler {
         if(!fileLocation.endsWith(File.separator)) {
             fileLocation = fileLocation + File.separator;
         }
+        errorMsg.put("fi", "Virhe: Käyttöohjetta ei voitu ladata.");
+        errorMsg.put("sv", "Bruksanvisningarna kunde inte laddas.");
+        errorMsg.put("en", "Failed to load user guide.");
     }
 
     @Override
@@ -103,6 +110,20 @@ public class GetArticlesByTagHandler extends ActionHandler {
             JSONHelper.putValue(articleJson, KEY_ID, "none");
             JSONHelper.putValue(articleJson, KEY_CONTENT, articleContent);
             articles.put(articleJson);
+        }
+        // Change any dummy article to a localized error message:
+        for (int i = 0; i < articles.length(); i++) {
+            JSONObject art = articles.optJSONObject(i);
+            if (art == null) {
+                continue;
+            }
+            JSONObject content = art.optJSONObject(KEY_CONTENT);
+            if (content == null || !content.optBoolean(KEY_DUMMY)) {
+                continue;
+            }
+            String debugInfo = content.optString(KEY_BODY);
+            JSONHelper.putValue(content, KEY_BODY, errorMsg.getOrDefault(params.getLocale().getLanguage(), ""));
+            JSONHelper.putValue(content, "debugInfo", debugInfo);
         }
 
         final JSONObject response = new JSONObject();
