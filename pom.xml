@@ -11,7 +11,7 @@
 
     <properties>
         <oskari.version>2.6.0-SNAPSHOT</oskari.version>
-        <nls.search.version>3.6</nls.search.version>
+        <nls.search.version>3.6.1</nls.search.version>
         <nls.proj.version>1.2</nls.proj.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
