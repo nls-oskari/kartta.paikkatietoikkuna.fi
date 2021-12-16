@@ -10,7 +10,7 @@
     <name>kartta.paikkatietoikkuna.fi</name>
 
     <properties>
-        <oskari.version>2.6.0-SNAPSHOT</oskari.version>
+        <oskari.version>2.5.3</oskari.version>
         <nls.search.version>3.6</nls.search.version>
         <nls.proj.version>1.2</nls.proj.version>
 
