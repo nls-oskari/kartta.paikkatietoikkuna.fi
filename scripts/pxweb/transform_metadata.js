@@ -49,14 +49,14 @@ const jsonItems = rows.map(row => {
         decimalCount: Number(cols[12]),
         timerange: {
             start: cols[8],
-            end: cols[9]
+            // - commented out since manually updated/end: cols[9]
         },
-        updated: cols[6],
-        nextUpdate: cols[7]
-//        lyhenne: cols[3],
-//        labels: cols[4] ? cols[4].split(',').map(l => l.trim()) : [],
-//        prio: Number(cols[5]),
-//        regionsets: cols[15] ? cols[15].split(',').map(l => l.trim()): []
+        // - commented out since manually updated/updated: cols[6],
+        // - commented out since manually updated/nextUpdate: cols[7]
+        // - commented out since not used/lyhenne: cols[3],
+        // - commented out since not used/labels: cols[4] ? cols[4].split(',').map(l => l.trim()) : [],
+        // - commented out since not used/prio: Number(cols[5]),
+        // - commented out since not used/regionsets: cols[15] ? cols[15].split(',').map(l => l.trim()): []
     }
 })
 .filter(item => !!item)
