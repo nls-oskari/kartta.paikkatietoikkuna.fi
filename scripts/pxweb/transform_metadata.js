@@ -10,6 +10,7 @@
 const fs = require('fs');
 const contents = fs.readFileSync(__dirname + '/metadata_tk.csv', { encoding : 'latin1' }).toString();
 
+// Valuetypes are no longer used in latest CSV :(
 const VALUE_TYPE = {
     '%osuus': 'percentage',
     'lkm': 'count',
@@ -33,10 +34,10 @@ const getNum = (value, row) => {
     }
     if ('ääretön' === value) {
         //console.log('Number.POSITIVE_INFINITY')
-        return 'Number.POSITIVE_INFINITY'
+        return undefined;
     } else if ('negat ääretön' === value) {
         //console.log('Number.NEGATIVE_INFINITY')
-        return 'Number.NEGATIVE_INFINITY'
+        return undefined;
     }
     let num = value;
     try {
