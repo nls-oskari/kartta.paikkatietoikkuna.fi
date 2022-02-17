@@ -97,7 +97,7 @@ const jsonItems = rows.map(row => {
         desc: getLocalized(cols[10]),
         source: getLocalized(cols[2]),
         // there's no valueType anymore. Frontend should use min, max, base, isRatio to detect it.
-        valueType: VALUE_TYPE[cols[14]],
+        // valueType: VALUE_TYPE[cols[14]],
         decimalCount: Number(cols[12]),
         timerange: {
             start: cols[8],
