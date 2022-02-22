@@ -126,25 +126,20 @@ public class TerrainProfileHandler extends ActionHandler {
 
     @Override
     public void handleAction(ActionParameters params) throws ActionException {
-        JsonNode route;
-        try {
-            route = om.readTree(params.getRequiredParam(PARAM_ROUTE));
-        } catch (JsonProcessingException e) {
-            throw new ActionParamsException("Expected JSON object for param " + PARAM_ROUTE, e);
-        }
-        // JSONObject route = JSONHelper.createJSONObject(params.getRequiredParam(PARAM_ROUTE));
-
-        String targetSRS = params.getHttpParam(ActionConstants.PARAM_SRS, DEFAULT_SRS);
-        boolean reproject = !targetSRS.equals(serviceSrs);
+        JsonNode route = getParamRoute(params);
 
         double[] points = getRoutePoints(route);
-        if (reproject) {
-            transformInPlace(points, serviceSrs, targetSRS);
-        }
+        int numPoints = getNumPoints(route.get(JSON_PROPERTY_PROPERTIES));
+        double scaleFactor = getScaleFactor(route.get(JSON_PROPERTY_PROPERTIES));
 
-        JsonNode properties = route.get(JSON_PROPERTY_PROPERTIES);
-        int numPoints = getNumPoints(properties);
-        double scaleFactor = getScaleFactor(properties);
+        // Allow route to be GC'd
+        route = null;
+
+        MathTransform transform = getTransform(serviceSrs, params);
+
+        if (transform != null) {
+            transformInPlace(points, transform);
+        }
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("Number of coords:", points.length / 2,
@@ -153,13 +148,25 @@ public class TerrainProfileHandler extends ActionHandler {
 
         try {
             List<DataPoint> dp = getService().getTerrainProfile(points, numPoints, scaleFactor);
-            writeResponse(params, dp, reproject);
+            if (transform != null) {
+                transformInPlace(dp, transform);
+            }
+            writeResponse(params, dp);
         } catch (ServiceException e) {
             throw new ActionException(e.getMessage(), e);
         }
     }
 
-    private double[] getRoutePoints(JsonNode route) throws ActionParamsException {
+    private JsonNode getParamRoute(ActionParameters params) throws ActionParamsException {
+        try {
+            String routeJson = params.getRequiredParam(PARAM_ROUTE);
+            return om.readTree(routeJson);
+        } catch (JsonProcessingException e) {
+            throw new ActionParamsException("Expected JSON object for param " + PARAM_ROUTE, e);
+        }
+    }
+
+    protected double[] getRoutePoints(JsonNode route) throws ActionParamsException {
         JsonNode geometry = route.get("geometry");
         if (geometry == null || !geometry.isObject()) {
             throw new ActionParamsException("Invalid input - expected GeoJSON feature");
@@ -198,28 +205,6 @@ public class TerrainProfileHandler extends ActionHandler {
         return xy;
     }
 
-    protected void transformInPlace(double[] xy, String fromSrs, String toSrs) throws ActionException {
-        MathTransform transform = getTransform(fromSrs, toSrs);
-        try {
-            transform.transform(xy, 0, xy, 0, xy.length / 2);
-        } catch (TransformException e) {
-            throw new ActionException(e.getMessage(), e);
-        }
-    }
-
-    protected MathTransform getTransform(String fromSrs, String toSrs) throws ActionException {
-        CoordinateReferenceSystem fromCRS;
-        CoordinateReferenceSystem toCRS;
-        try {
-            fromCRS = CRS.decode(fromSrs);
-            toCRS = CRS.decode(toSrs);
-            boolean lenient = true; // allow for some error due to different datums
-            return CRS.findMathTransform(fromCRS, toCRS, lenient);
-        } catch (FactoryException e) {
-            throw new ActionParamsException("Invalid " + ActionConstants.PARAM_SRS);
-        }
-    }
-
     protected int getNumPoints(JsonNode props) throws ActionParamsException {
         if (props == null || !props.has(JSON_PROPERTY_NUM_POINTS)) {
             return 0;
@@ -234,26 +219,51 @@ public class TerrainProfileHandler extends ActionHandler {
 
     protected double getScaleFactor(JsonNode props) {
         double fallback = 0.0;
+        if (props == null || !props.has(JSON_PROPERTY_SCALE_FACTOR)) {
+            return fallback;
+        }
         return props.get(JSON_PROPERTY_SCALE_FACTOR).asDouble(fallback);
     }
 
-    protected void writeResponse(ActionParameters params, List<DataPoint> dp, boolean reproject) throws ActionException {
-        if (reproject) {
+    private MathTransform getTransform(String serviceCrs, ActionParameters params) throws ActionParamsException {
+        try {
             String targetSRS = params.getHttpParam(ActionConstants.PARAM_SRS, DEFAULT_SRS);
-            MathTransform transform = getTransform(serviceSrs, targetSRS);
-            try {
-                double[] xy = new double[2];
-                for (DataPoint cur : dp) {
-                    xy[0] = cur.getE();
-                    xy[1] = cur.getN();
-                    transform.transform(xy, 0, xy, 0, 1);
-                    cur.setE(xy[0]);
-                    cur.setN(xy[1]);
-                }
-            } catch (TransformException e) {
-                throw new ActionException(e.getMessage(), e);
+            if (targetSRS.equals(serviceSrs)) {
+                return null;
             }
+            CoordinateReferenceSystem fromCRS = CRS.decode(serviceCrs);
+            CoordinateReferenceSystem toCRS = CRS.decode(targetSRS);
+            boolean lenient = true; // allow for some error due to different datums
+            return CRS.findMathTransform(fromCRS, toCRS, lenient);
+        } catch (FactoryException e) {
+            throw new ActionParamsException("Invalid " + ActionConstants.PARAM_SRS);
         }
+    }
+
+    private void transformInPlace(double[] xy, MathTransform transform) throws ActionException {
+        try {
+            transform.transform(xy, 0, xy, 0, xy.length / 2);
+        } catch (TransformException e) {
+            throw new ActionException(e.getMessage(), e);
+        }
+    }
+
+    private void transformInPlace(List<DataPoint> dp, MathTransform transform) throws ActionException {
+        try {
+            double[] xy = new double[2];
+            for (DataPoint cur : dp) {
+                xy[0] = cur.getE();
+                xy[1] = cur.getN();
+                transform.transform(xy, 0, xy, 0, 1);
+                cur.setE(xy[0]);
+                cur.setN(xy[1]);
+            }
+        } catch (TransformException e) {
+            throw new ActionException(e.getMessage(), e);
+        }
+    }
+
+    protected void writeResponse(ActionParameters params, List<DataPoint> dp) throws ActionException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (JsonGenerator json = om.getFactory().createGenerator(baos)) {
             writeMultiPointFeature(dp, json);
