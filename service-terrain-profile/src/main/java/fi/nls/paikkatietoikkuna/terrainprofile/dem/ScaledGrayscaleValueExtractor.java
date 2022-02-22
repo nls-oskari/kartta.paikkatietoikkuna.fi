@@ -10,8 +10,8 @@ public class ScaledGrayscaleValueExtractor implements TileValueExtractor {
 
     public static final String ID = "INT";
 
-    private final double scale;
-    private final double offset;
+    private final double scaleInv;
+    private final double negatedOffset;
     private final int noData;
 
     private final Map<Integer, short[]> tileCache = new HashMap<>();
@@ -19,8 +19,8 @@ public class ScaledGrayscaleValueExtractor implements TileValueExtractor {
     private boolean unsigned;
 
     public ScaledGrayscaleValueExtractor(double scale, double offset, int noData) {
-        this.scale = scale;
-        this.offset = offset;
+        this.scaleInv = 1.0 / scale;
+        this.negatedOffset = -offset;
         this.noData = noData;
     }
 
@@ -40,13 +40,10 @@ public class ScaledGrayscaleValueExtractor implements TileValueExtractor {
 
     @Override
     public double getTileValue(TIFFReader r, IFD ifd, int ifdIdx, int tileIndex, int tileOffset) {
-        short[] tile = tileCache.computeIfAbsent(tileIndex, __ -> {
-            short[] toCache = new short[ifd.getTileWidth() * ifd.getTileHeight()];
-            r.readTile(ifdIdx, tileIndex, toCache);
-            int toCache;
-        });
+        int n = ifd.getTileWidth() * ifd.getTileHeight();
+        short[] tile = tileCache.computeIfAbsent(tileIndex, __ -> r.readTile(ifdIdx, tileIndex, new short[n]));
         int value = unsigned ? tile[tileOffset] & 0xFFFF : tile[tileOffset];
-        return value == noData ? Double.NaN : value * scale + offset;
+        return value == noData ? Double.NaN : (value + negatedOffset) * scaleInv;
     }
 
 }

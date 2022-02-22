@@ -26,11 +26,8 @@ public class FloatAsIsValueExtractor implements TileValueExtractor {
 
     @Override
     public double getTileValue(TIFFReader r, IFD ifd, int ifdIdx, int tileIndex, int tileOffset) {
-        float[] tile = tileCache.computeIfAbsent(tileIndex, __ -> {
-            float[] toCache = new float[ifd.getTileWidth() * ifd.getTileHeight()];
-            r.readTile(ifdIdx, tileIndex, toCache);
-            return toCache;
-        });
+        int n = ifd.getTileWidth() * ifd.getTileHeight();
+        float[] tile = tileCache.computeIfAbsent(tileIndex, __ -> r.readTile(ifdIdx, tileIndex, new float[n]));
         float value = tile[tileOffset];
         return (value == noData) ? Double.NaN : value;
     }
