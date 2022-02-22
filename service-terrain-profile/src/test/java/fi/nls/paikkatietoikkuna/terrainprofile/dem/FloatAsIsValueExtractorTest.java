@@ -1,4 +1,4 @@
-package fi.nls.paikkatietoikkuna.terrainprofile.demo;
+package fi.nls.paikkatietoikkuna.terrainprofile.dem;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -11,29 +11,25 @@ import org.junit.Test;
 import org.oskari.wcs.geotiff.IFD;
 import org.oskari.wcs.geotiff.TIFFReader;
 
-import fi.nls.paikkatietoikkuna.terrainprofile.dem.ScaledGrayscaleValueExtractor;
-
-public class ScaledGrayscaleValueExtractorTest {
+public class FloatAsIsValueExtractorTest {
 
     @Test
     public void testScaleOffset() {
-        double scale = 32.0;
-        double offset = -1000;
-        int noData = 0;
-        ScaledGrayscaleValueExtractor e = new ScaledGrayscaleValueExtractor(scale, offset, noData);
+        float noData = -9999.9f;
+        FloatAsIsValueExtractor e = new FloatAsIsValueExtractor(noData);
 
-        double z0 = 527.125;
-        double z1 = -425.375;
+        double z0 = 3527.125;
+        double z1 = -534.375;
 
         int tileWidth = 256;
         int tileHeight = 256;
-        short[] tile = new short[tileWidth * tileHeight];
+        float[] tile = new float[tileWidth * tileHeight];
         TIFFReader tiffReader = mock(TIFFReader.class);
-        when(tiffReader.readTile(anyInt(), anyInt(), any(short[].class))).thenReturn(tile);
+        when(tiffReader.readTile(anyInt(), anyInt(), any(float[].class))).thenReturn(tile);
 
-        tile[0] = (short) Math.round(z0 * scale + offset);
-        tile[1] = (short) Math.round(z1 * scale + offset);
-        tile[2] = (short) noData;
+        tile[0] = (float) z0;
+        tile[1] = (float) z1;
+        tile[2] = noData;
 
         IFD ifd = mock(IFD.class);
         when(ifd.getTileWidth()).thenReturn(tileWidth);
