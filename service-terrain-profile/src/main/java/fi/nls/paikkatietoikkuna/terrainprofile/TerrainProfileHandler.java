@@ -1,11 +1,9 @@
 package fi.nls.paikkatietoikkuna.terrainprofile;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.locationtech.jts.geom.CoordinateSequence;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.LineString;
 
 import fi.nls.oskari.annotation.OskariActionRoute;
 import fi.nls.oskari.control.*;
@@ -14,7 +12,6 @@ import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.service.ServiceException;
 import fi.nls.oskari.service.ServiceRuntimeException;
 import fi.nls.oskari.util.IOHelper;
-import fi.nls.oskari.util.JSONHelper;
 import fi.nls.oskari.util.PropertyUtil;
 import fi.nls.oskari.util.ResponseHelper;
 import fi.nls.paikkatietoikkuna.terrainprofile.dem.FloatAsIsValueExtractor;
@@ -29,14 +26,11 @@ import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.opengis.referencing.operation.TransformException;
-import org.oskari.geojson.GeoJSONReader;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
 
 @OskariActionRoute("TerrainProfile")
 public class TerrainProfileHandler extends ActionHandler {
@@ -132,7 +126,13 @@ public class TerrainProfileHandler extends ActionHandler {
 
     @Override
     public void handleAction(ActionParameters params) throws ActionException {
-        JSONObject route = JSONHelper.createJSONObject(params.getRequiredParam(PARAM_ROUTE));
+        JsonNode route;
+        try {
+            route = om.readTree(params.getRequiredParam(PARAM_ROUTE));
+        } catch (JsonProcessingException e) {
+            throw new ActionParamsException("Expected JSON object for param " + PARAM_ROUTE, e);
+        }
+        // JSONObject route = JSONHelper.createJSONObject(params.getRequiredParam(PARAM_ROUTE));
 
         String targetSRS = params.getHttpParam(ActionConstants.PARAM_SRS, DEFAULT_SRS);
         boolean reproject = !targetSRS.equals(serviceSrs);
@@ -142,7 +142,7 @@ public class TerrainProfileHandler extends ActionHandler {
             transformInPlace(points, serviceSrs, targetSRS);
         }
 
-        JSONObject properties = route.optJSONObject(JSON_PROPERTY_PROPERTIES);
+        JsonNode properties = route.get(JSON_PROPERTY_PROPERTIES);
         int numPoints = getNumPoints(properties);
         double scaleFactor = getScaleFactor(properties);
 
@@ -159,35 +159,41 @@ public class TerrainProfileHandler extends ActionHandler {
         }
     }
 
-    private double[] getRoutePoints(JSONObject route) throws ActionException {
-        LineString geom = getGeometry(route);
-        return getXYCoordinates(geom);
-    }
+    private double[] getRoutePoints(JsonNode route) throws ActionParamsException {
+        JsonNode geometry = route.get("geometry");
+        if (geometry == null || !geometry.isObject()) {
+            throw new ActionParamsException("Invalid input - expected GeoJSON feature");
+        }
 
-    protected LineString getGeometry(JSONObject route) throws ActionParamsException {
-        try {
-            Geometry geom = GeoJSONReader.toGeometry(route.getJSONObject("geometry"));
-            if (geom.getNumPoints() > NUM_POINTS_MAX) {
-                throw new ActionParamsException("Invalid input - too many coordinates, maximum is " + NUM_POINTS_MAX);
-            }
-            if (!(geom instanceof LineString)) {
+        JsonNode type = geometry.get("type");
+        if (type == null || !type.isTextual() || !"LineString".equals(type.textValue())) {
+            throw new ActionParamsException("Invalid input - expected LineString geometry");
+        }
+
+        JsonNode coordinates = geometry.get("coordinates");
+        if (coordinates == null || !coordinates.isArray()) {
+            throw new ActionParamsException("Invalid input - expected LineString geometry");
+        }
+        int len = coordinates.size();
+        if (len < 2) {
+            throw new ActionParamsException("Invalid input - expected LineString with atleast two coordinates");
+        } else if (len > NUM_POINTS_MAX) {
+            throw new ActionParamsException("Invalid input - too many coordinates, maximum is " + NUM_POINTS_MAX);
+        }
+
+        double[] xy = new double[len * 2];
+        for (int i = 0; i < len; i++) {
+            JsonNode coordinate = coordinates.get(i);
+            if (coordinate == null || !coordinate.isArray()) {
                 throw new ActionParamsException("Invalid input - expected LineString geometry");
             }
-            return (LineString) geom;
-        } catch (JSONException e) {
-            throw new ActionParamsException("Invalid input - expected GeoJSON feature", e);
-        } catch (IllegalArgumentException e) {
-            throw new ActionParamsException("Invalid input - expected LineString with atleast two coordinates");
-        }
-    }
-
-    private double[] getXYCoordinates(LineString line) {
-        final CoordinateSequence csq = line.getCoordinateSequence();
-        final int len = csq.size();
-        final double[] xy = new double[len * 2];
-        for (int ci = 0, i = 0; ci < len; ci++) {
-            xy[i++] = csq.getX(ci);
-            xy[i++] = csq.getY(ci);
+            JsonNode x = coordinate.get(0);
+            JsonNode y = coordinate.get(1);
+            if (!x.isNumber() || !y.isNumber()) {
+                throw new ActionParamsException("Invalid input - expected LineString geometry");
+            }
+            xy[i * 2 + 0] = x.asDouble();
+            xy[i * 2 + 1] = y.asDouble();
         }
         return xy;
     }
@@ -214,28 +220,21 @@ public class TerrainProfileHandler extends ActionHandler {
         }
     }
 
-    protected int getNumPoints(JSONObject props) throws ActionParamsException {
+    protected int getNumPoints(JsonNode props) throws ActionParamsException {
         if (props == null || !props.has(JSON_PROPERTY_NUM_POINTS)) {
             return 0;
         }
-        try {
-            return Math.min(props.getInt(JSON_PROPERTY_NUM_POINTS), NUM_POINTS_MAX);
-        } catch (JSONException e) {
-            // Throwing ActionParamsException below
+        JsonNode numPoints = props.get(JSON_PROPERTY_NUM_POINTS);
+        if (!numPoints.isIntegralNumber()) {
+            throw new ActionParamsException(String.format(
+                    "Invalid property value '%s'", JSON_PROPERTY_NUM_POINTS));
         }
-        throw new ActionParamsException(String.format(
-                "Invalid property value '%s'", JSON_PROPERTY_NUM_POINTS));
+        return Math.min(numPoints.asInt(), NUM_POINTS_MAX);
     }
 
-    protected double getScaleFactor(JSONObject props) {
-        if (props != null && props.has(JSON_PROPERTY_SCALE_FACTOR)) {
-            try {
-                return props.getDouble(JSON_PROPERTY_SCALE_FACTOR);
-            } catch (JSONException e) {
-                // Ignore
-            }
-        }
-        return 0;
+    protected double getScaleFactor(JsonNode props) {
+        double fallback = 0.0;
+        return props.get(JSON_PROPERTY_SCALE_FACTOR).asDouble(fallback);
     }
 
     protected void writeResponse(ActionParameters params, List<DataPoint> dp, boolean reproject) throws ActionException {
