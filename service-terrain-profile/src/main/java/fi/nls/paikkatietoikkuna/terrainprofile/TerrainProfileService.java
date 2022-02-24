@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -17,6 +18,7 @@ import org.oskari.wcs.capabilities.Capabilities;
 import org.oskari.wcs.coverage.CoverageDescription;
 import org.oskari.wcs.coverage.RectifiedGridCoverage;
 import org.oskari.wcs.extension.scaling.ScaleByFactor;
+import org.oskari.wcs.geotiff.TIFFReader;
 import org.oskari.wcs.gml.RectifiedGrid;
 import org.oskari.wcs.parser.CapabilitiesParser;
 import org.oskari.wcs.parser.CoverageDescriptionsParser;
@@ -29,6 +31,9 @@ import com.netflix.hystrix.exception.HystrixRuntimeException;
 
 import fi.nls.oskari.service.ServiceException;
 import fi.nls.oskari.util.IOHelper;
+import fi.nls.paikkatietoikkuna.terrainprofile.dem.FloatAsIsValueExtractor;
+import fi.nls.paikkatietoikkuna.terrainprofile.dem.TileValueExtractor;
+import fi.nls.paikkatietoikkuna.terrainprofile.dem.TiledTiffDEM;
 
 public class TerrainProfileService {
 
@@ -48,6 +53,7 @@ public class TerrainProfileService {
     };
 
     private final String endPoint;
+    private final Supplier<TileValueExtractor> extractorGenerator;
     private final Capabilities caps;
     private final RectifiedGridCoverage desc;
     private final double originEast;
@@ -56,8 +62,13 @@ public class TerrainProfileService {
     private final double offsetVectorY;
 
     public TerrainProfileService(String endPoint, String coverageId) throws ServiceException {
+        this(endPoint, coverageId, () -> new FloatAsIsValueExtractor(Float.NaN));
+    }
+
+    public TerrainProfileService(String endPoint, String coverageId, Supplier<TileValueExtractor> extractorGenerator) throws ServiceException {
         try {
             this.endPoint = endPoint;
+            this.extractorGenerator = extractorGenerator;
             caps = getCapabilities(endPoint);
             CoverageDescription tmp = describeCoverage(endPoint, coverageId);
             if (!(tmp instanceof RectifiedGridCoverage)) {
@@ -126,12 +137,8 @@ public class TerrainProfileService {
             setAltitudes(pointsInTile, scaleFactor, dx, dy);
         }
 
-        points.sort(new Comparator<DataPoint>() {
-            @Override
-            public int compare(DataPoint o1, DataPoint o2) {
-                return Double.compare(o1.getDistFromStart(), o2.getDistFromStart());
-            }
-        });
+        points.sort(Comparator.comparingDouble(DataPoint::getDistFromStart));
+
         return points;
     }
 
@@ -313,19 +320,19 @@ public class TerrainProfileService {
         }
 
         try {
-            FloatGeoTIFF tiff = new FloatGeoTIFF(response);
+            TIFFReader r = new TIFFReader(response);
+            TiledTiffDEM tiff = new TiledTiffDEM(r, extractorGenerator.get());
             setAltitudes(pointsInTile, tiff, minGridX, minGridY);
         } catch (IllegalArgumentException e) {
             throw new ServiceException("Unexpected TIFF file", e);
         }
     }
 
-    private void setAltitudes(List<DataPoint> pointsInTile, FloatGeoTIFF tiff, int minGridX, int minGridY) {
+    private void setAltitudes(List<DataPoint> pointsInTile, TiledTiffDEM tiff, int minGridX, int minGridY) {
         for (DataPoint point : pointsInTile) {
             int x = point.getGridX() - minGridX;
             int y = point.getGridY() - minGridY;
-            float alt = tiff.getValue(x, y);
-            point.setAltitude(alt);
+            point.setAltitude(tiff.getValue(x, y));
         }
     }
 

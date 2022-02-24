@@ -1,11 +1,10 @@
 package fi.nls.paikkatietoikkuna.terrainprofile;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
 import fi.nls.oskari.annotation.OskariActionRoute;
 import fi.nls.oskari.control.*;
 import fi.nls.oskari.log.LogFactory;
@@ -13,25 +12,25 @@ import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.service.ServiceException;
 import fi.nls.oskari.service.ServiceRuntimeException;
 import fi.nls.oskari.util.IOHelper;
-import fi.nls.oskari.util.JSONHelper;
 import fi.nls.oskari.util.PropertyUtil;
 import fi.nls.oskari.util.ResponseHelper;
+import fi.nls.paikkatietoikkuna.terrainprofile.dem.FloatAsIsValueExtractor;
+import fi.nls.paikkatietoikkuna.terrainprofile.dem.ScaledGrayscaleValueExtractor;
+import fi.nls.paikkatietoikkuna.terrainprofile.dem.TileValueExtractor;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.opengis.referencing.operation.TransformException;
-import org.oskari.geojson.GeoJSONReader;
-
-import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
 
 @OskariActionRoute("TerrainProfile")
 public class TerrainProfileHandler extends ActionHandler {
@@ -44,6 +43,9 @@ public class TerrainProfileHandler extends ActionHandler {
     protected static final String PROPERTY_ENDPOINT_SRS = "terrain.profile.wcs.srs";
     protected static final String PROPERTY_DEM_COVERAGE_ID = "terrain.profile.wcs.demCoverageId";
     protected static final String PROPERTY_NODATA_VALUE = "terrain.profile.wcs.noData";
+    protected static final String PROPERTY_DEM_TYPE = "terrain.profile.wcs.demType";
+    protected static final String PROPERTY_DEM_SCALE = "terrain.profile.wcs.demScale";
+    protected static final String PROPERTY_DEM_OFFSET = "terrain.profile.wcs.demOffset";
 
     protected static final String JSON_PROPERTY_PROPERTIES = "properties";
     protected static final String JSON_PROPERTY_NUM_POINTS = "numPoints";
@@ -55,7 +57,6 @@ public class TerrainProfileHandler extends ActionHandler {
 
     private final ObjectMapper om;
     private TerrainProfileService tps;
-    private float noDataValue;
     private String serviceSrs;
 
     public TerrainProfileHandler() {
@@ -80,96 +81,158 @@ public class TerrainProfileHandler extends ActionHandler {
             LOG.error("Failed to init TerrainProfileService: " + ex.getMessage(), ex);
         }
         serviceSrs = PropertyUtil.get(PROPERTY_ENDPOINT_SRS, DEFAULT_SRS).toUpperCase();
-        noDataValue = getNoDataValue();
-        LOG.debug("NODATA value:", noDataValue);
     }
 
     protected synchronized TerrainProfileService getService() throws ServiceException {
         if (tps == null) {
             tps = new TerrainProfileService(
                     PropertyUtil.getNecessary(PROPERTY_ENDPOINT),
-                    PropertyUtil.getNecessary(PROPERTY_DEM_COVERAGE_ID));
+                    PropertyUtil.getNecessary(PROPERTY_DEM_COVERAGE_ID),
+                    getTileValueExtractor());
         }
         return tps;
     }
 
-    private float getNoDataValue() {
+    private Supplier<TileValueExtractor> getTileValueExtractor() {
+        String type = PropertyUtil.get(PROPERTY_DEM_TYPE, FloatAsIsValueExtractor.ID);
+
+        switch (type) {
+        case ScaledGrayscaleValueExtractor.ID:
+            double scale = Double.parseDouble(PropertyUtil.getNecessary(PROPERTY_DEM_SCALE));
+            double offset = Double.parseDouble(PropertyUtil.getNecessary(PROPERTY_DEM_OFFSET));
+            short noDataS = getNoDataValue(Short::parseShort).shortValue();
+            return () -> new ScaledGrayscaleValueExtractor(offset, scale, noDataS);
+
+        case FloatAsIsValueExtractor.ID:
+        default:
+            float noDataF = getNoDataValue(Float::parseFloat).floatValue();
+            return () -> new FloatAsIsValueExtractor(noDataF);
+        }
+    }
+
+    private Number getNoDataValue(Function<String, Number> parser) {
         String noDataStr = PropertyUtil.getOptional(PROPERTY_NODATA_VALUE);
         if (noDataStr != null && !noDataStr.isEmpty()) {
             try {
-                return Float.parseFloat(noDataStr);
+                Number noDataValue = parser.apply(noDataStr);
+                LOG.debug("NODATA value:", noDataValue);
+                return noDataValue;
             } catch (NumberFormatException e) {
                 LOG.warn("Could not parse NODATA value from " + noDataStr);
             }
         }
-        return Float.NaN;
+        return Double.NaN;
     }
 
     @Override
     public void handleAction(ActionParameters params) throws ActionException {
-        JSONObject route = JSONHelper.createJSONObject(params.getRequiredParam(PARAM_ROUTE));
-        Geometry geom = getGeometry(route);
+        JsonNode route = getParamRoute(params);
 
-        String targetSRS = params.getHttpParam(ActionConstants.PARAM_SRS, DEFAULT_SRS);
-        boolean reproject = !targetSRS.equals(serviceSrs);
-        if (reproject) {
-            geom = getReprojected(geom, targetSRS, serviceSrs);
-        }
+        double[] points = getRoutePoints(route);
+        int numPoints = getNumPoints(route.get(JSON_PROPERTY_PROPERTIES));
+        double scaleFactor = getScaleFactor(route.get(JSON_PROPERTY_PROPERTIES));
 
-        JSONObject properties = route.optJSONObject(JSON_PROPERTY_PROPERTIES);
-        int numPoints = Math.min(getNumPoints(properties), NUM_POINTS_MAX);
-        double scaleFactor = getScaleFactor(properties);
-        double[] points = new double[geom.getNumPoints() * 2];
-        int ptIndex = -1;
-        for (Coordinate coord : geom.getCoordinates()) {
-            points[++ptIndex] = coord.x;
-            points[++ptIndex] = coord.y;
+        // Allow route to be GC'd
+        route = null;
+
+        MathTransform transform = getTransform(serviceSrs, params);
+
+        if (transform != null) {
+            transformInPlace(points, transform);
         }
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Number of coords:", geom.getNumPoints(),
+            LOG.debug("Number of coords:", points.length / 2,
                     "line:", Arrays.toString(points), "numPoints", numPoints);
         }
 
         try {
-            writeResponse(params, getService().getTerrainProfile(points, numPoints, scaleFactor), reproject);
+            List<DataPoint> dp = getService().getTerrainProfile(points, numPoints, scaleFactor);
+            if (transform != null) {
+                transformInPlace(dp, transform);
+            }
+            writeResponse(params, dp);
         } catch (ServiceException e) {
             throw new ActionException(e.getMessage(), e);
         }
     }
 
-    protected Geometry getGeometry(JSONObject route) throws ActionParamsException {
+    private JsonNode getParamRoute(ActionParameters params) throws ActionParamsException {
         try {
-            Geometry geom = GeoJSONReader.toGeometry(route.getJSONObject("geometry"));
-            if (!(geom.getGeometryType().equals("LineString"))) {
+            String routeJson = params.getRequiredParam(PARAM_ROUTE);
+            return om.readTree(routeJson);
+        } catch (JsonProcessingException e) {
+            throw new ActionParamsException("Expected JSON object for param " + PARAM_ROUTE, e);
+        }
+    }
+
+    protected double[] getRoutePoints(JsonNode route) throws ActionParamsException {
+        JsonNode geometry = route.get("geometry");
+        if (geometry == null || !geometry.isObject()) {
+            throw new ActionParamsException("Invalid input - expected GeoJSON feature");
+        }
+
+        JsonNode type = geometry.get("type");
+        if (type == null || !type.isTextual() || !"LineString".equals(type.textValue())) {
+            throw new ActionParamsException("Invalid input - expected LineString geometry");
+        }
+
+        JsonNode coordinates = geometry.get("coordinates");
+        if (coordinates == null || !coordinates.isArray()) {
+            throw new ActionParamsException("Invalid input - expected LineString geometry");
+        }
+        int len = coordinates.size();
+        if (len < 2) {
+            throw new ActionParamsException("Invalid input - expected LineString with atleast two coordinates");
+        } else if (len > NUM_POINTS_MAX) {
+            throw new ActionParamsException("Invalid input - too many coordinates, maximum is " + NUM_POINTS_MAX);
+        }
+
+        double[] xy = new double[len * 2];
+        for (int i = 0; i < len; i++) {
+            JsonNode coordinate = coordinates.get(i);
+            if (coordinate == null || !coordinate.isArray()) {
                 throw new ActionParamsException("Invalid input - expected LineString geometry");
             }
-            if (geom.getNumPoints() > NUM_POINTS_MAX) {
-                throw new ActionParamsException("Invalid input - too many coordinates, maximum is " + NUM_POINTS_MAX);
+            JsonNode x = coordinate.get(0);
+            JsonNode y = coordinate.get(1);
+            if (!x.isNumber() || !y.isNumber()) {
+                throw new ActionParamsException("Invalid input - expected LineString geometry");
             }
-            return geom;
-        } catch (JSONException e) {
-            throw new ActionParamsException("Invalid input - expected GeoJSON feature", e);
-        } catch (IllegalArgumentException e) {
-            throw new ActionParamsException("Invalid input - expected LineString with atleast two coordinates");
+            xy[i * 2 + 0] = x.asDouble();
+            xy[i * 2 + 1] = y.asDouble();
         }
+        return xy;
     }
 
-    protected Geometry getReprojected(Geometry geom, String fromSrs, String toSrs) throws ActionException {
-        MathTransform transform = getTransform(fromSrs, toSrs);
-        try {
-            return JTS.transform(geom, transform);
-        } catch (TransformException e) {
-            throw new ActionException(e.getMessage(), e);
+    protected int getNumPoints(JsonNode props) throws ActionParamsException {
+        if (props == null || !props.has(JSON_PROPERTY_NUM_POINTS)) {
+            return 0;
         }
+        JsonNode numPoints = props.get(JSON_PROPERTY_NUM_POINTS);
+        if (!numPoints.isIntegralNumber()) {
+            throw new ActionParamsException(String.format(
+                    "Invalid property value '%s'", JSON_PROPERTY_NUM_POINTS));
+        }
+        return Math.min(numPoints.asInt(), NUM_POINTS_MAX);
     }
 
-    protected MathTransform getTransform(String fromSrs, String toSrs) throws ActionException {
-        CoordinateReferenceSystem fromCRS;
-        CoordinateReferenceSystem toCRS;
+    protected double getScaleFactor(JsonNode props) {
+        double fallback = 0.0;
+        if (props == null || !props.has(JSON_PROPERTY_SCALE_FACTOR)) {
+            return fallback;
+        }
+        return props.get(JSON_PROPERTY_SCALE_FACTOR).asDouble(fallback);
+    }
+
+    private MathTransform getTransform(String serviceCrs, ActionParameters params) throws ActionParamsException {
         try {
-            fromCRS = CRS.decode(fromSrs);
-            toCRS = CRS.decode(toSrs);
+            String targetSRS = params.getHttpParam(ActionConstants.PARAM_SRS, DEFAULT_SRS);
+            if (targetSRS.equals(serviceSrs)) {
+                return null;
+            }
+            CoordinateReferenceSystem fromCRS = CRS.decode(serviceCrs);
+            CoordinateReferenceSystem toCRS = CRS.decode(targetSRS);
             boolean lenient = true; // allow for some error due to different datums
             return CRS.findMathTransform(fromCRS, toCRS, lenient);
         } catch (FactoryException e) {
@@ -177,49 +240,33 @@ public class TerrainProfileHandler extends ActionHandler {
         }
     }
 
-    protected int getNumPoints(JSONObject props) throws ActionParamsException {
-        if (props == null || !props.has(JSON_PROPERTY_NUM_POINTS)) {
-            return 0;
-        }
+    private void transformInPlace(double[] xy, MathTransform transform) throws ActionException {
         try {
-            return props.getInt(JSON_PROPERTY_NUM_POINTS);
-        } catch (JSONException e) {
-            // Throwing ActionParamsException below
+            transform.transform(xy, 0, xy, 0, xy.length / 2);
+        } catch (TransformException e) {
+            throw new ActionException(e.getMessage(), e);
         }
-        throw new ActionParamsException(String.format(
-                "Invalid property value '%s'", JSON_PROPERTY_NUM_POINTS));
     }
 
-    protected double getScaleFactor(JSONObject props) {
-        if (props != null && props.has(JSON_PROPERTY_SCALE_FACTOR)) {
-            try {
-                return props.getDouble(JSON_PROPERTY_SCALE_FACTOR);
-            } catch (JSONException e) {
-                // Ignore
+    private void transformInPlace(List<DataPoint> dp, MathTransform transform) throws ActionException {
+        try {
+            double[] xy = new double[2];
+            for (DataPoint cur : dp) {
+                xy[0] = cur.getE();
+                xy[1] = cur.getN();
+                transform.transform(xy, 0, xy, 0, 1);
+                cur.setE(xy[0]);
+                cur.setN(xy[1]);
             }
+        } catch (TransformException e) {
+            throw new ActionException(e.getMessage(), e);
         }
-        return 0;
     }
 
-    protected void writeResponse(ActionParameters params, List<DataPoint> dp, boolean reproject) throws ActionException {
-        if (reproject) {
-            String targetSRS = params.getHttpParam(ActionConstants.PARAM_SRS, DEFAULT_SRS);
-            MathTransform transform = getTransform(serviceSrs, targetSRS);
-            GeometryFactory gf = new GeometryFactory();
-            try {
-                for (DataPoint cur : dp) {
-                    Geometry geom = gf.createPoint(new Coordinate(cur.getE(), cur.getN()));
-                    geom = JTS.transform(geom, transform);
-                    cur.setE(geom.getCoordinate().x);
-                    cur.setN(geom.getCoordinate().y);
-                }
-            } catch (TransformException e) {
-                throw new ActionException(e.getMessage(), e);
-            }
-        }
+    protected void writeResponse(ActionParameters params, List<DataPoint> dp) throws ActionException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (JsonGenerator json = om.getFactory().createGenerator(baos)) {
-            writeMultiPointFeature(dp, json, noDataValue);
+            writeMultiPointFeature(dp, json);
         } catch (IOException e) {
             throw new ActionException("Failed to encode GeoJSON", e);
         }
@@ -227,7 +274,7 @@ public class TerrainProfileHandler extends ActionHandler {
     }
 
     protected static void writeMultiPointFeature(List<DataPoint> dp,
-            JsonGenerator json, final float noData) throws IOException {
+            JsonGenerator json) throws IOException {
         json.writeStartObject();
         json.writeStringField("type", "Feature");
 
@@ -240,8 +287,8 @@ public class TerrainProfileHandler extends ActionHandler {
             json.writeStartArray();
             json.writeNumber(p.getE());
             json.writeNumber(p.getN());
-            float alt = p.getAltitude();
-            if (alt == noData) {
+            double alt = p.getAltitude();
+            if (Double.isNaN(alt)) {
                 json.writeNull();
             } else {
                 json.writeNumber(alt);

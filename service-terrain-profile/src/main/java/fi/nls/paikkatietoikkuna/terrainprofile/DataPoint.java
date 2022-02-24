@@ -4,12 +4,12 @@ public class DataPoint {
 
     private double e;
     private double n;
+    private double altitude;
     private double distFromStart;
     private int gridX;
     private int gridY;
     private int tileX;
     private int tileY;
-    private float altitude;
 
     public double getE() {
         return e;
@@ -25,6 +25,14 @@ public class DataPoint {
 
     public void setN(double n) {
         this.n = n;
+    }
+
+    public double getAltitude() {
+        return altitude;
+    }
+
+    public void setAltitude(double altitude) {
+        this.altitude = altitude;
     }
 
     public double getDistFromStart() {
@@ -65,14 +73,6 @@ public class DataPoint {
 
     public void setTileY(int tileY) {
         this.tileY = tileY;
-    }
-
-    public float getAltitude() {
-        return altitude;
-    }
-
-    public void setAltitude(float altitude) {
-        this.altitude = altitude;
     }
 
 }

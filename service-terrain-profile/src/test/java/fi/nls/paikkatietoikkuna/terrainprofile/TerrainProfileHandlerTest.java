@@ -201,7 +201,7 @@ public class TerrainProfileHandlerTest {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (JsonGenerator json = new JsonFactory().createGenerator(baos)) {
-            TerrainProfileHandler.writeMultiPointFeature(Arrays.asList(p1, p2), json, Float.NaN);
+            TerrainProfileHandler.writeMultiPointFeature(Arrays.asList(p1, p2), json);
         }
 
         ObjectMapper om = new ObjectMapper();

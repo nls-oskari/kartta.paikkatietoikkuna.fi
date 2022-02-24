@@ -22,6 +22,7 @@
             <groupId>de.grundid.opendatalab</groupId>
             <artifactId>geojson-jackson</artifactId>
             <version>${geojson-jackson.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -36,10 +37,6 @@
         <dependency>
             <groupId>com.netflix.hystrix</groupId>
             <artifactId>hystrix-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.oskari</groupId>
-            <artifactId>gt-geojson</artifactId>
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
