@@ -23,9 +23,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>fi.nls.paikkatietoikkuna</groupId>
+            <groupId>fi.nls.oskari.extras</groupId>
             <artifactId>service-terrain-profile</artifactId>
-            <version>${project.version}</version>
+            <version>${nls.terrain-profile.version}</version>
         </dependency>
         <dependency>
             <groupId>fi.nls.paikkatietoikkuna</groupId>
