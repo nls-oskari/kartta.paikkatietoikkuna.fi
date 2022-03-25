@@ -13,6 +13,8 @@
         <oskari.version>2.7.0</oskari.version>
         <nls.search.version>3.7.0</nls.search.version>
         <nls.proj.version>1.2</nls.proj.version>
+        <nls.terrain-profile.version>1.0</nls.terrain-profile.version>
+
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
