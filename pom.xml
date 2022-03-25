@@ -82,7 +82,6 @@
         <module>webapp-landing</module>
         <module>service-spatineo-serval</module>
         <module>service-coordtransform</module>
-        <module>service-terrain-profile</module>
     </modules>
 
 </project>
