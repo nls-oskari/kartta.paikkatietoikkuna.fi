@@ -23,11 +23,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>fi.nls.oskari.extras</groupId>
-            <artifactId>service-terrain-profile</artifactId>
-            <version>${nls.terrain-profile.version}</version>
-        </dependency>
-        <dependency>
             <groupId>fi.nls.paikkatietoikkuna</groupId>
             <artifactId>app-resources</artifactId>
             <version>${project.version}</version>
@@ -67,6 +62,11 @@
             <groupId>fi.nls.oskari.extras</groupId>
             <artifactId>oskari-search-nls</artifactId>
             <version>${nls.search.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>fi.nls.oskari.extras</groupId>
+            <artifactId>service-terrain-profile</artifactId>
+            <version>${nls.terrain-profile.version}</version>
         </dependency>
         <!-- /extras -->
         <dependency>
