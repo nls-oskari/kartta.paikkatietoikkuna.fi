@@ -158,13 +158,13 @@
 
                 <c:set var="feedbackURL" scope="page" value="${props.getWithOptionalModifier('pti.feedback.url', language)}" />
                 <c:if test="${language == 'fi'}">
-                    <a target="_blank" href="${feedbackURL}">Palaute</a>
+                    <a target="_blank" href="${feedbackURL}">Palaute tai tukipyyntö</a>
                 </c:if>
                 <c:if test="${language == 'sv'}">
-                    <a target="_blank" href="${feedbackURL}">Respons</a>
+                    <a target="_blank" href="${feedbackURL}">Respons och stödtjänst</a>
                 </c:if>
                 <c:if test="${language == 'en'}">
-                    <a target="_blank" href="${feedbackURL}">Feedback</a>
+                    <a target="_blank" href="${feedbackURL}">Feedback and support</a>
                 </c:if>
             </div>
             <div id="toolbar">
