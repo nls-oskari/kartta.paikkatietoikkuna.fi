@@ -17,11 +17,11 @@
     </properties>
 
     <dependencies>
-        <dependency>
+        <!-- dependency>
             <groupId>fi.nls.paikkatietoikkuna</groupId>
             <artifactId>service-spatineo-serval</artifactId>
             <version>${project.version}</version>
-        </dependency>
+        </dependency -->
         <dependency>
             <groupId>fi.nls.paikkatietoikkuna</groupId>
             <artifactId>app-resources</artifactId>
