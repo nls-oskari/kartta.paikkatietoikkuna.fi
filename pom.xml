@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>fi.nls.paikkatietoikkuna</groupId>
     <artifactId>kartta</artifactId>
-    <version>1.23.0</version>
+    <version>1.24.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>kartta.paikkatietoikkuna.fi</name>
 
     <properties>
-        <oskari.version>2.9.0</oskari.version>
+        <oskari.version>2.10.0-SNAPSHOT</oskari.version>
         <nls.search.version>3.7.0</nls.search.version>
         <nls.proj.version>1.2</nls.proj.version>
         <nls.terrain-profile.version>1.1</nls.terrain-profile.version>
