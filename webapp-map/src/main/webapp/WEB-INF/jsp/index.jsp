@@ -11,19 +11,25 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <c:if test="${language == 'fi'}">
         <meta name="Description" CONTENT="Paikkatietoikkuna on kansallinen paikkatietoportaali, joka esittelee paikkatietoaineistoja ja -palveluja sekä niiden hyödyntämismahdollisuuksia." />
+        <link rel="alternate" hreflang="sv" href="https://kartta.paikkatietoikkuna.fi/?lang=sv" />
+        <link rel="alternate" hreflang="en" href="https://kartta.paikkatietoikkuna.fi/?lang=en" />
     </c:if>
     <c:if test="${language == 'sv'}">
         <meta name="Description" CONTENT="Paikkatietoikkuna är vår nationella geodataportal som presenterar geodatamaterial och relaterade tjänster samt hur man kan utnyttja dem." />
+        <link rel="alternate" hreflang="fi" href="https://kartta.paikkatietoikkuna.fi/?lang=fi" />
+        <link rel="alternate" hreflang="en" href="https://kartta.paikkatietoikkuna.fi/?lang=en" />
     </c:if>
     <c:if test="${language == 'en'}">
         <meta name="Description" CONTENT="Paikkatietoikkuna is the national geoportal presenting spatial data and related services and the ways these can be used." />
+        <link rel="alternate" hreflang="sv" href="https://kartta.paikkatietoikkuna.fi/?lang=sv" />
+        <link rel="alternate" hreflang="fi" href="https://kartta.paikkatietoikkuna.fi/?lang=fi" />
     </c:if>
     <c:if test = "${(not empty param.coord) or (not empty param.mapLayers) or (not empty param.uuid)}">
         <link rel="canonical" href="https://kartta.paikkatietoikkuna.fi" />
         <meta name="robots" content="noindex" />
     </c:if>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="keywords" content="Paikkatieto, kartat, maps, GIS, geoportal, Oskari" />
+    <meta name="keywords" content="Paikkatieto, kartta, kartat, maps, GIS, geoportal, Oskari" />
     <meta property="og:image" content="${props.getOptional('oskari.domain')}/static/paikkis.png" />
     <meta property="og:image:width" content="1140" />
     <meta property="og:image:height" content="1140" />
