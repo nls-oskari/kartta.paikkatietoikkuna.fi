@@ -19,6 +19,7 @@
         <meta name="Description" CONTENT="Paikkatietoikkuna is the national geoportal presenting spatial data and related services and the ways these can be used." />
     </c:if>
     <c:if test = "${(not empty param.coord) or (not empty param.mapLayers) or (not empty param.uuid)}">
+        <link rel="canonical" href="https://kartta.paikkatietoikkuna.fi" />
         <meta name="robots" content="noindex" />
     </c:if>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
