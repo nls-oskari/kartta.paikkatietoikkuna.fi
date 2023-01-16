@@ -47,20 +47,19 @@
             body {
                 margin: 0;
                 padding: 0;
+                height: 100vh;
+                width: 100%;
+                display: flex;
+                flex-direction: row;
+                background: #fff;
             }
 
-            #content {
-                position: relative;
-            }
-
-            #sidebar {
+            header.sidebar {
                 background-color: #FFDE00;
-                width: 40px;
-                position: fixed;
-                display: block;
-                z-index: 3;
-                height: 100%;
-                margin-left: -40px;
+                min-width: 40px;
+                max-width: 40px;
+                min-height: 100%;
+                max-height: 100%;
             }
 
             #pti-icon {
@@ -68,41 +67,11 @@
                 margin-top: 25px;
                 margin-left: 10px;
             }
-
             #pti-name {
                 width: 135px;
                 margin-top: 15px;
                 margin-left: 15px;
                 margin-bottom: 7px;
-            }
-
-            #mapContainer {
-                display: block;
-            }
-
-            #mapdiv {
-                width: 100%;
-            }
-
-            #maptools {
-                background-color: #333438;
-                height: 100%;
-                position: absolute;
-                top: 0;
-                width: 153px;
-                z-index: 2;
-            }
-
-            #contentMap {
-                height: 100%;
-                margin-left: 170px;
-            }
-
-            #oskari-system-messages {
-                bottom: 1em;
-                position: fixed;
-                display: table;
-                padding-left: 0.3em;
             }
 
             #language, #pti-feedback {
@@ -129,17 +98,14 @@
             href="/Oskari${path}/oskari.min.css"/>
     <!-- ############# /css ################# -->
 </head>
-<body class="mml-map">
-
-<div id="wrapper">
-    <div id="sidebar">
-        <img id="pti-icon" src="/static/img/ikkuna.svg">
-    </div>
-    <section id="content" class="floatleft">
+<body>
+    <header class="sidebar">
+        <img id="pti-icon" alt="Logo" src="/static/img/ikkuna.svg" />
+    </header>
+    <main id="oskari">
         <nav id="maptools">
-            <div id="logobar">
-                <img id="pti-name" src="/static/img/paikkatietoikkuna_138px.svg">
-            </div>
+            <img id="pti-name" alt="Paikkatietoikkuna" src="/static/img/paikkatietoikkuna_138px.svg" />
+
             <div id="menubar">
             </div>
             <div id="divider">
@@ -175,23 +141,8 @@
             </div>
             <div id="toolbar">
             </div>
-            <div id="oskari-system-messages"></div>
         </nav>
-        <div id="contentMap" class="oskariui container-fluid">
-            <div id="menutoolbar" class="container-fluid"></div>
-            <div class="row-fluid oskariui-mode-content" style="height: 100%; background-color:white;">
-                <div class="oskariui-left"></div>
-                <div class="span12 oskariui-center" style="height: 100%; margin: 0;">
-                    <div id="mapdiv"></div>
-                </div>
-                <div class="oskari-closed oskariui-right">
-                    <div id="mapdivB"></div>
-                </div>
-            </div>
-        </div>
-    </section>
-</div>
-
+    </main>
 
 <!-- ############# Javascript ################# -->
 
