@@ -22,9 +22,9 @@ public class V3_2_1__apply_theme extends BaseJavaMigration {
         Connection connection = context.getConnection();
         // update theme for geoportal views
         List<Long> ids = AppSetupHelper.getSetupsForType(connection, ViewTypes.DEFAULT, ViewTypes.USER);
+        JSONObject theme = generateTheme();
         for (Long id: ids) {
             JSONObject metadata = getAppSetupMetadata(connection, id);
-            JSONObject theme = generateTheme();
             JSONHelper.putValue(metadata, "theme", theme);
             updateAppMetadata(connection, id, metadata);
         }
