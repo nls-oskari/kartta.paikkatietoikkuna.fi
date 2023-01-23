@@ -11,7 +11,7 @@
 
     <properties>
         <oskari.version>2.10.0-SNAPSHOT</oskari.version>
-        <nls.search.version>3.7.0</nls.search.version>
+        <nls.search.version>4.0</nls.search.version>
         <nls.proj.version>1.2</nls.proj.version>
         <nls.terrain-profile.version>1.2</nls.terrain-profile.version>
 
