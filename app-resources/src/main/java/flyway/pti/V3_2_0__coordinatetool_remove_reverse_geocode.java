@@ -39,17 +39,4 @@ public class V3_2_0__coordinatetool_remove_reverse_geocode extends BaseJavaMigra
         bundle.setConfig(conf.toString());
         return true;
     }
-    /*
-    protected boolean updateBundle(Bundle bundle) {
-        if (bundle == null) {
-            return false;
-        }
-        // This will be the migration to run once testing is complete:
-        JSONObject conf = bundle.getConfigJSON();
-        boolean updateRequired = conf.remove("isReverseGeocode") != null;
-        updateRequired = updateRequired || conf.remove("reverseGeocodingIds") != null;
-        bundle.setConfig(conf.toString());
-        return updateRequired;
-    }
-     */
 }
