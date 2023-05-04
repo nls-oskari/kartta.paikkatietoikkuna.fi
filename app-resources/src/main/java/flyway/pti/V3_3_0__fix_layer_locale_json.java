@@ -3,6 +3,7 @@ package flyway.pti;
 import fi.nls.oskari.util.JSONHelper;
 import org.flywaydb.core.api.migration.BaseJavaMigration;
 import org.flywaydb.core.api.migration.Context;
+import org.json.JSONObject;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -25,7 +26,10 @@ public class V3_3_0__fix_layer_locale_json extends BaseJavaMigration {
         Connection connection = context.getConnection();
         List<Result> layers = getLayersToModify(connection);
         layers.forEach(r -> {
-            r.locale = JSONHelper.createJSONObject(r.locale).toString();
+            JSONObject value = JSONHelper.createJSONObject(r.locale);
+            if (value != null) {
+                r.locale = value.toString();
+            }
         });
         saveChanges(connection, layers);
     }
