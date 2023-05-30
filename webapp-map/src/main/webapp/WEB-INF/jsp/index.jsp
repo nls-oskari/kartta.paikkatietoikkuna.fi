@@ -31,6 +31,7 @@
     </c:if>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="keywords" content="Paikkatieto, kartta, kartat, maps, GIS, geoportal, Oskari" />
+    <meta name="format-detection" content="telephone=no" />
     <meta property="og:image" content="${oskariDomain}/static/paikkis.png" />
     <meta property="og:image:width" content="1140" />
     <meta property="og:image:height" content="1140" />
@@ -61,7 +62,12 @@
                 min-height: 100%;
                 max-height: 100%;
             }
-
+            #pti_disclaimer {
+                padding: 10px;
+                color: #FFDE00;
+                font-size: 12px;
+                max-width: 170px;
+            }
             #pti-icon {
                 height: 25px;
                 margin-top: 25px;
@@ -105,6 +111,11 @@
     <main id="oskari">
         <nav id="maptools">
             <img id="pti-name" alt="Paikkatietoikkuna" src="/static/img/paikkatietoikkuna_138px.svg" />
+            <p id="pti_disclaimer">
+                <c:if test="${language == 'fi'}">Selaa eri organisaatioiden tuottamia karttoja</c:if>
+                <c:if test="${language == 'sv'}">Titta på kartor från olika organisationer</c:if>
+                <c:if test="${language == 'en'}">Look at maps from different organisations in Finland</c:if>
+            </p>
 
             <div id="menubar">
             </div>
@@ -199,6 +210,8 @@
             top: 0px;
             left: 0px;
             position: fixed;
+            opacity: 0.8;
+            pointer-events: none;
             <%--  left side --%>
             padding-left: 40px;
             margin-top: 20px;
