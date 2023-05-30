@@ -42,12 +42,12 @@ public class OskariPreAuthenticationSecurityConfig extends WebSecurityConfigurer
         filter.setPrincipalRequestHeader(PropertyUtil.get("oskari.preauth.username.header", "auth-email"));
 
         HeaderAuthenticationDetailsSource headerAuthenticationDetailsSource = new HeaderAuthenticationDetailsSource();
-
-        filter.setExceptionIfHeaderMissing(true);
+        boolean isDevEnv = HeaderAuthenticationDetails.isDevEnv();
+        filter.setExceptionIfHeaderMissing(!isDevEnv);
 
         filter.setAuthenticationDetailsSource(headerAuthenticationDetailsSource);
         filter.setAuthenticationManager(authenticationManager());
-        filter.setContinueFilterChainOnUnsuccessfulAuthentication(false);
+        filter.setContinueFilterChainOnUnsuccessfulAuthentication(isDevEnv);
 
         String authorizeUrl = PropertyUtil.get("oskari.authorize.url", "/auth");
 
