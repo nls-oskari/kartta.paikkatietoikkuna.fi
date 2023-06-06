@@ -112,9 +112,9 @@
         <nav id="maptools">
             <img id="pti-name" alt="Paikkatietoikkuna" src="/static/img/paikkatietoikkuna_138px.svg" />
             <p id="pti_disclaimer">
-                <c:if test="${language == 'fi'}">Selaa eri organisaatioiden tuottamia karttoja</c:if>
-                <c:if test="${language == 'sv'}">Titta på kartor från olika organisationer</c:if>
-                <c:if test="${language == 'en'}">Look at maps from different organisations in Finland</c:if>
+                <c:if test="${language == 'fi'}">Näyteikkuna eri organisaatioiden julkaisemiin karttatasoihin</c:if>
+                <c:if test="${language == 'sv'}">Ett fönster till kartlager publicerade av olika organisationer</c:if>
+                <c:if test="${language == 'en'}">The window of map layers published by different organisations</c:if>
             </p>
 
             <div id="menubar">
