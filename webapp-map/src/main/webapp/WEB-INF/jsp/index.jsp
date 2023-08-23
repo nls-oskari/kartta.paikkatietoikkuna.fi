@@ -62,6 +62,11 @@
                 min-height: 100%;
                 max-height: 100%;
             }
+            @media (max-width: 600px) {
+                header.sidebar {
+                    display: none;
+                }
+            }
             #pti_disclaimer {
                 padding: 10px;
                 color: #FFDE00;
