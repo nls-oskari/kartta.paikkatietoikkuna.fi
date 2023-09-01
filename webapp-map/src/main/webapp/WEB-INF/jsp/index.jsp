@@ -239,6 +239,11 @@
         #demoribbon:hover {
             display:none;
         }
+        @media (max-width: 600px) {
+            #demoribbon {
+                opacity: 0.3;
+            }
+        }
     </style>
     <div id="demoribbon">${ribbon}</div>
 </c:if>
