@@ -56,7 +56,7 @@
             }
 
             header.sidebar {
-                background-color: #FFDE00;
+                background-color: #ffd400;
                 min-width: 40px;
                 max-width: 40px;
                 min-height: 100%;
@@ -67,9 +67,31 @@
                     display: none;
                 }
             }
+            #maptools {
+                color: #ffd400;
+                font-size: 12px;
+            }
+
+            #maptools .linksContainer > div {
+                padding: 10px 10px 0px 16px;
+                color: #CCC;
+                margin-bottom: 8px;
+                vertical-align: bottom;
+            }
+
+            #maptools .linksContainer a {
+                color: #ffd400;
+                text-decoration: underline;
+            }
+            @media (max-width: 600px) {
+                #maptools {
+                    font-size: 14px;
+                    line-height: 200%;
+                }
+            }
+
             #pti_disclaimer {
                 padding: 10px;
-                color: #FFDE00;
                 font-size: 12px;
                 max-width: 170px;
             }
@@ -83,22 +105,6 @@
                 margin-top: 15px;
                 margin-left: 15px;
                 margin-bottom: 7px;
-            }
-
-            #language, #pti-feedback {
-                padding: 0px 10px 0px 16px;
-                color: #CCC;
-            }
-
-            #language a, #pti-feedback a {
-                color: #FFDE00;
-                font-size: 12px;
-                cursor: pointer;
-                text-decoration: underline;
-            }
-
-            #language {
-                margin-bottom: 8px;
             }
 
         }
@@ -126,34 +132,35 @@
             </div>
             <div id="divider">
             </div>
-            <div id="loginbar">
-            </div>
-            <div id="language">
-                <c:if test="${language == 'fi'}">
-                    <a href="javascript:void(0)" onclick="ptiUtil.changeLang('sv')">På svenska</a> -
-                    <a href="javascript:void(0)" onclick="ptiUtil.changeLang('en')">In English</a>
-                </c:if>
-                <c:if test="${language == 'sv'}">
-                    <a href="javascript:void(0)" onclick="ptiUtil.changeLang('fi')">Suomeksi</a> -
-                    <a href="javascript:void(0)" onclick="ptiUtil.changeLang('en')">In English</a>
-                </c:if>
-                <c:if test="${language == 'en'}">
-                    <a href="javascript:void(0)" onclick="ptiUtil.changeLang('fi')">Suomeksi</a> -
-                    <a href="javascript:void(0)" onclick="ptiUtil.changeLang('sv')">På svenska</a>
-                </c:if>
-            </div>
-            <div id="pti-feedback">
-
-                <c:set var="feedbackURL" scope="page" value="${props.getWithOptionalModifier('pti.feedback.url', language)}" />
-                <c:if test="${language == 'fi'}">
-                    <a target="_blank" href="${feedbackURL}">Palaute tai tukipyyntö</a>
-                </c:if>
-                <c:if test="${language == 'sv'}">
-                    <a target="_blank" href="${feedbackURL}">Respons och stödtjänst</a>
-                </c:if>
-                <c:if test="${language == 'en'}">
-                    <a target="_blank" href="${feedbackURL}">Feedback and support</a>
-                </c:if>
+            <div class="linksContainer">
+                <div id="loginbar">
+                </div>
+                <div id="language">
+                    <c:if test="${language == 'fi'}">
+                        <a href="javascript:void(0)" onclick="ptiUtil.changeLang('sv')">På svenska</a> -
+                        <a href="javascript:void(0)" onclick="ptiUtil.changeLang('en')">In English</a>
+                    </c:if>
+                    <c:if test="${language == 'sv'}">
+                        <a href="javascript:void(0)" onclick="ptiUtil.changeLang('fi')">Suomeksi</a> -
+                        <a href="javascript:void(0)" onclick="ptiUtil.changeLang('en')">In English</a>
+                    </c:if>
+                    <c:if test="${language == 'en'}">
+                        <a href="javascript:void(0)" onclick="ptiUtil.changeLang('fi')">Suomeksi</a> -
+                        <a href="javascript:void(0)" onclick="ptiUtil.changeLang('sv')">På svenska</a>
+                    </c:if>
+                </div>
+                <div id="pti-feedback">
+                    <c:set var="feedbackURL" scope="page" value="${props.getWithOptionalModifier('pti.feedback.url', language)}" />
+                    <c:if test="${language == 'fi'}">
+                        <a target="_blank" href="${feedbackURL}">Palaute tai tukipyyntö</a>
+                    </c:if>
+                    <c:if test="${language == 'sv'}">
+                        <a target="_blank" href="${feedbackURL}">Respons och stödtjänst</a>
+                    </c:if>
+                    <c:if test="${language == 'en'}">
+                        <a target="_blank" href="${feedbackURL}">Feedback and support</a>
+                    </c:if>
+                </div>
             </div>
             <div id="toolbar">
             </div>
