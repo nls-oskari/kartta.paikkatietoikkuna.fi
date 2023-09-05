@@ -83,6 +83,10 @@
                 color: #ffd400;
                 text-decoration: underline;
             }
+            <%-- For mobile user guide link --%>
+            #maptools .linksContainer a div {
+                text-decoration: underline;
+            }
             @media (max-width: 600px) {
                 #maptools {
                     font-size: 14px;
