@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.OffsetDateTime;
 import java.util.Date;
 
 public class OskariPreAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
@@ -63,12 +64,9 @@ public class OskariPreAuthenticationSuccessHandler extends SimpleUrlAuthenticati
 
     private User getUser(OskariUserDetails oud) throws ServiceException {
         User user = userService.getUserByEmail(oud.getUser().getEmail());
-        // sdf is not threadsafe so create new for each login
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         if(user == null) {
             user = oud.getUser();
             user.addRole(Role.getDefaultUserRole());
-            user.setAttribute("created", format.format(new Date()));
         } else {
             // copy data that we got from headers
             user.setFirstname(oud.getUser().getFirstname());
@@ -77,7 +75,6 @@ public class OskariPreAuthenticationSuccessHandler extends SimpleUrlAuthenticati
             // merge attributes
             JSONHelper.merge(user.getAttributesJSON(), oud.getUser().getAttributesJSON());
         }
-        user.setAttribute("lastLogin", format.format(new Date()));
         return user;
 
     }
@@ -90,6 +87,17 @@ public class OskariPreAuthenticationSuccessHandler extends SimpleUrlAuthenticati
         AuditLog.user(ActionParameters.getClientIp(request), authenticatedUser.getEmail())
                 .withMsg("Login")
                 .updated(AuditLog.ResourceType.USER);
+
+        // update last login
+        try {
+            User userToUpdate = userService.getUser(authenticatedUser.getId());
+            userToUpdate.setLastLogin(OffsetDateTime.now());
+            userService.modifyUser(userToUpdate);
+        } catch (Exception e) {
+
+        }
+
+
     }
 
     protected DatabaseUserService getUserService() {
