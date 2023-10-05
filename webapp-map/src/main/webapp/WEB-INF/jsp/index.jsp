@@ -247,9 +247,6 @@
             transform: rotate(45deg);
              --%>
         }
-        #demoribbon:hover {
-            display:none;
-        }
         @media (max-width: 600px) {
             #demoribbon {
                 opacity: 0.3;
