@@ -24,6 +24,11 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
+        <!-- JSTL not needed for Jetty, but required by Tomcat -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>jstl</artifactId>
+        </dependency>
         <!-- For Java 11 compatibility -->
         <dependency>
             <groupId>javax.annotation</groupId>
