@@ -27,7 +27,7 @@ public class LandingHandler {
             b.append("?");
             b.append(query);
         }
-        logger404.info(b.toString() + " referer: " + request.getHeader("referer"));
+        logger404.info(b + " referer: " + request.getHeader("referer"));
         return new ModelAndView("redirect:/");
     }
 }
