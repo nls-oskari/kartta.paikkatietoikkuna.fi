@@ -1,4 +1,4 @@
--- Update URL for all layers from geo.stat.fi to us https and /geoserver/ows
+-- Update URL for all layers from geo.stat.fi to use https and /geoserver/ows
 update oskari_maplayer set url = 'https://geo.stat.fi/geoserver/ows' where type = 'statslayer' and url like '%geo.stat.fi%';
 
 -- Remove featuresUrl from attributes so layer url is used as endpoint
