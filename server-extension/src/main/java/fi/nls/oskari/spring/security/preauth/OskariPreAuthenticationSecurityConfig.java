@@ -1,31 +1,56 @@
 package fi.nls.oskari.spring.security.preauth;
 
+import fi.nls.oskari.log.LogFactory;
+import fi.nls.oskari.log.Logger;
+import fi.nls.oskari.spring.security.database.OskariAuthenticationProvider;
+import fi.nls.oskari.spring.security.database.OskariAuthenticationSuccessHandler;
 import fi.nls.oskari.util.PropertyUtil;
+import fi.nls.oskari.spring.SpringEnvHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Profile("preauth")
 @Configuration
 @EnableWebSecurity
-@Order()
-public class OskariPreAuthenticationSecurityConfig extends WebSecurityConfigurerAdapter {
+// @Order()
+public class OskariPreAuthenticationSecurityConfig {
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    private static final Logger log = LogFactory.getLogger(OskariPreAuthenticationSecurityConfig.class);
+    private final SpringEnvHelper env;
+    private final OskariAuthenticationProvider oskariAuthenticationProvider;
+    private final OskariAuthenticationSuccessHandler oskariAuthenticationSuccessHandler;
 
-        // Don't set "X-Frame-Options: deny" header, that would prevent
-        // embedded maps from working
-        http.headers().frameOptions().disable();
+    public OskariPreAuthenticationSecurityConfig(SpringEnvHelper env,
+                                        OskariAuthenticationProvider oskariAuthenticationProvider,
+                                        OskariAuthenticationSuccessHandler oskariAuthenticationSuccessHandler) {
+        this.env = env;
+        this.oskariAuthenticationProvider = oskariAuthenticationProvider;
+        this.oskariAuthenticationSuccessHandler = oskariAuthenticationSuccessHandler;
+    }
+
+    @Bean
+    @Order(1)
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        log.info("Configuring preauth login");
+
+        // Add custom authentication provider
+        http.authenticationProvider(oskariAuthenticationProvider);
+
+        // Disable frame options and CSRF for embedded maps
+        http.headers(headers -> headers.frameOptions().disable());
+
 
         // Don't create unnecessary sessions
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
@@ -35,7 +60,8 @@ public class OskariPreAuthenticationSecurityConfig extends WebSecurityConfigurer
 
         // 3rd party cookie blockers don't really work with cookie based CSRF protection on embedded maps.
         // Configure nginx to attach SameSite-flag to cookies instead.
-        http.csrf().disable();
+        http.csrf(csrf -> csrf.disable());
+
 
         OskariRequestHeaderAuthenticationFilter filter = new OskariRequestHeaderAuthenticationFilter();
         filter.setAuthenticationSuccessHandler(new OskariPreAuthenticationSuccessHandler());
@@ -46,24 +72,27 @@ public class OskariPreAuthenticationSecurityConfig extends WebSecurityConfigurer
         filter.setExceptionIfHeaderMissing(!isDevEnv);
 
         filter.setAuthenticationDetailsSource(headerAuthenticationDetailsSource);
-        filter.setAuthenticationManager(authenticationManager());
+        // commented out
+        //filter.setAuthenticationManager(authenticationManager());
         filter.setContinueFilterChainOnUnsuccessfulAuthentication(isDevEnv);
 
+        //http.authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll());
+
+        http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
         String authorizeUrl = PropertyUtil.get("oskari.authorize.url", "/auth");
+        http.authorizeHttpRequests((authz) -> authz
+                .requestMatchers(authorizeUrl).authenticated()
+        );
+        http.authorizeHttpRequests((authz) -> authz
+                .requestMatchers(authorizeUrl)
+                .authenticated()
+        );
+        return http.build();
+    }
 
-        // use authorization for ALL requests
-        http.authorizeRequests()
-                // IF accessing /auth -> require authentication (== headers)
-                .antMatchers(authorizeUrl).authenticated();
-
-        // Add the preauth filter listening to /auth paths
-        http
-                .requestMatchers()
-                .antMatchers(authorizeUrl)
-                .and()
-                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
-                .authorizeRequests()
-                .anyRequest().authenticated();
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Autowired

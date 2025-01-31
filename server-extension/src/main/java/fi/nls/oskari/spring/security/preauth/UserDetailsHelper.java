@@ -2,7 +2,7 @@ package fi.nls.oskari.spring.security.preauth;
 
 import fi.nls.oskari.domain.User;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import javax.xml.bind.DatatypeConverter;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
