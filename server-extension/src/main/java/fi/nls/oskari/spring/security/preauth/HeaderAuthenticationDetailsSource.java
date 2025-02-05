@@ -7,6 +7,9 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 
 public class HeaderAuthenticationDetailsSource extends WebAuthenticationDetailsSource {
 
+	public static String getHeaderPrexif() {
+		return "auth-";
+	}
 	/**
 	 * @param context the {@code HttpServletRequest} object.
 	 * @return the {@code WebAuthenticationDetails} containing information about the
@@ -14,6 +17,6 @@ public class HeaderAuthenticationDetailsSource extends WebAuthenticationDetailsS
 	 */
 	@Override
 	public WebAuthenticationDetails buildDetails(HttpServletRequest context) {
-		return new HeaderAuthenticationDetails(context, "auth-");
+		return new HeaderAuthenticationDetails(context, getHeaderPrexif());
 	}
 }
