@@ -17,9 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
-import java.util.Date;
 
 public class OskariPreAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
@@ -34,12 +32,11 @@ public class OskariPreAuthenticationSuccessHandler extends SimpleUrlAuthenticati
                                         HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         final Object principal = authentication.getPrincipal();
 
-        if (!(principal instanceof OskariUserDetails)) {
+        if (!(principal instanceof OskariUserDetails oud)) {
             throw new IllegalArgumentException(
                     "Expected fi.nls.oskari.spring.security.preauth.OskariUserDetails, "
                             + "got: " + principal.getClass().getName());
         }
-        OskariUserDetails oud = (OskariUserDetails) principal;
 
         User user = null;
         try {
@@ -93,11 +90,9 @@ public class OskariPreAuthenticationSuccessHandler extends SimpleUrlAuthenticati
             User userToUpdate = userService.getUser(authenticatedUser.getId());
             userToUpdate.setLastLogin(OffsetDateTime.now());
             userService.modifyUser(userToUpdate);
-        } catch (Exception e) {
-
+        } catch (Exception ignored) {
+            // ignored
         }
-
-
     }
 
     protected DatabaseUserService getUserService() {

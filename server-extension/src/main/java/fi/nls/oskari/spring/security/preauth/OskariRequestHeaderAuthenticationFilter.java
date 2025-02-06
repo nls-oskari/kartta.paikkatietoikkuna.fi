@@ -2,7 +2,6 @@ package fi.nls.oskari.spring.security.preauth;
 
 import java.io.IOException;
 
-import fi.nls.oskari.util.PropertyUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,7 +13,12 @@ import org.springframework.security.web.authentication.preauth.RequestHeaderAuth
 public class OskariRequestHeaderAuthenticationFilter extends RequestHeaderAuthenticationFilter {
     
     private AuthenticationSuccessHandler successHandler;
-        
+    private String authPath = "/auth";
+
+    public void setAuthPath(String authPath) {
+        this.authPath = authPath;
+    }
+
     public void setAuthenticationSuccessHandler(AuthenticationSuccessHandler successHandler) {
         this.successHandler = successHandler;
     }
@@ -40,16 +44,10 @@ public class OskariRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 
     @Override
     protected Object getPreAuthenticatedPrincipal(HttpServletRequest request) {
-        String authorizeUrl = PropertyUtil.get("oskari.authorize.url", "/auth");
-
-        if (request.getRequestURI().equals(authorizeUrl)) {
+        if (request.getRequestURI().equals(authPath)) {
             return new HeaderAuthenticationDetails(request, HeaderAuthenticationDetailsSource.getHeaderPrexif());
         }
-        return null; // No authentication for other paths
+        // No authentication for other paths
+        return null;
     }
-    @Override
-    protected Object getPreAuthenticatedCredentials(HttpServletRequest request) {
-        return "N/A"; // No password needed
-    }
-
 }

@@ -4,7 +4,6 @@ import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.util.PropertyUtil;
 import fi.nls.oskari.spring.SpringEnvHelper;
-import org.oskari.spring.security.OskariLoginFailureHandler;
 import org.oskari.spring.security.OskariSpringSecurityDsl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -15,10 +14,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider;
 
 import java.util.Arrays;
@@ -46,59 +42,41 @@ public class OskariPreAuthenticationSecurityConfig {
         preAuthProvider.setPreAuthenticatedUserDetailsService(new OskariPreAuthenticatedUserDetailsService());
         http.authenticationProvider(preAuthProvider);
 
-
-
+        // The filter that does the login
+        String authorizeUrl = PropertyUtil.get("oskari.authorize.url", "/auth");
         OskariRequestHeaderAuthenticationFilter filter = new OskariRequestHeaderAuthenticationFilter();
         filter.setAuthenticationSuccessHandler(new OskariPreAuthenticationSuccessHandler());
-        filter.setPrincipalRequestHeader(PropertyUtil.get("oskari.preauth.username.header", "auth-email"));
+        // looks like we need to pass HeaderAuthenticationDetailsSource or Spring throws a tantrum
+        // even when filter.getPreAuthenticatedPrincipal() does the same thing
+        filter.setAuthenticationDetailsSource(new HeaderAuthenticationDetailsSource());
+        filter.setAuthPath(authorizeUrl);
+        filter.setAuthenticationManager(authenticationManager(preAuthProvider));
 
-        HeaderAuthenticationDetailsSource headerAuthenticationDetailsSource = new HeaderAuthenticationDetailsSource();
         boolean isDevEnv = HeaderAuthenticationDetails.isDevEnv();
         filter.setExceptionIfHeaderMissing(!isDevEnv);
-
-        filter.setAuthenticationDetailsSource(headerAuthenticationDetailsSource);
         filter.setContinueFilterChainOnUnsuccessfulAuthentication(isDevEnv);
-        //OskariSpringSecurityDsl oskariCommonDsl = OskariSpringSecurityDsl.oskariCommonDsl();
-        // feels like this should come from Spring and not somehing we inject, but...
-        filter.setAuthenticationManager(authenticationManager());
 
-        String authorizeUrl = PropertyUtil.get("oskari.authorize.url", "/auth");
-
-        //http.headers((headers) -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
         http
                 .authorizeHttpRequests(authorize -> authorize
+                    // the pre-auth endpoint requires authenticated user (pre-auth headers to be sent)
                     .requestMatchers(authorizeUrl).authenticated()
-                //.authorizeHttpRequests(authorize -> authorize
-                    .anyRequest().permitAll())
-                .addFilterBefore(filter, AbstractPreAuthenticatedProcessingFilter.class)
-                .formLogin(form -> form
-                        .loginPage("/") // just so we can give the geoportal as page to go after logging out
-                        .permitAll()
-                );
-        OskariSpringSecurityDsl.disableFrameOptions(http);
-        OskariSpringSecurityDsl.disableCSRF(http);
-        OskariSpringSecurityDsl.disableHSTS(http);
-        OskariSpringSecurityDsl.configLogout(http, "/logout", "/");
-        // OskariSpringSecurityDsl.disableUnnecessarySessions(http);
-        /*
-        http.with(oskariCommonDsl,
+                    // any other path is free for all
+                    .anyRequest().permitAll());
+        // Use with defaults
+        http.with(OskariSpringSecurityDsl.oskariCommonDsl(),
                 (dsl) -> dsl
+                        .setAllowMapsToBeEmbedded(true)
                         .setLogoutUrl(env.getLogoutUrl())
-                        .setLogoutSuccessUrl(env.getLoggedOutPage())
-                        //.setLoginFilter(filter)
-                        .setUseCommonLogout(false)
+                        .setLogoutSuccessUrl(env.getMapUrl())
+                        .setPreAuthFilter(filter)
                         .setDisableUnnecessarySessions(false)
         );
-        oskariCommonDsl.configLogout(http);
-         */
+
         return http.build();
     }
 
-    public AuthenticationManager authenticationManager() {
-        PreAuthenticatedAuthenticationProvider preAuthenticatedProvider = new PreAuthenticatedAuthenticationProvider();
-        preAuthenticatedProvider.setPreAuthenticatedUserDetailsService(new OskariPreAuthenticatedUserDetailsService());
-
+    public AuthenticationManager authenticationManager(PreAuthenticatedAuthenticationProvider preAuthProvider) {
         AnonymousAuthenticationProvider guestUserProvider = new AnonymousAuthenticationProvider(UUID.randomUUID().toString());
-        return new ProviderManager(Arrays.asList(guestUserProvider, preAuthenticatedProvider));
+        return new ProviderManager(Arrays.asList(guestUserProvider, preAuthProvider));
     }
 }
