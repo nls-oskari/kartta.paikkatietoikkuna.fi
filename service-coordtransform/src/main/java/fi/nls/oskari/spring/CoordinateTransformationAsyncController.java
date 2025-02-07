@@ -7,7 +7,7 @@ import fi.nls.oskari.control.*;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.service.OskariComponentManager;
-import fi.nls.oskari.spring.extension.OskariParam;
+import org.oskari.spring.extension.OskariParam;
 import fi.nls.oskari.util.IOHelper;
 import fi.nls.oskari.util.JSONHelper;
 import fi.nls.paikkatietoikkuna.coordtransform.*;

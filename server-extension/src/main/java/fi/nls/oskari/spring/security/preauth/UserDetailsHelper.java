@@ -1,6 +1,6 @@
 package fi.nls.oskari.spring.security.preauth;
 
-import fi.nls.oskari.domain.User;
+import org.oskari.user.User;
 
 import jakarta.servlet.http.HttpServletRequest;
 import javax.xml.bind.DatatypeConverter;

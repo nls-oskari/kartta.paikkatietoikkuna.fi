@@ -1,8 +1,8 @@
 package fi.nls.oskari.spring.security.preauth;
 
 import fi.nls.oskari.control.ActionParameters;
-import fi.nls.oskari.domain.Role;
-import fi.nls.oskari.domain.User;
+import org.oskari.user.Role;
+import org.oskari.user.User;
 import fi.nls.oskari.service.ServiceException;
 import fi.nls.oskari.service.UserService;
 import fi.nls.oskari.user.DatabaseUserService;
@@ -34,7 +34,7 @@ public class OskariPreAuthenticationSuccessHandler extends SimpleUrlAuthenticati
 
         if (!(principal instanceof OskariUserDetails oud)) {
             throw new IllegalArgumentException(
-                    "Expected fi.nls.oskari.spring.security.preauth.OskariUserDetails, "
+                    "Expected org.oskari.spring.security.preauth.OskariUserDetails, "
                             + "got: " + principal.getClass().getName());
         }
 

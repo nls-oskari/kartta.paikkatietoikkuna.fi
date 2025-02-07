@@ -1,6 +1,6 @@
 package fi.nls.oskari.spring.security.preauth;
 
-import fi.nls.oskari.domain.User;
+import org.oskari.user.User;
 import fi.nls.oskari.util.PropertyUtil;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;

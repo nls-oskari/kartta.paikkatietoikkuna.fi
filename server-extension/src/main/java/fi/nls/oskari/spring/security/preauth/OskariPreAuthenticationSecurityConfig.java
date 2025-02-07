@@ -3,7 +3,7 @@ package fi.nls.oskari.spring.security.preauth;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.util.PropertyUtil;
-import fi.nls.oskari.spring.SpringEnvHelper;
+import org.oskari.spring.SpringEnvHelper;
 import org.oskari.spring.security.OskariSpringSecurityDsl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

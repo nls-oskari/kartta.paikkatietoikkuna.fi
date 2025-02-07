@@ -2,7 +2,7 @@ package fi.nls.oskari.spring.security.preauth;
 
 import java.util.Collection;
 
-import fi.nls.oskari.domain.User;
+import org.oskari.user.User;
 import org.springframework.security.core.GrantedAuthority;
 
 public class OskariUserDetails extends org.springframework.security.core.userdetails.User {

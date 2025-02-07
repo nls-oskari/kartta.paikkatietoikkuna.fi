@@ -3,7 +3,7 @@ package fi.nls.oskari.spring;
 import fi.nls.oskari.control.ActionParameters;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
-import fi.nls.oskari.spring.extension.OskariParam;
+import org.oskari.spring.extension.OskariParam;
 import fi.nls.oskari.spring.security.preauth.UserDetailsHelper;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Controller;
