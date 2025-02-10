@@ -61,7 +61,7 @@ public class OskariPreAuthenticationSuccessHandler extends SimpleUrlAuthenticati
 
     private User getUser(OskariUserDetails oud) throws ServiceException {
         User user = userService.getUserByEmail(oud.getUser().getEmail());
-        if(user == null) {
+        if (user == null) {
             user = oud.getUser();
             user.addRole(Role.getDefaultUserRole());
         } else {
@@ -69,11 +69,9 @@ public class OskariPreAuthenticationSuccessHandler extends SimpleUrlAuthenticati
             user.setFirstname(oud.getUser().getFirstname());
             user.setLastname(oud.getUser().getLastname());
             user.setScreenname(oud.getUser().getScreenname());
-            // merge attributes
-            JSONHelper.merge(user.getAttributesJSON(), oud.getUser().getAttributesJSON());
+            oud.getUser().getAttributes().forEach(user::setAttribute);
         }
         return user;
-
     }
 
     protected void setupSession(User authenticatedUser, HttpServletRequest request) {

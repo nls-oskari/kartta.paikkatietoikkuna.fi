@@ -22,7 +22,7 @@ import java.util.UUID;
 
 @Profile("preauth")
 @Configuration
-@EnableWebSecurity(debug = true)
+@EnableWebSecurity
 public class OskariPreAuthenticationSecurityConfig {
 
     private static final Logger log = LogFactory.getLogger(OskariPreAuthenticationSecurityConfig.class);
