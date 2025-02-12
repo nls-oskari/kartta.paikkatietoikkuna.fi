@@ -1,8 +1,8 @@
 package fi.nls.oskari.spring.security.preauth;
 
 import fi.nls.oskari.control.ActionParameters;
-import fi.nls.oskari.domain.Role;
-import fi.nls.oskari.domain.User;
+import org.oskari.user.Role;
+import org.oskari.user.User;
 import fi.nls.oskari.service.ServiceException;
 import fi.nls.oskari.service.UserService;
 import fi.nls.oskari.user.DatabaseUserService;
@@ -12,14 +12,12 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
-import java.util.Date;
 
 public class OskariPreAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
@@ -34,12 +32,11 @@ public class OskariPreAuthenticationSuccessHandler extends SimpleUrlAuthenticati
                                         HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         final Object principal = authentication.getPrincipal();
 
-        if (!(principal instanceof OskariUserDetails)) {
+        if (!(principal instanceof OskariUserDetails oud)) {
             throw new IllegalArgumentException(
-                    "Expected fi.nls.oskari.spring.security.preauth.OskariUserDetails, "
+                    "Expected org.oskari.spring.security.preauth.OskariUserDetails, "
                             + "got: " + principal.getClass().getName());
         }
-        OskariUserDetails oud = (OskariUserDetails) principal;
 
         User user = null;
         try {
@@ -64,7 +61,7 @@ public class OskariPreAuthenticationSuccessHandler extends SimpleUrlAuthenticati
 
     private User getUser(OskariUserDetails oud) throws ServiceException {
         User user = userService.getUserByEmail(oud.getUser().getEmail());
-        if(user == null) {
+        if (user == null) {
             user = oud.getUser();
             user.addRole(Role.getDefaultUserRole());
         } else {
@@ -72,11 +69,9 @@ public class OskariPreAuthenticationSuccessHandler extends SimpleUrlAuthenticati
             user.setFirstname(oud.getUser().getFirstname());
             user.setLastname(oud.getUser().getLastname());
             user.setScreenname(oud.getUser().getScreenname());
-            // merge attributes
-            JSONHelper.merge(user.getAttributesJSON(), oud.getUser().getAttributesJSON());
+            oud.getUser().getAttributes().forEach(user::setAttribute);
         }
         return user;
-
     }
 
     protected void setupSession(User authenticatedUser, HttpServletRequest request) {
@@ -93,11 +88,9 @@ public class OskariPreAuthenticationSuccessHandler extends SimpleUrlAuthenticati
             User userToUpdate = userService.getUser(authenticatedUser.getId());
             userToUpdate.setLastLogin(OffsetDateTime.now());
             userService.modifyUser(userToUpdate);
-        } catch (Exception e) {
-
+        } catch (Exception ignored) {
+            // ignored
         }
-
-
     }
 
     protected DatabaseUserService getUserService() {

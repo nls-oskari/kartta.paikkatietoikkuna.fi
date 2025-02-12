@@ -2,9 +2,9 @@ package fi.nls.oskari.spring.security.preauth;
 
 import java.io.IOException;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -13,7 +13,12 @@ import org.springframework.security.web.authentication.preauth.RequestHeaderAuth
 public class OskariRequestHeaderAuthenticationFilter extends RequestHeaderAuthenticationFilter {
     
     private AuthenticationSuccessHandler successHandler;
-        
+    private String authPath = "/auth";
+
+    public void setAuthPath(String authPath) {
+        this.authPath = authPath;
+    }
+
     public void setAuthenticationSuccessHandler(AuthenticationSuccessHandler successHandler) {
         this.successHandler = successHandler;
     }
@@ -36,5 +41,13 @@ public class OskariRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
             throw new RuntimeException(e);
         }
     }
-   
+
+    @Override
+    protected Object getPreAuthenticatedPrincipal(HttpServletRequest request) {
+        if (request.getRequestURI().equals(authPath)) {
+            return new HeaderAuthenticationDetails(request, HeaderAuthenticationDetailsSource.getHeaderPrexif());
+        }
+        // No authentication for other paths
+        return null;
+    }
 }

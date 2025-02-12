@@ -1,10 +1,10 @@
 package fi.nls.oskari.spring;
 
-import fi.nls.oskari.MapController;
+import org.oskari.spring.controllers.MapController;
 import fi.nls.oskari.control.ActionParameters;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
-import fi.nls.oskari.spring.extension.OskariParam;
+import org.oskari.spring.extension.OskariParam;
 import fi.nls.oskari.util.PropertyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

@@ -1,13 +1,13 @@
 package fi.nls.oskari.spring.security.preauth;
 
-import fi.nls.oskari.domain.User;
+import org.oskari.user.User;
 import fi.nls.oskari.util.PropertyUtil;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.GrantedAuthoritiesContainer;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collection;
 
 public class HeaderAuthenticationDetails extends WebAuthenticationDetails

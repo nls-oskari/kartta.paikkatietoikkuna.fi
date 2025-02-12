@@ -4,15 +4,18 @@ import fi.nls.oskari.control.ActionParameters;
 import fi.nls.oskari.control.ActionParamsException;
 import fi.nls.oskari.util.JSONHelper;
 import fi.nls.oskari.util.PropertyUtil;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
+
+import org.apache.commons.fileupload2.core.FileItem;
+import org.apache.commons.fileupload2.core.FileUploadException;
+import org.apache.commons.fileupload2.core.DiskFileItemFactory;
+import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletFileUpload;
 import org.json.JSONObject;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -42,7 +45,8 @@ public class TransformParams {
 
     // Store files smaller than 128kb in memory instead of writing them to disk
     private static final int MAX_SIZE_MEMORY = 128 * 1024;
-    private final DiskFileItemFactory diskFileItemFactory = new DiskFileItemFactory(MAX_SIZE_MEMORY, null);
+    Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"));
+    private final DiskFileItemFactory diskFileItemFactory = DiskFileItemFactory.builder().setPath(tempDir).setBufferSize(MAX_SIZE_MEMORY).get();
     private static final int MB = 1024 * 1024;
     private final int maxFileSize = PropertyUtil.getOptional("coordtransform.max.filesize.mb", 50) * MB;
 
@@ -129,7 +133,7 @@ public class TransformParams {
     private List<FileItem> getFileItems(HttpServletRequest request) throws ActionParamsException {
         try {
             request.setCharacterEncoding("UTF-8");
-            ServletFileUpload upload = new ServletFileUpload(diskFileItemFactory);
+            JakartaServletFileUpload upload = new JakartaServletFileUpload(diskFileItemFactory);
             upload.setSizeMax(maxFileSize);
             return upload.parseRequest(request);
         } catch (UnsupportedEncodingException | FileUploadException e) {

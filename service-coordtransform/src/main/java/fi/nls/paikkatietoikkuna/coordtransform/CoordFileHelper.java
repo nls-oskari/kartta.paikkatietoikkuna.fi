@@ -8,10 +8,10 @@ import fi.nls.oskari.control.ActionException;
 import fi.nls.oskari.control.ActionParamsException;
 import fi.nls.oskari.util.IOHelper;
 import fi.nls.oskari.util.JSONHelper;
-import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload2.core.FileItem;
 import org.json.JSONObject;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.HashMap;
 import java.util.List;

@@ -17,11 +17,6 @@
     </properties>
 
     <dependencies>
-        <!-- dependency>
-            <groupId>fi.nls.paikkatietoikkuna</groupId>
-            <artifactId>service-spatineo-serval</artifactId>
-            <version>${project.version}</version>
-        </dependency -->
         <dependency>
             <groupId>fi.nls.paikkatietoikkuna</groupId>
             <artifactId>app-resources</artifactId>
@@ -56,8 +51,7 @@
             <artifactId>nlsfi-projections</artifactId>
             <version>${nls.proj.version}</version>
         </dependency>
-        <!-- ##### oskari-search-nls 3.x uses 19.2 geotools, requires update if geotools is updated ###### -->
-        <!-- ##### oskari-search-nls 3.4-SNAPSHOT uses 23.2 geotools, requires update if geotools is updated ###### -->
+        <!-- ##### oskari-search-nls 5.0-SNAPSHOT uses 32.2 geotools, requires update if geotools is updated ###### -->
         <dependency>
             <groupId>fi.nls.oskari.extras</groupId>
             <artifactId>oskari-search-nls</artifactId>
@@ -129,10 +123,6 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j2-impl</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-dbcp2</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -141,8 +131,12 @@
 
         <!-- JSTL not needed for Jetty, but required by Tomcat -->
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>jstl</artifactId>
+            <groupId>org.glassfish.web</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.servlet.jsp.jstl</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
         </dependency>
     </dependencies>
 

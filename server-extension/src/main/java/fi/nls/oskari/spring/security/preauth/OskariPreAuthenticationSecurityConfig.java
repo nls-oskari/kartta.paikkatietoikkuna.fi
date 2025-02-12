@@ -1,76 +1,82 @@
 package fi.nls.oskari.spring.security.preauth;
 
+import fi.nls.oskari.log.LogFactory;
+import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.util.PropertyUtil;
+import org.oskari.spring.SpringEnvHelper;
+import org.oskari.spring.security.OskariSpringSecurityDsl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.annotation.Order;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.authentication.AnonymousAuthenticationProvider;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+
+import java.util.Arrays;
+import java.util.UUID;
 
 @Profile("preauth")
 @Configuration
 @EnableWebSecurity
-@Order()
-public class OskariPreAuthenticationSecurityConfig extends WebSecurityConfigurerAdapter {
+public class OskariPreAuthenticationSecurityConfig {
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-
-        // Don't set "X-Frame-Options: deny" header, that would prevent
-        // embedded maps from working
-        http.headers().frameOptions().disable();
-
-        // Don't create unnecessary sessions
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
-
-        // Disable HSTS header, we don't want to force HTTPS for ALL requests
-        http.headers().httpStrictTransportSecurity().disable();
-
-        // 3rd party cookie blockers don't really work with cookie based CSRF protection on embedded maps.
-        // Configure nginx to attach SameSite-flag to cookies instead.
-        http.csrf().disable();
-
-        OskariRequestHeaderAuthenticationFilter filter = new OskariRequestHeaderAuthenticationFilter();
-        filter.setAuthenticationSuccessHandler(new OskariPreAuthenticationSuccessHandler());
-        filter.setPrincipalRequestHeader(PropertyUtil.get("oskari.preauth.username.header", "auth-email"));
-
-        HeaderAuthenticationDetailsSource headerAuthenticationDetailsSource = new HeaderAuthenticationDetailsSource();
-        boolean isDevEnv = HeaderAuthenticationDetails.isDevEnv();
-        filter.setExceptionIfHeaderMissing(!isDevEnv);
-
-        filter.setAuthenticationDetailsSource(headerAuthenticationDetailsSource);
-        filter.setAuthenticationManager(authenticationManager());
-        filter.setContinueFilterChainOnUnsuccessfulAuthentication(isDevEnv);
-
-        String authorizeUrl = PropertyUtil.get("oskari.authorize.url", "/auth");
-
-        // use authorization for ALL requests
-        http.authorizeRequests()
-                // IF accessing /auth -> require authentication (== headers)
-                .antMatchers(authorizeUrl).authenticated();
-
-        // Add the preauth filter listening to /auth paths
-        http
-                .requestMatchers()
-                .antMatchers(authorizeUrl)
-                .and()
-                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
-                .authorizeRequests()
-                .anyRequest().authenticated();
-    }
+    private static final Logger log = LogFactory.getLogger(OskariPreAuthenticationSecurityConfig.class);
+    private final SpringEnvHelper env;
 
     @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth)
-            throws Exception {
-        PreAuthenticatedAuthenticationProvider preAuthenticatedProvider = new PreAuthenticatedAuthenticationProvider();
-        preAuthenticatedProvider.setPreAuthenticatedUserDetailsService(new OskariPreAuthenticatedUserDetailsService());
-        auth.authenticationProvider(preAuthenticatedProvider);
+    public OskariPreAuthenticationSecurityConfig(SpringEnvHelper env) {
+        this.env = env;
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        log.info("Configuring preauth login");
+
+        // Add custom authentication provider
+        PreAuthenticatedAuthenticationProvider preAuthProvider = new PreAuthenticatedAuthenticationProvider();
+        preAuthProvider.setPreAuthenticatedUserDetailsService(new OskariPreAuthenticatedUserDetailsService());
+        http.authenticationProvider(preAuthProvider);
+
+        // The filter that does the login
+        String authorizeUrl = PropertyUtil.get("oskari.authorize.url", "/auth");
+        OskariRequestHeaderAuthenticationFilter filter = new OskariRequestHeaderAuthenticationFilter();
+        filter.setAuthenticationSuccessHandler(new OskariPreAuthenticationSuccessHandler());
+        // looks like we need to pass HeaderAuthenticationDetailsSource or Spring throws a tantrum
+        // even when filter.getPreAuthenticatedPrincipal() does the same thing
+        filter.setAuthenticationDetailsSource(new HeaderAuthenticationDetailsSource());
+        filter.setAuthPath(authorizeUrl);
+        filter.setAuthenticationManager(authenticationManager(preAuthProvider));
+
+        boolean isDevEnv = HeaderAuthenticationDetails.isDevEnv();
+        filter.setExceptionIfHeaderMissing(!isDevEnv);
+        filter.setContinueFilterChainOnUnsuccessfulAuthentication(isDevEnv);
+
+        http
+                .authorizeHttpRequests(authorize -> authorize
+                    // the pre-auth endpoint requires authenticated user (pre-auth headers to be sent)
+                    .requestMatchers(authorizeUrl).authenticated()
+                    // any other path is free for all
+                    .anyRequest().permitAll());
+        // Use with defaults
+        http.with(OskariSpringSecurityDsl.oskariCommonDsl(),
+                (dsl) -> dsl
+                        .setAllowMapsToBeEmbedded(true)
+                        .setLogoutUrl(env.getLogoutUrl())
+                        .setLogoutSuccessUrl(env.getMapUrl())
+                        .setPreAuthFilter(filter)
+                        .setDisableUnnecessarySessions(false)
+        );
+
+        return http.build();
+    }
+
+    public AuthenticationManager authenticationManager(PreAuthenticatedAuthenticationProvider preAuthProvider) {
+        AnonymousAuthenticationProvider guestUserProvider = new AnonymousAuthenticationProvider(UUID.randomUUID().toString());
+        return new ProviderManager(Arrays.asList(guestUserProvider, preAuthProvider));
     }
 }
