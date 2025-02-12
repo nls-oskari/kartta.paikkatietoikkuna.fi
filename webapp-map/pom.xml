@@ -51,9 +51,8 @@
             <artifactId>nlsfi-projections</artifactId>
             <version>${nls.proj.version}</version>
         </dependency>
-        <!-- ##### oskari-search-nls 3.x uses 19.2 geotools, requires update if geotools is updated ###### -->
-        <!-- ##### oskari-search-nls 3.4-SNAPSHOT uses 23.2 geotools, requires update if geotools is updated ###### -->
-        <!-- dependency>
+        <!-- ##### oskari-search-nls 5.0-SNAPSHOT uses 32.2 geotools, requires update if geotools is updated ###### -->
+        <dependency>
             <groupId>fi.nls.oskari.extras</groupId>
             <artifactId>oskari-search-nls</artifactId>
             <version>${nls.search.version}</version>
@@ -62,7 +61,7 @@
             <groupId>fi.nls.oskari.extras</groupId>
             <artifactId>service-terrain-profile</artifactId>
             <version>${nls.terrain-profile.version}</version>
-        </dependency -->
+        </dependency>
         <!-- /extras -->
         <dependency>
             <groupId>org.oskari</groupId>
