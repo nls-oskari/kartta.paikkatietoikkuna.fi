@@ -51,7 +51,8 @@ public class CoordinateTransformationAsyncController {
         this.worker = OskariComponentManager.getComponentOfType(CoordTransWorker.class);
     }
 
-    @RequestMapping(ROUTE + "/{jobId}")
+    // Using ROUTE + "/{jobId}" as RequestMapping value no longer works with Spring 6
+    @RequestMapping("/coordinatetransform/watch/{jobId}")
     public @ResponseBody DeferredResult<CoordinatesPayload> watchJob(@PathVariable("jobId") String jobId, @OskariParam ActionParameters params) {
         if (jobId == null) {
             handleActionParamsException(new ActionParamsException(
