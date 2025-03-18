@@ -10,10 +10,10 @@
     <name>kartta.paikkatietoikkuna.fi</name>
 
     <properties>
-        <oskari.version>3.0.0-SNAPSHOT</oskari.version>
-        <nls.search.version>5.0-SNAPSHOT</nls.search.version>
-        <nls.proj.version>1.3-SNAPSHOT</nls.proj.version>
-        <nls.terrain-profile.version>2.0-SNAPSHOT</nls.terrain-profile.version>
+        <oskari.version>3.0.0</oskari.version>
+        <nls.search.version>5.0</nls.search.version>
+        <nls.proj.version>1.3</nls.proj.version>
+        <nls.terrain-profile.version>2.0</nls.terrain-profile.version>
         <junit.version>4.13.2</junit.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
