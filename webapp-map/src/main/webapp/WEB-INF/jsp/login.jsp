@@ -158,8 +158,7 @@
 
         <div class="intro">
             <p>
-                Kirjautuneena pääset julkaisemaan karttoja,
-                käyttämään analyysitoimintoa sekä tallentamaan omia kohteita ja paikkatietoaineistoja.
+                Tervetuloa kirjautumaan Paikkatietoikkunaan! Kirjautuneena käyttäjänä voit julkaista karttoja, tallentaa omia kohteita ja karttanäkymiä sekä tuoda palveluun omia paikkatietoaineistojasi.
             </p>
         </div>
         <div class="login-form">
@@ -206,8 +205,7 @@
 
         <div class="intro">
             <p>
-                Som inloggad användare kan du publicera inbäddade kartor, använda analysfuntionen
-                samt spara egna platser och hämta egna datamängder till tjänsten.
+                Välkommen att logga in i Paikkatietoikkuna! Efter inloggningen kan du publicera kartor, spara egna platser och kartvyer samt importera ditt eget dataset.
             </p>
         </div>
         <div class="login-form">
@@ -256,8 +254,7 @@
 
         <div class="intro">
             <p>
-                As a logged-in user, you can publish embedded maps, use the analysis tool
-                and save your own places or import your own dataset.
+                Welcome to log in to Paikkatietoikkuna! As a logged-in user, you can publish embedded maps, save your own places and map views, and import your own datasets.
             </p>
         </div>
         <div class="login-form">
