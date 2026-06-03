@@ -4,7 +4,7 @@ import org.oskari.user.User;
 
 import jakarta.servlet.http.HttpServletRequest;
 import javax.xml.bind.DatatypeConverter;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 
 /**
@@ -73,7 +73,7 @@ public class UserDetailsHelper {
         }
         input = input.substring(2);
         byte[] bytes = DatatypeConverter.parseHexBinary(input);
-        return new String(bytes, Charset.forName("UTF-8"));
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
 }

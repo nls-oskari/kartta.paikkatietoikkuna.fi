@@ -11,10 +11,9 @@
 
     <properties>
         <oskari.version>3.4.0-SNAPSHOT</oskari.version>
-        <nls.search.version>5.1</nls.search.version>
+        <nls.search.version>5.2</nls.search.version>
         <nls.proj.version>1.4</nls.proj.version>
-        <nls.terrain-profile.version>2.1</nls.terrain-profile.version>
-
+        <nls.terrain-profile.version>2.2-SNAPSHOT</nls.terrain-profile.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>17</java.version>
     </properties>
