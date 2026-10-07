@@ -57,7 +57,6 @@ public class V3_34_1__remove_plugins extends BaseJavaMigration {
         if (plugins == null) {
             return;
         }
-        int index = -1;
         JSONArray newPlugins = new JSONArray();
         for (int i = 0; i < plugins.length(); i++) {
             JSONObject plugin = plugins.optJSONObject(i);
