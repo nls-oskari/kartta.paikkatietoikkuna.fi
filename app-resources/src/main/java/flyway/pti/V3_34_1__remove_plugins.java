@@ -7,7 +7,6 @@ import org.flywaydb.core.api.migration.Context;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.oskari.helpers.AppSetupHelper;
-import fi.nls.oskari.domain.map.view.ViewTypes;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -24,8 +23,7 @@ public class V3_34_1__remove_plugins extends BaseJavaMigration {
 
         Connection connection = context.getConnection();
         // migrate all appsetups
-        List<Long> viewIds =  AppSetupHelper.getSetupsForType(connection,
-            ViewTypes.DEFAULT, ViewTypes.USER, ViewTypes.PUBLISH_TEMPLATE, ViewTypes.PUBLISHED);
+        List<Long> viewIds =  AppSetupHelper.getSetupsForType(connection);
         List<String> pluginsToRemove = getPluginIdsToRemove();
         for (Long id : viewIds) {
             updateAppsetup(connection, id, pluginsToRemove);
