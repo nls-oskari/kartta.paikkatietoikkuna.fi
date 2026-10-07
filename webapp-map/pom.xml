@@ -34,10 +34,6 @@
         </dependency>
         <dependency>
             <groupId>org.oskari</groupId>
-            <artifactId>control-userlayer</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.oskari</groupId>
             <artifactId>control-myfeatures</artifactId>
         </dependency>
         <dependency>
@@ -73,10 +69,6 @@
         </dependency>
         <!-- /Statistics plugins -->
         <!-- artifactId "oskari-control-base" is implied by adding extended actions -->
-        <dependency>
-            <groupId>org.oskari</groupId>
-            <artifactId>control-myplaces</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.oskari</groupId>
