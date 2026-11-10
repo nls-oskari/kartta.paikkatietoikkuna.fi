@@ -18,6 +18,7 @@ import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
 
+import java.time.Duration;
 import java.util.Locale;
 
 /**
@@ -49,10 +50,9 @@ public class SpringConfig {
 
     @Bean(name = "localeResolver")
     public LocaleResolver localeResolver() {
-        CookieLocaleResolver resolver = new CookieLocaleResolver();
+        CookieLocaleResolver resolver = new CookieLocaleResolver("oskari.language");
         resolver.setDefaultLocale(new Locale("fi"));
-        resolver.setCookieMaxAge(-1);
-        resolver.setCookieName("oskari.language");
+        resolver.setCookieMaxAge(Duration.ofSeconds(-1));
         return resolver;
     }
     //  --------- /locale handling -------------
